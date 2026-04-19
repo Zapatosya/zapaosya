@@ -826,6 +826,9 @@ function closeCheckout(){document.getElementById("checkoutModal").classList.remo
 document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const btn=document.getElementById("coSubmit"); btn.disabled=true; btn.textContent='Procesando...';
+  const msg=document.getElementById("checkoutMsg");
+  msg.innerHTML='';
+  
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
   const ship=tot>=150000?0:10000;
   const pedido={
@@ -838,19 +841,70 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     subtotal: tot,
     envio: ship,
     total: tot+ship,
-    notas: document.getElementById("coNotes").value
+    notas: document.getElementById("coNotes").value,
+    estado: 'pendiente'
   };
-  const {data,error}=await sb.from('pedidos').insert([pedido]).select().single();
-  btn.disabled=false; btn.textContent='Confirmar pedido →';
-  if(error){
-    document.getElementById("checkoutMsg").innerHTML='<div class="auth-error">Error: '+error.message+'</div>';
-    return;
+  
+  try{
+    // 1) Crear pedido en Supabase con fetch directo (más confiable)
+    btn.textContent='Creando pedido...';
+    const created = await sbInsert('pedidos', pedido);
+    const pedidoCreado = Array.isArray(created) ? created[0] : created;
+    
+    if(!pedidoCreado || !pedidoCreado.id){
+      throw new Error('No se pudo crear el pedido');
+    }
+    
+    // 2) Llamar a la función de Netlify para crear link de pago
+    btn.textContent='Conectando con Mercado Pago...';
+    const payRes = await fetch('/.netlify/functions/crear-pago', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        pedido_id: pedidoCreado.id,
+        items: cart,
+        total: tot+ship,
+        email: pedido.email,
+        nombre: pedido.nombre_cliente
+      })
+    });
+    
+    const payData = await payRes.json();
+    
+    if(!payRes.ok || !payData.init_point){
+      throw new Error(payData.error || 'Error creando link de pago');
+    }
+    
+    // 3) Limpiar carrito y redirigir a Mercado Pago
+    cart=[]; saveCart(); updateCartUI();
+    showToast(`Pedido #${pedidoCreado.numero_pedido} creado. Redirigiendo a Mercado Pago...`);
+    
+    // Usar sandbox en pruebas, init_point en producción
+    const payUrl = payData.sandbox_init_point || payData.init_point;
+    setTimeout(()=>{ window.location.href = payUrl; }, 1200);
+    
+  }catch(err){
+    console.error('Checkout error:', err);
+    btn.disabled=false; btn.textContent='Confirmar pedido →';
+    msg.innerHTML='<div class="auth-error">Error: '+err.message+'</div>';
   }
-  cart=[]; saveCart(); updateCartUI();
-  closeCheckout();
-  showToast(`¡Pedido #${data.numero_pedido} realizado con éxito!`);
-  document.getElementById("checkoutForm").reset();
 });
+
+// Mostrar mensaje si el usuario vuelve de Mercado Pago
+(function checkPaymentReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const pago = params.get('pago');
+  if(pago === 'exitoso'){
+    setTimeout(()=>showToast('¡Pago exitoso! Pronto recibirás un email de confirmación.'), 800);
+    history.replaceState(null,'',window.location.pathname);
+  } else if(pago === 'pendiente'){
+    setTimeout(()=>showToast('Tu pago está siendo procesado. Te avisaremos cuando se confirme.'), 800);
+    history.replaceState(null,'',window.location.pathname);
+  } else if(pago === 'fallido'){
+    setTimeout(()=>showToast('El pago no se completó. Puedes intentarlo de nuevo.'), 800);
+    history.replaceState(null,'',window.location.pathname);
+  }
+})();
 
 // ─── AUTH ─────────────────────────────────────────────────────
 function openAuth(mode='login'){
@@ -1218,3 +1272,4 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeC
 </script>
 </body>
 </html>
+
