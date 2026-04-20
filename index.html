@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ZapatosYa — Rápido y Seguro</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" async></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--red:#E63946;--red2:#c0303c;--blk:#111;--blk2:#1a1a1a;--wht:#F5F5F5;--yel:#FFB703;--gray:#888;--border:#e2e2e2;--fh:'Poppins',sans-serif;--fb:'DM Sans',sans-serif;--tr:.24s cubic-bezier(.4,0,.2,1);--shd:0 20px 60px rgba(0,0,0,.2)}
@@ -1327,14 +1327,18 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeC
 // ─── INIT ─────────────────────────────────────────────────────
 (async()=>{
   loadCart(); updateCartUI();
-  try{
-    if(sb && sb.auth){
-      const {data:{session}}=await sb.auth.getSession();
-      currentUser=session?.user||null;
-      if(currentUser) await loadProfile();
-    }
-  }catch(e){console.warn('session init:',e);}
-  await loadProducts();
+  // Cargar productos INMEDIATAMENTE (no espera nada más)
+  loadProducts();
+  // Auth en segundo plano, no bloquea nada
+  setTimeout(async()=>{
+    try{
+      if(sb && sb.auth){
+        const {data:{session}}=await sb.auth.getSession();
+        currentUser=session?.user||null;
+        if(currentUser) await loadProfile();
+      }
+    }catch(e){console.warn('session init:',e);}
+  }, 100);
 })();
 </script>
 </body>
