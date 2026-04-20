@@ -879,8 +879,8 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     cart=[]; saveCart(); updateCartUI();
     showToast(`Pedido #${pedidoCreado.numero_pedido} creado. Redirigiendo a Mercado Pago...`);
     
-    // Usar sandbox en pruebas, init_point en producción
-    const payUrl = payData.sandbox_init_point || payData.init_point;
+    // Usar init_point para producción (sandbox es solo para pruebas)
+    const payUrl = payData.init_point || payData.sandbox_init_point;
     setTimeout(()=>{ window.location.href = payUrl; }, 1200);
     
   }catch(err){
