@@ -798,7 +798,7 @@ function renderCart(){
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
   foot.innerHTML=`
     <div class="ctot"><span class="ctot-lbl">Total</span><span class="ctot-amt">${fmt(tot)}</span></div>
-    <p class="cship">${tot>=150000?'<span>¡Envío GRATIS incluido!</span>':`Agrega ${fmt(150000-tot)} para <span>envío gratis</span>`}</p>
+    <p class="cship"><span>Envío incluido</span></p>
     <button class="btn btn-red btn-full" onclick="openCheckout()">Finalizar compra →</button>`;
 }
 
@@ -807,7 +807,7 @@ function openCheckout(){
   if(!cart.length){showToast("Carrito vacío");return;}
   closeCart();
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const ship=tot>=150000?0:10000;
+  const ship=0;
   document.getElementById("coSubtotal").textContent=fmt(tot);
   document.getElementById("coShip").textContent=ship?fmt(ship):'Gratis';
   document.getElementById("coTotal").textContent=fmt(tot+ship);
@@ -830,7 +830,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   msg.innerHTML='';
   
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const ship=tot>=150000?0:10000;
+  const ship=0;
   const pedido={
     user_id: currentUser?currentUser.id:null,
     email: document.getElementById("coEmail").value,
