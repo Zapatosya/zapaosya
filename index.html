@@ -110,8 +110,12 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pc-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
 .pc:hover .pc-img svg{transform:scale(1.09) rotate(3deg)}
 .pc:hover .pc-img img{transform:scale(1.06)}
-.pc-labels{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:5px;z-index:3;pointer-events:none}
-.lbl{display:inline-block;padding:4px 10px;border-radius:50px;font-family:var(--fh);font-weight:700;font-size:.67rem;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pc-labels{position:absolute;top:10px;left:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:3;pointer-events:none;align-items:flex-start}
+.lbl{display:inline-block;padding:3px 9px;border-radius:50px;font-family:var(--fh);font-weight:700;font-size:.62rem;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap}
+@media(max-width:620px){
+  .pc-labels{flex-direction:row;flex-wrap:wrap;gap:3px}
+  .lbl{font-size:.55rem;padding:2px 7px}
+}
 .lbl-n{background:var(--blk);color:#fff}
 .lbl-s{background:var(--yel);color:var(--blk)}
 .lbl-h{background:var(--red);color:#fff}
@@ -1787,19 +1791,28 @@ async function saveProduct(){
 
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
 async function loadProfile(){
-  if(!currentUser)return;
+  if(!currentUser){console.log('[loadProfile] sin user');return;}
+  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
     // Usar fetch directo para no depender de sesión RLS de Supabase Auth
     const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
       headers:SB_HEADERS
     });
-    if(!res.ok){console.warn('[loadProfile] status',res.status); return;}
+    console.log('[loadProfile] status:',res.status);
+    if(!res.ok){
+      const txt=await res.text();
+      console.warn('[loadProfile] error body:',txt);
+      return;
+    }
     const rows=await res.json();
+    console.log('[loadProfile] rows:',rows);
     const data=rows[0];
     if(data){
       currentProfile=data;
       isAdmin=data.es_admin===true;
-      console.log('[loadProfile] isAdmin:',isAdmin);
+      console.log('[loadProfile] ✓ isAdmin:',isAdmin,'perfil:',data);
+    }else{
+      console.warn('[loadProfile] no se encontró perfil para user id:',currentUser.id);
     }
   }catch(e){
     console.warn('[loadProfile] error:',e);
