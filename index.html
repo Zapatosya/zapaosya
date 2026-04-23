@@ -107,7 +107,9 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pc:hover{transform:translateY(-6px);box-shadow:var(--shd);border-color:transparent}
 .pc-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .pc-img svg{width:68%;height:68%;transition:transform .4s ease}
+.pc-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
 .pc:hover .pc-img svg{transform:scale(1.09) rotate(3deg)}
+.pc:hover .pc-img img{transform:scale(1.06)}
 .pc-labels{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:5px}
 .lbl{display:inline-block;padding:4px 10px;border-radius:50px;font-family:var(--fh);font-weight:700;font-size:.67rem}
 .lbl-n{background:var(--blk);color:#fff}
@@ -264,6 +266,33 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .checkout-summary{background:var(--wht);border-radius:12px;padding:16px 18px;margin-bottom:18px}
 .cs-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.88rem}
 .cs-total{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;font-family:var(--fh);font-weight:800;font-size:1.1rem}
+
+/* PRODUCT EDITOR MODAL */
+.pe{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:12px}
+.pe.open{display:flex}
+.pe-ov{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.pe-box{position:relative;background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:fu .3s ease}
+.pe-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+.pe-head h3{font-family:var(--fh);font-weight:700;font-size:1.1rem}
+.pe-close{width:32px;height:32px;border-radius:50%;background:var(--wht);display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:var(--tr)}
+.pe-close:hover{background:var(--red);color:#fff}
+.pe-body{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.pe-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pe-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);background:var(--wht);border-radius:0 0 16px 16px}
+.pe-tags,.pe-sizes{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.pe-chk{display:inline-flex;align-items:center;gap:5px;font-size:.82rem;padding:5px 10px;background:var(--wht);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:var(--tr)}
+.pe-chk:hover{border-color:var(--red)}
+.pe-chk input{width:auto;padding:0;margin:0}
+.pe-color-row{background:var(--wht);border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
+.pe-color-main{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.pe-color-main input[type="color"]{width:42px;height:38px;padding:2px;cursor:pointer;flex:0 0 42px}
+.pe-color-main input[type="text"]{flex:1}
+.pe-del{width:32px;height:32px;border-radius:50%;background:#fff;color:var(--red);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;flex-shrink:0}
+.pe-del:hover{background:var(--red);color:#fff}
+.pe-color-img{display:flex;gap:10px;align-items:center}
+.pe-preview{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#fff;border:1px solid var(--border)}
+.pe-preview-empty{display:flex;align-items:center;justify-content:center;color:var(--gray);font-size:.7rem;text-align:center}
+@media(max-width:640px){.pe-row{grid-template-columns:1fr}.pe-box{max-height:96vh}}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(110px);background:var(--blk);color:#fff;padding:12px 22px;border-radius:50px;font-family:var(--fh);font-weight:600;font-size:.86rem;z-index:300;transition:transform .38s cubic-bezier(.34,1.4,.64,1),opacity .3s;opacity:0;white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,.3);max-width:90vw}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -563,6 +592,9 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   <div class="cdf" id="cFoot"></div>
 </aside>
 
+<!-- ==================== PRODUCT EDITOR MODAL ==================== -->
+<div class="pe" id="prodEditor"></div>
+
 <div class="toast" id="toast"></div>
 
 <footer>
@@ -662,6 +694,15 @@ const fmt=p=>"$"+(p||0).toLocaleString("es-CO");
 const disc=(o,c)=>Math.round(((o-c)/o)*100);
 const lblHTML=ls=>(ls||[]).map(l=>({h:'<span class="lbl lbl-h">Más vendido</span>',n:'<span class="lbl lbl-n">Nuevo</span>',s:'<span class="lbl lbl-s">Oferta</span>',l:'<span class="lbl lbl-l">Limitado</span>'}[l]||'')).join('');
 const getSVG=(p)=>(SVGS[p.svg_tipo]||SVGS.sneaker)(p.color_principal,p.color_secundario);
+// Helper: devuelve HTML de imagen real o SVG fallback
+const getProductVisual=(p,colorIdx=0)=>{
+  const imgs=p.imagenes||[];
+  if(imgs.length>0){
+    const url=imgs[colorIdx]||imgs[0];
+    return `<img src="${url}" alt="${p.nombre}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`;
+  }
+  return getSVG(p);
+};
 
 // ─── PRODUCTOS ───────────────────────────────────────────────
 async function loadProducts(){
@@ -682,7 +723,7 @@ function render(f="todos"){
   document.getElementById("pg").innerHTML=data.map((p,i)=>`
     <article class="pc" data-id="${p.id}" style="animation-delay:${i*.07}s" tabindex="0">
       <div class="pc-img" style="background:${p.fondo}">
-        ${getSVG(p)}
+        ${getProductVisual(p,0)}
         <div class="pc-labels">${lblHTML(p.etiquetas)}</div>
         <div class="pc-ov"><button class="btn btn-red">Ver más →</button></div>
       </div>
@@ -708,9 +749,17 @@ function openModal(id){
   const p=curP;
   const mi=document.getElementById("mImg");
   mi.style.background=p.fondo;
-  const old=mi.querySelector("svg"); if(old) old.remove();
-  mi.insertAdjacentHTML("afterbegin",getSVG(p));
-  mi.querySelector("svg").style.cssText="width:78%;max-width:260px;height:auto;filter:drop-shadow(0 16px 32px rgba(0,0,0,.14))";
+  // Limpia svg/img previos
+  const oldSvg=mi.querySelector("svg"); if(oldSvg) oldSvg.remove();
+  const oldImg=mi.querySelector("img"); if(oldImg) oldImg.remove();
+  // Inserta imagen real o SVG fallback
+  if((p.imagenes||[]).length>0){
+    mi.insertAdjacentHTML("afterbegin",`<img id="mProductImg" src="${p.imagenes[0]}" alt="${p.nombre}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit"/>`);
+  }else{
+    mi.insertAdjacentHTML("afterbegin",getSVG(p));
+    const svg=mi.querySelector("svg");
+    if(svg) svg.style.cssText="width:78%;max-width:260px;height:auto;filter:drop-shadow(0 16px 32px rgba(0,0,0,.14))";
+  }
   document.getElementById("mBadge").innerHTML=(p.etiquetas||[]).includes("h")?'<span class="lbl lbl-h">Más vendido</span>':(p.etiquetas||[]).includes("l")?'<span class="lbl lbl-l">Limitado</span>':'';
   document.getElementById("mCat").textContent=p.categoria;
   document.getElementById("mTit").textContent=p.nombre;
@@ -728,6 +777,15 @@ function openModal(id){
     co.querySelectorAll(".copt").forEach(x=>x.classList.remove("sel"));
     b.classList.add("sel"); selC=+b.dataset.ci;
     document.getElementById("selC").textContent=cn[selC]||'—';
+    // Cambiar imagen si hay imágenes por color
+    const imgEl=document.getElementById("mProductImg");
+    if(imgEl && (curP.imagenes||[])[selC]){
+      imgEl.src=curP.imagenes[selC];
+    }
+    // Cambiar fondo si hay fondos por color
+    if((curP.fondos||[])[selC]){
+      document.getElementById("mImg").style.background=curP.fondos[selC];
+    }
   }));
   const so=document.getElementById("sopts");
   const noSz=p.tallas_no_disponibles||[];
@@ -1225,14 +1283,18 @@ async function renderAdminTab(tab){
   else if(tab==='productos'){
     c.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-red btn-sm" onclick="addProduct()">+ Nuevo producto</button></div>
     <div class="admin-wrap"><table class="admin-table">
-      <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th></th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>${PRODUCTS.map(p=>`
         <tr>
           <td><strong>${p.nombre}</strong></td>
           <td>${p.categoria}</td>
           <td>${fmt(p.precio)}</td>
           <td><span class="estado-badge est-${p.activo?'entregado':'cancelado'}">${p.activo?'activo':'inactivo'}</span></td>
-          <td><button class="btn btn-out btn-sm" onclick="toggleProd('${p.id}',${!p.activo})">${p.activo?'Desactivar':'Activar'}</button></td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-out btn-sm" onclick="editProduct('${p.id}')" style="margin-right:4px">✏️ Editar</button>
+            <button class="btn btn-out btn-sm" onclick="toggleProd('${p.id}',${!p.activo})" style="margin-right:4px">${p.activo?'Desactivar':'Activar'}</button>
+            <button class="btn btn-out btn-sm" onclick="deleteProduct('${p.id}')" style="color:var(--red)">🗑</button>
+          </td>
         </tr>`).join('')}</tbody></table></div>`;
   }
   else if(tab==='clientes'){
@@ -1261,14 +1323,192 @@ async function toggleProd(id,activo){
   renderAdminTab('productos');
 }
 async function addProduct(){
-  const nombre=prompt("Nombre del producto:"); if(!nombre) return;
-  const categoria=prompt("Categoría (Hombre/Mujer/Unisex):"); if(!categoria) return;
-  const precio=parseInt(prompt("Precio:")); if(!precio) return;
-  const descripcion=prompt("Descripción:")||'';
-  await sb.from('productos').insert([{nombre,categoria,precio,descripcion,colores:['#E63946'],nombres_colores:['Rojo'],tallas:[38,39,40,41,42],etiquetas:['n']}]);
+  openProductEditor(null);
+}
+
+async function editProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
+  openProductEditor(p);
+}
+
+async function deleteProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
+  if(!confirm(`¿Eliminar "${p.nombre}" permanentemente?`)) return;
+  const {error}=await sb.from('productos').delete().eq('id',id);
+  if(error){showToast('Error: '+error.message); return;}
   await loadProducts();
   renderAdminTab('productos');
-  showToast('Producto creado');
+  showToast('Producto eliminado');
+}
+
+function openProductEditor(p){
+  const isEdit=!!p;
+  const m=document.getElementById('prodEditor');
+  const colores=p?.colores||[];
+  const nombresColores=p?.nombres_colores||[];
+  const imagenes=p?.imagenes||[];
+  const fondos=p?.fondos||[];
+  const tallas=p?.tallas||[];
+  const etiquetas=p?.etiquetas||[];
+  m.innerHTML=`
+    <div class="pe-ov" onclick="closeProductEditor()"></div>
+    <div class="pe-box">
+      <div class="pe-head">
+        <h3>${isEdit?'Editar producto':'Nuevo producto'}</h3>
+        <button class="pe-close" onclick="closeProductEditor()">✕</button>
+      </div>
+      <div class="pe-body">
+        <input type="hidden" id="peId" value="${p?.id||''}">
+        <div class="pe-row">
+          <div><label>Nombre *</label><input id="peName" value="${p?.nombre||''}" placeholder="Ej: Diesel Classic"></div>
+          <div><label>Categoría *</label>
+            <select id="peCat">
+              <option value="Hombre" ${p?.categoria==='Hombre'?'selected':''}>Hombre</option>
+              <option value="Mujer" ${p?.categoria==='Mujer'?'selected':''}>Mujer</option>
+              <option value="Unisex" ${p?.categoria==='Unisex'?'selected':''}>Unisex</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-row">
+          <div><label>Precio *</label><input id="pePrice" type="number" value="${p?.precio||''}" placeholder="139900"></div>
+          <div><label>Precio original (opcional)</label><input id="pePriceOrig" type="number" value="${p?.precio_original||''}" placeholder="169900"></div>
+        </div>
+        <div><label>Descripción</label><textarea id="peDesc" rows="3" placeholder="Descripción del producto...">${p?.descripcion||''}</textarea></div>
+        <div class="pe-row">
+          <div><label>Mensaje de stock</label><input id="peStock" value="${p?.stock_mensaje||''}" placeholder="¡Últimas 8 unidades!"></div>
+          <div><label>Etiquetas</label>
+            <div class="pe-tags">
+              ${[{v:'n',t:'Nuevo'},{v:'h',t:'Más vendido'},{v:'s',t:'Oferta'},{v:'l',t:'Limitado'}].map(x=>
+                `<label class="pe-chk"><input type="checkbox" value="${x.v}" ${etiquetas.includes(x.v)?'checked':''} class="peTag"> ${x.t}</label>`
+              ).join('')}
+            </div>
+          </div>
+        </div>
+        <div><label>Tallas disponibles</label>
+          <div class="pe-sizes">
+            ${Array.from({length:13},(_,i)=>i+34).map(s=>
+              `<label class="pe-chk"><input type="checkbox" value="${s}" ${tallas.includes(s)?'checked':''} class="peSize"> ${s}</label>`
+            ).join('')}
+          </div>
+        </div>
+        <div><label>Colores e imágenes</label>
+          <div id="peColors"></div>
+          <button type="button" class="btn btn-out btn-sm" onclick="addColorRow()" style="margin-top:8px">+ Agregar color</button>
+        </div>
+      </div>
+      <div class="pe-foot">
+        <button class="btn btn-out" onclick="closeProductEditor()">Cancelar</button>
+        <button class="btn btn-red" onclick="saveProduct()">${isEdit?'Guardar cambios':'Crear producto'}</button>
+      </div>
+    </div>`;
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+  // Cargar colores existentes o uno vacío
+  const colorRows=document.getElementById('peColors');
+  if(colores.length){
+    colores.forEach((c,i)=>addColorRow(c,nombresColores[i]||'',imagenes[i]||'',fondos[i]||c));
+  }else{
+    addColorRow();
+  }
+}
+
+function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
+  const wrap=document.getElementById('peColors');
+  const row=document.createElement('div');
+  row.className='pe-color-row';
+  row.innerHTML=`
+    <div class="pe-color-main">
+      <input type="color" value="${hex}" class="peColorHex" title="Color del botón">
+      <input type="text" placeholder="Nombre (ej: Negro)" value="${nombre}" class="peColorName">
+      <input type="color" value="${fondo||hex}" class="peColorBg" title="Color de fondo">
+      <button type="button" class="pe-del" onclick="this.closest('.pe-color-row').remove()">✕</button>
+    </div>
+    <div class="pe-color-img">
+      ${imgUrl?`<img src="${imgUrl}" class="pe-preview">`:'<div class="pe-preview pe-preview-empty">Sin imagen</div>'}
+      <input type="hidden" value="${imgUrl}" class="peColorImg">
+      <label class="btn btn-out btn-sm" style="cursor:pointer">
+        📷 Subir imagen
+        <input type="file" accept="image/*" style="display:none" onchange="uploadColorImage(this)">
+      </label>
+    </div>`;
+  wrap.appendChild(row);
+}
+
+async function uploadColorImage(input){
+  const file=input.files[0]; if(!file) return;
+  const row=input.closest('.pe-color-row');
+  const preview=row.querySelector('.pe-preview');
+  const hidden=row.querySelector('.peColorImg');
+  // Mostrar loading
+  preview.outerHTML='<div class="pe-preview pe-preview-empty">Subiendo...</div>';
+  try{
+    const ext=file.name.split('.').pop();
+    const fileName=`${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const {data,error}=await sb.storage.from('productos').upload(fileName,file,{cacheControl:'3600',upsert:false});
+    if(error) throw error;
+    const {data:{publicUrl}}=sb.storage.from('productos').getPublicUrl(fileName);
+    hidden.value=publicUrl;
+    const newPreview=document.createElement('img');
+    newPreview.src=publicUrl;
+    newPreview.className='pe-preview';
+    row.querySelector('.pe-preview-empty').replaceWith(newPreview);
+    showToast('Imagen subida');
+  }catch(e){
+    console.error(e);
+    showToast('Error: '+(e.message||'No se pudo subir'));
+    row.querySelector('.pe-preview-empty').textContent='Sin imagen';
+  }
+}
+
+function closeProductEditor(){
+  const m=document.getElementById('prodEditor');
+  m.classList.remove('open');
+  m.innerHTML='';
+  document.body.style.overflow='';
+}
+
+async function saveProduct(){
+  const id=document.getElementById('peId').value;
+  const nombre=document.getElementById('peName').value.trim();
+  const categoria=document.getElementById('peCat').value;
+  const precio=parseInt(document.getElementById('pePrice').value);
+  const precio_original=parseInt(document.getElementById('pePriceOrig').value)||null;
+  const descripcion=document.getElementById('peDesc').value.trim();
+  const stock_mensaje=document.getElementById('peStock').value.trim();
+  if(!nombre||!categoria||!precio){showToast('Completa nombre, categoría y precio'); return;}
+  const etiquetas=Array.from(document.querySelectorAll('.peTag:checked')).map(x=>x.value);
+  const tallas=Array.from(document.querySelectorAll('.peSize:checked')).map(x=>parseInt(x.value));
+  const colorRows=document.querySelectorAll('.pe-color-row');
+  const colores=[],nombres_colores=[],imagenes=[],fondos=[];
+  colorRows.forEach(r=>{
+    colores.push(r.querySelector('.peColorHex').value);
+    nombres_colores.push(r.querySelector('.peColorName').value.trim()||'—');
+    imagenes.push(r.querySelector('.peColorImg').value||'');
+    fondos.push(r.querySelector('.peColorBg').value);
+  });
+  const payload={
+    nombre,categoria,precio,precio_original,descripcion,stock_mensaje,
+    colores,nombres_colores,imagenes,fondos,tallas,etiquetas,
+    color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
+    fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
+  };
+  try{
+    if(id){
+      const {error}=await sb.from('productos').update(payload).eq('id',id);
+      if(error) throw error;
+      showToast('Producto actualizado');
+    }else{
+      const {error}=await sb.from('productos').insert([payload]);
+      if(error) throw error;
+      showToast('Producto creado');
+    }
+    closeProductEditor();
+    await loadProducts();
+    renderAdminTab('productos');
+  }catch(e){
+    console.error(e);
+    showToast('Error: '+(e.message||'No se pudo guardar'));
+  }
 }
 
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
