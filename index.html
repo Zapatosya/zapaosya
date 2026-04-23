@@ -17,6 +17,8 @@ img{max-width:100%;display:block}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px}
 input,select,textarea{font-family:inherit;font-size:.95rem;padding:12px 14px;border:1px solid var(--border);border-radius:10px;width:100%;transition:var(--tr);background:#fff}
+select{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px;padding-right:38px}
+select:disabled{background-color:#f5f5f5;color:#999;cursor:not-allowed;opacity:.7}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(230,57,70,.1)}
 label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bottom:6px}
 
@@ -596,10 +598,19 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
         </div>
         <div class="checkout-grid" style="margin-top:14px">
           <div><label>Email</label><input type="email" id="coEmail" required/></div>
-          <div><label>Dirección completa</label><input type="text" id="coAddr" required placeholder="Calle 123 #45-67, Barrio"/></div>
+          <div><label>Dirección</label><input type="text" id="coAddr" required placeholder="Calle 123 #45-67, Barrio"/></div>
+          <div><label>Torre / Apartamento <span style="color:var(--gray);font-weight:400">(opcional)</span></label><input type="text" id="coApt" placeholder="Ej: Torre 2, Apto 504"/></div>
           <div class="checkout-grid-2">
-            <div><label>Ciudad</label><input type="text" id="coCity" required placeholder="Medellín"/></div>
-            <div><label>Departamento</label><input type="text" id="coDept" required placeholder="Antioquia"/></div>
+            <div><label>Departamento</label>
+              <select id="coDept" required>
+                <option value="">Selecciona...</option>
+              </select>
+            </div>
+            <div><label>Ciudad</label>
+              <select id="coCity" required disabled>
+                <option value="">Primero elige departamento</option>
+              </select>
+            </div>
           </div>
           <div><label>Notas (opcional)</label><textarea id="coNotes" rows="2" placeholder="Instrucciones especiales..."></textarea></div>
         </div>
@@ -1094,9 +1105,73 @@ function renderCart(){
 }
 
 // ─── CHECKOUT ─────────────────────────────────────────────────
+// ─── DEPARTAMENTOS Y CIUDADES DE COLOMBIA ────────────────────
+const COL_LOCATIONS={
+  "Antioquia":["Medellín","Bello","Envigado","Itagüí","Rionegro","Apartadó","Sabaneta","Turbo","La Estrella","Copacabana","Caldas","Girardota","Marinilla","Caucasia","La Ceja"],
+  "Atlántico":["Barranquilla","Soledad","Malambo","Sabanalarga","Puerto Colombia","Baranoa","Galapa","Sabanagrande"],
+  "Bogotá D.C.":["Bogotá"],
+  "Bolívar":["Cartagena","Magangué","Turbaco","Arjona","El Carmen de Bolívar","Mompós"],
+  "Boyacá":["Tunja","Duitama","Sogamoso","Chiquinquirá","Paipa","Villa de Leyva"],
+  "Caldas":["Manizales","La Dorada","Chinchiná","Villamaría","Riosucio","Anserma"],
+  "Caquetá":["Florencia","San Vicente del Caguán","Puerto Rico"],
+  "Casanare":["Yopal","Aguazul","Villanueva","Tauramena","Monterrey"],
+  "Cauca":["Popayán","Santander de Quilichao","Puerto Tejada","Patía","Guapi"],
+  "Cesar":["Valledupar","Aguachica","Bosconia","Codazzi","La Jagua de Ibirico"],
+  "Chocó":["Quibdó","Istmina","Condoto","Tadó"],
+  "Córdoba":["Montería","Lorica","Cereté","Sahagún","Montelíbano","Planeta Rica"],
+  "Cundinamarca":["Soacha","Chía","Zipaquirá","Facatativá","Fusagasugá","Mosquera","Funza","Madrid","Cajicá","Cota","La Calera","Tenjo","Sopó","Girardot"],
+  "Guainía":["Inírida"],
+  "Guaviare":["San José del Guaviare"],
+  "Huila":["Neiva","Pitalito","Garzón","La Plata","Campoalegre"],
+  "La Guajira":["Riohacha","Maicao","Uribia","Manaure","San Juan del Cesar","Fonseca"],
+  "Magdalena":["Santa Marta","Ciénaga","Fundación","El Banco","Plato","Aracataca"],
+  "Meta":["Villavicencio","Acacías","Granada","Puerto López","San Martín"],
+  "Nariño":["Pasto","Tumaco","Ipiales","Túquerres","La Unión"],
+  "Norte de Santander":["Cúcuta","Ocaña","Pamplona","Villa del Rosario","Los Patios","El Zulia"],
+  "Putumayo":["Mocoa","Puerto Asís","Orito","Valle del Guamuez"],
+  "Quindío":["Armenia","Calarcá","Montenegro","Quimbaya","La Tebaida","Circasia"],
+  "Risaralda":["Pereira","Dosquebradas","Santa Rosa de Cabal","La Virginia"],
+  "San Andrés y Providencia":["San Andrés","Providencia"],
+  "Santander":["Bucaramanga","Floridablanca","Girón","Piedecuesta","Barrancabermeja","San Gil","Socorro"],
+  "Sucre":["Sincelejo","Corozal","Sampués","San Marcos","Tolú"],
+  "Tolima":["Ibagué","Espinal","Melgar","Honda","Chaparral","Líbano","Mariquita"],
+  "Valle del Cauca":["Cali","Palmira","Buenaventura","Tuluá","Cartago","Buga","Jamundí","Yumbo","Candelaria","Florida"],
+  "Vaupés":["Mitú"],
+  "Vichada":["Puerto Carreño"],
+  "Amazonas":["Leticia","Puerto Nariño"],
+  "Arauca":["Arauca","Saravena","Tame","Arauquita"]
+};
+
+function populateDeptSelect(){
+  const deptSel=document.getElementById('coDept');
+  if(deptSel.options.length>1) return; // Ya poblado
+  Object.keys(COL_LOCATIONS).sort().forEach(d=>{
+    const opt=document.createElement('option');
+    opt.value=d; opt.textContent=d;
+    deptSel.appendChild(opt);
+  });
+  deptSel.addEventListener('change',()=>{
+    const citySel=document.getElementById('coCity');
+    citySel.innerHTML='<option value="">Selecciona ciudad...</option>';
+    const cities=COL_LOCATIONS[deptSel.value]||[];
+    if(cities.length){
+      citySel.disabled=false;
+      cities.sort().forEach(c=>{
+        const opt=document.createElement('option');
+        opt.value=c; opt.textContent=c;
+        citySel.appendChild(opt);
+      });
+    }else{
+      citySel.disabled=true;
+    }
+  });
+}
+
 function openCheckout(){
   if(!cart.length){showToast("Carrito vacío");return;}
   closeCart();
+  // Poblar selects si no se ha hecho
+  populateDeptSelect();
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
   const ship=0;
   document.getElementById("coSubtotal").textContent=fmt(tot);
@@ -1127,7 +1202,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     email: document.getElementById("coEmail").value,
     nombre_cliente: document.getElementById("coName").value,
     telefono: document.getElementById("coPhone").value,
-    direccion_completa: `${document.getElementById("coAddr").value}, ${document.getElementById("coCity").value}, ${document.getElementById("coDept").value}`,
+    direccion_completa: `${document.getElementById("coAddr").value}${document.getElementById("coApt").value?', '+document.getElementById("coApt").value:''}, ${document.getElementById("coCity").value}, ${document.getElementById("coDept").value}`,
     items: cart,
     subtotal: tot,
     envio: ship,
@@ -1188,6 +1263,7 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   const phone = document.getElementById("coPhone").value.trim();
   const email = document.getElementById("coEmail").value.trim();
   const addr = document.getElementById("coAddr").value.trim();
+  const apt = document.getElementById("coApt").value.trim();
   const city = document.getElementById("coCity").value.trim();
   const dept = document.getElementById("coDept").value.trim();
   const notes = document.getElementById("coNotes").value.trim();
@@ -1202,13 +1278,14 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   btn.textContent = 'Preparando...';
   
   const tot = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const dirCompleta = `${addr}${apt?', '+apt:''}, ${city}, ${dept}`;
   
   // Guardar pedido en Supabase con estado pendiente
   try{
     const pedido = {
       user_id: currentUser ? currentUser.id : null,
       email, nombre_cliente: name, telefono: phone,
-      direccion_completa: `${addr}, ${city}, ${dept}`,
+      direccion_completa: dirCompleta,
       items: cart, subtotal: tot, envio: 0, total: tot,
       notas: notes, estado: 'pendiente', metodo_pago: 'whatsapp'
     };
@@ -1220,7 +1297,7 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   msg += `*Cliente:* ${name}\n`;
   msg += `*Teléfono:* ${phone}\n`;
   msg += `*Email:* ${email}\n`;
-  msg += `*Dirección:* ${addr}, ${city}, ${dept}\n`;
+  msg += `*Dirección:* ${dirCompleta}\n`;
   if(notes) msg += `*Notas:* ${notes}\n`;
   msg += `\n*Productos:*\n`;
   cart.forEach(it=>{
