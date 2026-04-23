@@ -1532,22 +1532,33 @@ async function saveProduct(){
     color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
     fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
   };
+  console.log('[saveProduct] payload:',payload);
   try{
     if(id){
-      const {error}=await sb.from('productos').update(payload).eq('id',id);
-      if(error) throw error;
-      showToast('Producto actualizado');
+      // UPDATE
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`,{
+        method:'PATCH',
+        headers:{...SB_HEADERS,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){const t=await res.text(); console.error('[saveProduct] Error update',res.status,t); throw new Error(`${res.status}: ${t}`);}
+      showToast('Producto actualizado ✓');
     }else{
-      const {error}=await sb.from('productos').insert([payload]);
-      if(error) throw error;
-      showToast('Producto creado');
+      // INSERT
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/productos`,{
+        method:'POST',
+        headers:{...SB_HEADERS,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){const t=await res.text(); console.error('[saveProduct] Error insert',res.status,t); throw new Error(`${res.status}: ${t}`);}
+      showToast('Producto creado ✓');
     }
     closeProductEditor();
     await loadProducts();
     renderAdminTab('productos');
   }catch(e){
-    console.error(e);
-    showToast('Error: '+(e.message||'No se pudo guardar'));
+    console.error('[saveProduct] Error:',e);
+    showToast('Error: '+(e.message||'No se pudo guardar').slice(0,80));
   }
 }
 
