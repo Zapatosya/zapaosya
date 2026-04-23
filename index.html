@@ -863,7 +863,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     
     // 2) Llamar a la función de Netlify para crear link de pago
     btn.textContent='Conectando con Mercado Pago...';
-    const payRes = await fetch('/.netlify/functions/crear-pago', {
+    const payRes = await fetch('/crear-pago', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
