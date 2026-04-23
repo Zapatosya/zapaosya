@@ -110,8 +110,8 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pc-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
 .pc:hover .pc-img svg{transform:scale(1.09) rotate(3deg)}
 .pc:hover .pc-img img{transform:scale(1.06)}
-.pc-labels{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:5px}
-.lbl{display:inline-block;padding:4px 10px;border-radius:50px;font-family:var(--fh);font-weight:700;font-size:.67rem}
+.pc-labels{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:5px;z-index:3;pointer-events:none}
+.lbl{display:inline-block;padding:4px 10px;border-radius:50px;font-family:var(--fh);font-weight:700;font-size:.67rem;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .lbl-n{background:var(--blk);color:#fff}
 .lbl-s{background:var(--yel);color:var(--blk)}
 .lbl-h{background:var(--red);color:#fff}
@@ -141,14 +141,26 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .ov.open{opacity:1;pointer-events:all}
 .modal{background:#fff;border-radius:22px;width:100%;max-width:860px;max-height:92vh;overflow-y:auto;position:relative;transform:scale(.95) translateY(22px);transition:transform .32s cubic-bezier(.34,1.1,.64,1),opacity .3s;opacity:0}
 .ov.open .modal{transform:scale(1) translateY(0);opacity:1}
-.mc{position:sticky;top:14px;right:14px;float:right;margin:14px 14px 0 0;z-index:5;width:36px;height:36px;border-radius:50%;background:var(--wht);border:1px solid var(--border);font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
-.mc:hover{background:var(--blk);color:#fff}
+.mc{position:absolute;top:14px;right:14px;z-index:10;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid var(--border);font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:var(--tr);cursor:pointer}
+.mc:hover{background:var(--blk);color:#fff;border-color:var(--blk)}
 
 /* MODAL PRODUCTO */
 .mb{display:grid;grid-template-columns:1fr 1fr;clear:both}
-.mi{border-radius:22px 0 0 22px;display:flex;align-items:center;justify-content:center;position:relative;padding:40px;min-height:340px}
+.mi{border-radius:22px 0 0 22px;display:flex;align-items:center;justify-content:center;position:relative;padding:0;min-height:340px;overflow:hidden}
 .mi svg{width:80%;max-width:270px;height:auto;filter:drop-shadow(0 16px 36px rgba(0,0,0,.14));transition:transform .4s ease}
-.mi-badge{position:absolute;top:20px;left:20px}
+.mi img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .4s ease,opacity .2s ease;opacity:1}
+.mi-badge{position:absolute;top:20px;left:20px;z-index:5}
+/* Flechas navegación */
+.mi-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:var(--tr);box-shadow:0 4px 14px rgba(0,0,0,.15);border:none}
+.mi-nav:hover{background:#fff;transform:translateY(-50%) scale(1.08)}
+.mi-nav.prev{left:12px}
+.mi-nav.next{right:12px}
+.mi-nav svg{width:18px;height:18px}
+.mi-nav.hidden{display:none}
+/* Indicadores */
+.mi-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+.mi-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5);transition:var(--tr);cursor:pointer}
+.mi-dot.act{background:#fff;width:22px;border-radius:4px}
 .minfo{padding:34px;display:flex;flex-direction:column;gap:14px}
 .mcat{font-size:.73rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);font-weight:600}
 .mtit{font-family:var(--fh);font-weight:800;font-size:1.55rem;letter-spacing:-.5px;line-height:1.2}
@@ -240,8 +252,9 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .cempty-ico{font-size:3rem;margin-bottom:12px}
 .cempty h3{font-family:var(--fh);font-weight:700;margin-bottom:6px;color:var(--blk);font-size:.98rem}
 .citem{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);animation:fu .3s ease}
-.citem-ico{width:66px;height:66px;background:var(--wht);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.citem-ico{width:66px;height:66px;background:var(--wht);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .citem-ico svg{width:50px;height:50px}
+.citem-ico img{width:100%;height:100%;object-fit:cover}
 .ci-name{font-family:var(--fh);font-weight:700;font-size:.87rem;margin-bottom:3px}
 .ci-meta{font-size:.74rem;color:var(--gray);margin-bottom:7px}
 .ci-row{display:flex;align-items:center;justify-content:space-between}
@@ -266,6 +279,19 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .checkout-summary{background:var(--wht);border-radius:12px;padding:16px 18px;margin-bottom:18px}
 .cs-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.88rem}
 .cs-total{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;font-family:var(--fh);font-weight:800;font-size:1.1rem}
+
+/* LIGHTBOX ZOOM */
+.lbox{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+.lbox.open{display:flex;animation:fu .25s ease}
+.lbox img{max-width:100%;max-height:95vh;width:auto;height:auto;object-fit:contain;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:popIn .3s cubic-bezier(.34,1.3,.64,1)}
+.lbox-close{position:absolute;top:18px;right:18px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);z-index:2}
+.lbox-close:hover{background:rgba(255,255,255,.25);transform:rotate(90deg)}
+.lbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);color:#fff;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);z-index:2}
+.lbox-nav:hover{background:rgba(255,255,255,.25)}
+.lbox-nav.prev{left:18px}
+.lbox-nav.next{right:18px}
+.lbox-nav svg{width:22px;height:22px}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 
 /* PRODUCT EDITOR MODAL */
 .pe{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:12px}
@@ -312,9 +338,11 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   .hero-vis{justify-content:center}
   .logo-stage{width:300px}
   .mb{grid-template-columns:1fr}
-  .mi{border-radius:22px 22px 0 0;min-height:200px}
+  .mi{border-radius:22px 22px 0 0;min-height:auto;aspect-ratio:1;padding:0}
+  .mi svg{width:70%;max-width:220px}
   .minfo{padding:24px}
   .mtit{font-size:1.3rem}
+  .mi-nav{width:34px;height:34px}
 }
 @media(max-width:620px){
   .nav{display:none}
@@ -433,7 +461,16 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   <div class="modal">
     <button class="mc" id="mClose">✕</button>
     <div class="mb">
-      <div class="mi" id="mImg"><div class="mi-badge" id="mBadge"></div></div>
+      <div class="mi" id="mImg">
+        <div class="mi-badge" id="mBadge"></div>
+        <button class="mi-nav prev hidden" id="miPrev" aria-label="Anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="mi-nav next hidden" id="miNext" aria-label="Siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="mi-dots" id="miDots"></div>
+      </div>
       <div class="minfo">
         <div class="mcat" id="mCat"></div>
         <h2 class="mtit" id="mTit"></h2>
@@ -592,6 +629,18 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   <div class="cdf" id="cFoot"></div>
 </aside>
 
+<!-- ==================== LIGHTBOX ZOOM ==================== -->
+<div class="lbox" id="lbox">
+  <button class="lbox-close" onclick="closeLightbox()" aria-label="Cerrar">✕</button>
+  <button class="lbox-nav prev" id="lboxPrev" aria-label="Anterior">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="lbox-nav next" id="lboxNext" aria-label="Siguiente">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <img id="lboxImg" src="" alt="">
+</div>
+
 <!-- ==================== PRODUCT EDITOR MODAL ==================== -->
 <div class="pe" id="prodEditor"></div>
 
@@ -748,18 +797,37 @@ function openModal(id){
   selC=0; selS=null;
   const p=curP;
   const mi=document.getElementById("mImg");
-  mi.style.background=p.fondo;
-  // Limpia svg/img previos
-  const oldSvg=mi.querySelector("svg"); if(oldSvg) oldSvg.remove();
-  const oldImg=mi.querySelector("img"); if(oldImg) oldImg.remove();
-  // Inserta imagen real o SVG fallback
-  if((p.imagenes||[]).length>0){
-    mi.insertAdjacentHTML("afterbegin",`<img id="mProductImg" src="${p.imagenes[0]}" alt="${p.nombre}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit"/>`);
+  
+  // Precargar todas las imágenes para evitar flash al cambiar de color
+  (p.imagenes||[]).forEach(url=>{
+    if(url){const img=new Image(); img.src=url;}
+  });
+  
+  // Limpia cualquier svg/img previo (pero deja los elementos de UI: badge, nav, dots)
+  mi.querySelectorAll("svg").forEach(el=>{if(!el.closest('.mi-nav')&&!el.closest('.mi-badge')) el.remove();});
+  const oldImg=mi.querySelector("#mProductImg"); if(oldImg) oldImg.remove();
+  
+  // Inserta imagen real o SVG fallback (al principio del contenedor)
+  const hasImages=(p.imagenes||[]).filter(x=>x).length>0;
+  if(hasImages){
+    const img=document.createElement('img');
+    img.id='mProductImg';
+    img.src=p.imagenes[0]||'';
+    img.alt=p.nombre;
+    img.onclick=()=>openLightbox(selC);
+    mi.insertBefore(img,mi.firstChild);
   }else{
     mi.insertAdjacentHTML("afterbegin",getSVG(p));
-    const svg=mi.querySelector("svg");
-    if(svg) svg.style.cssText="width:78%;max-width:260px;height:auto;filter:drop-shadow(0 16px 32px rgba(0,0,0,.14))";
+    const svg=mi.querySelector("svg:not(.mi-nav svg)");
+    if(svg) svg.style.cssText="width:78%;max-width:260px;height:auto;filter:drop-shadow(0 16px 32px rgba(0,0,0,.14));margin:auto";
   }
+  
+  // Fondo inicial
+  mi.style.background=(p.fondos&&p.fondos[0])||p.fondo||'#F5F5F5';
+  
+  // Configurar navegación (flechas + dots)
+  setupImageNav(p);
+  
   document.getElementById("mBadge").innerHTML=(p.etiquetas||[]).includes("h")?'<span class="lbl lbl-h">Más vendido</span>':(p.etiquetas||[]).includes("l")?'<span class="lbl lbl-l">Limitado</span>':'';
   document.getElementById("mCat").textContent=p.categoria;
   document.getElementById("mTit").textContent=p.nombre;
@@ -774,18 +842,8 @@ function openModal(id){
   co.innerHTML=cs.map((c,i)=>`<button class="copt${i===0?' sel':''}" style="background:${c}" data-ci="${i}" title="${cn[i]||''}"></button>`).join('');
   document.getElementById("selC").textContent=cn[0]||'—';
   co.querySelectorAll(".copt").forEach(b=>b.addEventListener("click",()=>{
-    co.querySelectorAll(".copt").forEach(x=>x.classList.remove("sel"));
-    b.classList.add("sel"); selC=+b.dataset.ci;
-    document.getElementById("selC").textContent=cn[selC]||'—';
-    // Cambiar imagen si hay imágenes por color
-    const imgEl=document.getElementById("mProductImg");
-    if(imgEl && (curP.imagenes||[])[selC]){
-      imgEl.src=curP.imagenes[selC];
-    }
-    // Cambiar fondo si hay fondos por color
-    if((curP.fondos||[])[selC]){
-      document.getElementById("mImg").style.background=curP.fondos[selC];
-    }
+    selC=+b.dataset.ci;
+    updateModalColor();
   }));
   const so=document.getElementById("sopts");
   const noSz=p.tallas_no_disponibles||[];
@@ -801,13 +859,178 @@ function openModal(id){
 }
 function closeModal(){document.getElementById("pModal").classList.remove("open");document.body.style.overflow="";}
 
+// ─── NAV IMÁGENES EN MODAL ──────────────────────────────────
+function setupImageNav(p){
+  const imgs=(p.imagenes||[]).filter(x=>x);
+  const prev=document.getElementById('miPrev');
+  const next=document.getElementById('miNext');
+  const dots=document.getElementById('miDots');
+  const multiple=imgs.length>1;
+  
+  // Mostrar/ocultar controles
+  prev.classList.toggle('hidden',!multiple);
+  next.classList.toggle('hidden',!multiple);
+  
+  // Dots
+  if(multiple){
+    dots.innerHTML=imgs.map((_,i)=>`<span class="mi-dot${i===0?' act':''}" data-i="${i}"></span>`).join('');
+    dots.querySelectorAll('.mi-dot').forEach(d=>{
+      d.addEventListener('click',e=>{e.stopPropagation();selC=+d.dataset.i;updateModalColor();});
+    });
+  }else{
+    dots.innerHTML='';
+  }
+  
+  // Handlers flechas (remover anteriores primero)
+  prev.onclick=(e)=>{e.stopPropagation();changeImage(-1);};
+  next.onclick=(e)=>{e.stopPropagation();changeImage(1);};
+  
+  // Swipe táctil
+  setupSwipe(document.getElementById('mImg'));
+}
+
+function changeImage(dir){
+  if(!curP) return;
+  const n=(curP.imagenes||[]).filter(x=>x).length;
+  if(n<=1) return;
+  selC=(selC+dir+n)%n;
+  updateModalColor();
+}
+
+function updateModalColor(){
+  if(!curP) return;
+  const cn=curP.nombres_colores||[];
+  
+  // Actualizar selección visual de botones de color
+  document.querySelectorAll('#copts .copt').forEach((b,i)=>{
+    b.classList.toggle('sel',i===selC);
+  });
+  document.getElementById("selC").textContent=cn[selC]||'—';
+  
+  // Actualizar dots
+  document.querySelectorAll('#miDots .mi-dot').forEach((d,i)=>{
+    d.classList.toggle('act',i===selC);
+  });
+  
+  // Cambiar imagen con animación fade
+  const imgEl=document.getElementById("mProductImg");
+  const newSrc=(curP.imagenes||[])[selC];
+  if(imgEl && newSrc && imgEl.src!==newSrc){
+    // Fade out → change → fade in
+    imgEl.style.opacity='0';
+    const tempImg=new Image();
+    tempImg.onload=()=>{
+      imgEl.src=newSrc;
+      requestAnimationFrame(()=>{imgEl.style.opacity='1';});
+    };
+    tempImg.src=newSrc;
+  }
+  
+  // Cambiar fondo
+  const newBg=(curP.fondos||[])[selC]||curP.fondo;
+  if(newBg){
+    document.getElementById("mImg").style.background=newBg;
+  }
+}
+
+// Swipe táctil genérico
+let swipeStartX=0,swipeCurrent=null;
+function setupSwipe(el){
+  if(el.__swipeSetup) return;
+  el.__swipeSetup=true;
+  el.addEventListener('touchstart',e=>{
+    swipeStartX=e.touches[0].clientX;
+    swipeCurrent=el;
+  },{passive:true});
+  el.addEventListener('touchend',e=>{
+    if(swipeCurrent!==el) return;
+    const dx=e.changedTouches[0].clientX-swipeStartX;
+    if(Math.abs(dx)>40){
+      changeImage(dx<0?1:-1);
+    }
+    swipeCurrent=null;
+  },{passive:true});
+}
+
+// ─── LIGHTBOX ZOOM ──────────────────────────────────────────
+let lboxIdx=0;
+function openLightbox(idx=0){
+  if(!curP||!(curP.imagenes||[]).length) return;
+  lboxIdx=idx;
+  const lb=document.getElementById('lbox');
+  const img=document.getElementById('lboxImg');
+  img.src=curP.imagenes[lboxIdx];
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+  updateLboxNav();
+}
+function closeLightbox(){
+  document.getElementById('lbox').classList.remove('open');
+  // Solo restauro overflow si el modal de producto no está abierto
+  if(!document.getElementById('pModal').classList.contains('open')){
+    document.body.style.overflow='';
+  }
+}
+function changeLbox(dir){
+  if(!curP) return;
+  const n=(curP.imagenes||[]).filter(x=>x).length;
+  if(n<=1) return;
+  lboxIdx=(lboxIdx+dir+n)%n;
+  document.getElementById('lboxImg').src=curP.imagenes[lboxIdx];
+  updateLboxNav();
+  // Sincronizar con modal
+  selC=lboxIdx;
+  updateModalColor();
+}
+function updateLboxNav(){
+  const n=(curP?.imagenes||[]).filter(x=>x).length;
+  document.getElementById('lboxPrev').style.display=n>1?'flex':'none';
+  document.getElementById('lboxNext').style.display=n>1?'flex':'none';
+}
+// Inicializar handlers lightbox
+document.addEventListener('DOMContentLoaded',()=>{
+  const lb=document.getElementById('lbox');
+  if(lb){
+    // Click en fondo cierra
+    lb.addEventListener('click',e=>{if(e.target===lb||e.target.id==='lboxImg'===false&&e.target.tagName!=='BUTTON'&&!e.target.closest('button'))closeLightbox();});
+    // La imagen NO cierra al hacer click (para evitar cierre accidental)
+    document.getElementById('lboxImg').addEventListener('click',e=>e.stopPropagation());
+    document.getElementById('lboxPrev').addEventListener('click',e=>{e.stopPropagation();changeLbox(-1);});
+    document.getElementById('lboxNext').addEventListener('click',e=>{e.stopPropagation();changeLbox(1);});
+    // Swipe en lightbox
+    let lbStartX=0;
+    lb.addEventListener('touchstart',e=>{lbStartX=e.touches[0].clientX;},{passive:true});
+    lb.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-lbStartX;
+      if(Math.abs(dx)>40) changeLbox(dx<0?1:-1);
+    },{passive:true});
+  }
+  // Teclado: flechas + ESC
+  document.addEventListener('keydown',e=>{
+    if(document.getElementById('lbox').classList.contains('open')){
+      if(e.key==='ArrowLeft') changeLbox(-1);
+      else if(e.key==='ArrowRight') changeLbox(1);
+      else if(e.key==='Escape') closeLightbox();
+    }else if(document.getElementById('pModal').classList.contains('open')){
+      if(e.key==='ArrowLeft') changeImage(-1);
+      else if(e.key==='ArrowRight') changeImage(1);
+    }
+  });
+});
+
 // ─── CARRITO ─────────────────────────────────────────────────
 function addToCart(){
   if(!selS){showToast("Elige una talla primero");return;}
   const p=curP, cn=p.nombres_colores||[], key=`${p.id}-${selS}-${selC}`;
   const ex=cart.find(i=>i.key===key);
   if(ex) ex.qty++;
-  else cart.push({key,id:p.id,name:p.nombre,svg:p.svg_tipo,c1:p.color_principal,c2:p.color_secundario,price:p.precio,size:selS,color:cn[selC]||'',qty:1});
+  else cart.push({
+    key,id:p.id,name:p.nombre,
+    svg:p.svg_tipo,c1:p.color_principal,c2:p.color_secundario,
+    img:(p.imagenes||[])[selC]||'', // imagen real del color seleccionado
+    bg:(p.fondos||[])[selC]||p.fondo||'#F5F5F5',
+    price:p.precio,size:selS,color:cn[selC]||'',qty:1
+  });
   saveCart(); updateCartUI(); closeModal(); showToast(`${p.nombre} agregado al carrito`);
 }
 function rm(key){cart=cart.filter(i=>i.key!==key);saveCart();updateCartUI();renderCart();}
@@ -842,7 +1065,7 @@ function renderCart(){
   }
   body.innerHTML=cart.map(it=>`
     <div class="citem">
-      <div class="citem-ico">${(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
+      <div class="citem-ico" style="background:${it.bg||'var(--wht)'}">${it.img?`<img src="${it.img}" alt="${it.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
       <div style="flex:1">
         <div class="ci-name">${it.name}</div>
         <div class="ci-meta">Talla ${it.size} · ${it.color}</div>
@@ -1565,10 +1788,24 @@ async function saveProduct(){
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
 async function loadProfile(){
   if(!currentUser)return;
-  const {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  currentProfile=data;
-  isAdmin=data?.es_admin===true;
-  updateUserUI();
+  try{
+    // Usar fetch directo para no depender de sesión RLS de Supabase Auth
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
+      headers:SB_HEADERS
+    });
+    if(!res.ok){console.warn('[loadProfile] status',res.status); return;}
+    const rows=await res.json();
+    const data=rows[0];
+    if(data){
+      currentProfile=data;
+      isAdmin=data.es_admin===true;
+      console.log('[loadProfile] isAdmin:',isAdmin);
+    }
+  }catch(e){
+    console.warn('[loadProfile] error:',e);
+  }finally{
+    updateUserUI();
+  }
 }
 
 sb && sb.auth && sb.auth.onAuthStateChange(async(event,session)=>{
@@ -1626,9 +1863,17 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeC
       if(sb && sb.auth){
         const {data:{session}}=await sb.auth.getSession();
         currentUser=session?.user||null;
-        if(currentUser) await loadProfile();
+        console.log('[init] session user:',currentUser?.email||'ninguno');
+        if(currentUser){
+          await loadProfile(); // esto ya llama updateUserUI al final
+        }else{
+          updateUserUI(); // por si acaso
+        }
       }
-    }catch(e){console.warn('session init:',e);}
+    }catch(e){
+      console.warn('session init:',e);
+      updateUserUI(); // garantizar que la UI se renderice aunque haya error
+    }
   }, 100);
 })();
 </script>
