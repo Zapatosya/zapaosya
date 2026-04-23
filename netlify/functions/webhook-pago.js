@@ -1,44 +1,38 @@
 // ═══════════════════════════════════════════════════════════════
-// FUNCIÓN: webhook-pago
-// Qué hace: Mercado Pago llama a esta función cuando alguien paga
-//           o cambia el estado de un pago. Actualiza el pedido
-//           en Supabase automáticamente.
+// Cloudflare Pages Function: webhook-pago
+// Path: /functions/webhook-pago.js
+// Endpoint: https://zapatosya.com/webhook-pago
 // ═══════════════════════════════════════════════════════════════
 
-exports.handler = async (event) => {
+export async function onRequestPost(context) {
+  const { request, env } = context;
+
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json'
   };
 
   try {
-    // Mercado Pago envía notificaciones por POST
-    if (event.httpMethod !== 'POST') {
-      return { statusCode: 200, headers, body: 'OK' };
-    }
-
-    const body = JSON.parse(event.body || '{}');
+    const body = await request.json().catch(() => ({}));
     console.log('Webhook recibido:', JSON.stringify(body));
 
-    // Solo nos interesan notificaciones de tipo "payment"
     if (body.type !== 'payment') {
-      return { statusCode: 200, headers, body: JSON.stringify({ ignored: true }) };
+      return new Response(JSON.stringify({ ignored: true }), { status: 200, headers });
     }
 
     const paymentId = body.data?.id;
     if (!paymentId) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Sin payment id' }) };
+      return new Response(JSON.stringify({ error: 'Sin payment id' }), { status: 400, headers });
     }
 
-    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    const MP_ACCESS_TOKEN = env.MP_ACCESS_TOKEN;
+    const SUPABASE_URL = env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY;
 
     if (!MP_ACCESS_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Variables de entorno faltan' }) };
+      return new Response(JSON.stringify({ error: 'Variables de entorno faltan' }), { status: 500, headers });
     }
 
-    // Consultar el pago a Mercado Pago
     const paymentRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: { 'Authorization': `Bearer ${MP_ACCESS_TOKEN}` }
     });
@@ -46,33 +40,23 @@ exports.handler = async (event) => {
 
     if (!paymentRes.ok) {
       console.error('Error consultando pago:', payment);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Error consultando pago MP' }) };
+      return new Response(JSON.stringify({ error: 'Error consultando pago MP' }), { status: 500, headers });
     }
 
-    // external_reference es el ID del pedido en Supabase
     const pedidoId = payment.external_reference;
-    const status = payment.status; // approved, pending, rejected, etc
+    const status = payment.status;
+    const metodoPago = payment.payment_method_id || 'mercadopago';
 
-    // Mapear estado de MP a estado de nuestro pedido
     let nuevoEstado;
-    let metodoPago = payment.payment_method_id || 'mercadopago';
     switch (status) {
-      case 'approved':
-        nuevoEstado = 'confirmado';
-        break;
+      case 'approved': nuevoEstado = 'confirmado'; break;
       case 'pending':
-      case 'in_process':
-        nuevoEstado = 'pendiente';
-        break;
+      case 'in_process': nuevoEstado = 'pendiente'; break;
       case 'rejected':
-      case 'cancelled':
-        nuevoEstado = 'cancelado';
-        break;
-      default:
-        nuevoEstado = 'pendiente';
+      case 'cancelled': nuevoEstado = 'cancelado'; break;
+      default: nuevoEstado = 'pendiente';
     }
 
-    // Actualizar el pedido en Supabase
     const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${pedidoId}`, {
       method: 'PATCH',
       headers: {
@@ -81,28 +65,25 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({
-        estado: nuevoEstado,
-        metodo_pago: metodoPago
-      })
+      body: JSON.stringify({ estado: nuevoEstado, metodo_pago: metodoPago })
     });
 
     if (!updateRes.ok) {
       const errTxt = await updateRes.text();
       console.error('Error actualizando pedido:', errTxt);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Error actualizando pedido', detail: errTxt }) };
+      return new Response(JSON.stringify({ error: 'Error actualizando pedido' }), { status: 500, headers });
     }
 
     console.log(`Pedido ${pedidoId} actualizado a: ${nuevoEstado}`);
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ ok: true, pedido_id: pedidoId, estado: nuevoEstado })
-    };
+    return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, estado: nuevoEstado }), { status: 200, headers });
 
   } catch (err) {
-    console.error('Error webhook:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('Error webhook:', err.message);
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
   }
-};
+}
+
+// Aceptar también GET para verificación de Mercado Pago
+export async function onRequestGet() {
+  return new Response('webhook-pago OK', { status: 200 });
+}
