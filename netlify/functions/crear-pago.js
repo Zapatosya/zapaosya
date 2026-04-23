@@ -4,6 +4,51 @@
 // Endpoint: https://zapatosya.com/crear-pago
 // ═══════════════════════════════════════════════════════════════
 
+// ─── Helper: Enviar notificación a Telegram ────────────────────
+async function notificarTelegram(env, datos) {
+  const token = env.TELEGRAM_BOT_TOKEN;
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    console.warn('Telegram no configurado');
+    return;
+  }
+  try {
+    const { pedido_id, items, total, email, nombre, telefono, direccion } = datos;
+    let msg = `🛒 *NUEVO PEDIDO* \`#${pedido_id.slice(0,8)}\`\n`;
+    msg += `⏰ _Esperando pago en Mercado Pago_\n\n`;
+    if (nombre) msg += `👤 *Cliente:* ${nombre}\n`;
+    if (telefono) msg += `📱 *Teléfono:* ${telefono}\n`;
+    if (email) msg += `📧 *Email:* ${email}\n`;
+    if (direccion) msg += `📍 *Dirección:* ${direccion}\n`;
+    msg += `\n🛍 *Productos:*\n`;
+    (items || []).forEach(it => {
+      const sub = (it.price || 0) * (it.qty || 1);
+      msg += `• ${it.name || 'Producto'}`;
+      const detalles = [];
+      if (it.size) detalles.push(`Talla ${it.size}`);
+      if (it.color) detalles.push(it.color);
+      if (detalles.length) msg += ` (${detalles.join(', ')})`;
+      msg += ` x${it.qty || 1} — $${sub.toLocaleString('es-CO')}\n`;
+    });
+    msg += `\n💰 *TOTAL: $${(total || 0).toLocaleString('es-CO')}*`;
+
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: msg,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      })
+    });
+    if (!res.ok) console.error('Telegram error:', res.status, await res.text());
+    else console.log('Telegram OK ✓');
+  } catch (e) {
+    console.error('Error Telegram:', e.message);
+  }
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   
@@ -16,7 +61,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { pedido_id, items, total, email, nombre } = body;
+    const { pedido_id, items, total, email, nombre, telefono, direccion } = body;
     
     console.log('crear-pago iniciado, pedido:', pedido_id, 'total:', total);
 
@@ -79,6 +124,12 @@ export async function onRequestPost(context) {
     }
 
     console.log('Pago creado OK:', data.id);
+
+    // 🔔 Notificación a Telegram (no bloqueante - si falla, el pago sigue)
+    context.waitUntil(notificarTelegram(env, {
+      pedido_id, items, total, email, nombre, telefono, direccion
+    }));
+
     return new Response(JSON.stringify({
       init_point: data.init_point,
       sandbox_init_point: data.sandbox_init_point,
