@@ -1658,7 +1658,7 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   }
   
   // Número de WhatsApp de la tienda (CAMBIAR ESTE)
-  const WHATSAPP_NUMBER = '573107801564'; // 57 = Colombia, sin espacios
+  const WHATSAPP_NUMBER = '573212970591'; // 57 = Colombia, sin espacios
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   
   // Limpiar carrito y abrir WhatsApp
@@ -1716,7 +1716,7 @@ function showRecover(){
   if(wa){
     const email=document.getElementById('authEmail').value||'';
     const msg=encodeURIComponent(`Hola, olvidé mi contraseña de ZapatosYa.${email?' Mi email es: '+email:''}`);
-    wa.href=`https://wa.me/573107801564?text=${msg}`;
+    wa.href=`https://wa.me/573212970591?text=${msg}`;
   }
 }
 
@@ -2546,7 +2546,7 @@ function renderMenu(key){
 
 function chatWhatsapp(){
   const msg = encodeURIComponent('Hola, quisiera hablar con un asesor de ZapatosYa.');
-  window.open(`https://wa.me/573107801564?text=${msg}`, '_blank');
+  window.open(`https://wa.me/573212970591?text=${msg}`, '_blank');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
