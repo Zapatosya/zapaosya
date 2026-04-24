@@ -22,6 +22,8 @@ async function notificarPagoTelegram(env, pedido, payment, pagoEstado) {
       titulo = 'PAGO CONFIRMADO';
     } else if (pagoEstado === 'rechazado') {
       titulo = 'PAGO RECHAZADO';
+    } else if (pagoEstado === 'devuelto') {
+      titulo = 'PAGO DEVUELTO AL CLIENTE';
     } else {
       titulo = 'PAGO PENDIENTE';
     }
@@ -135,23 +137,25 @@ export async function onRequestPost(context) {
 
     const pedidoId = payment.external_reference;
     const status = payment.status;
+    const statusDetail = payment.status_detail || '';
     const metodoPago = payment.payment_method_id || 'mercadopago';
 
     // pago_estado (estado del pago en MP, controlado automáticamente)
     let pagoEstado;
     switch (status) {
       case 'approved': pagoEstado = 'confirmado'; break;
+      case 'refunded':
+      case 'charged_back': pagoEstado = 'devuelto'; break;
       case 'rejected':
       case 'cancelled': pagoEstado = 'rechazado'; break;
       default: pagoEstado = 'esperando';
     }
 
-    // estado del pedido: solo se actualiza a "confirmado" si el pago es aprobado
-    // Los demás estados (procesando, enviado, entregado) los maneja el admin manualmente
+    // estado del pedido: solo se actualiza automáticamente en casos claros
     let updateData = { pago_estado: pagoEstado, metodo_pago: metodoPago };
     if (pagoEstado === 'confirmado') {
       updateData.estado = 'confirmado';
-    } else if (pagoEstado === 'rechazado') {
+    } else if (pagoEstado === 'rechazado' || pagoEstado === 'devuelto') {
       updateData.estado = 'cancelado';
     }
 
