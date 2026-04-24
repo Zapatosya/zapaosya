@@ -312,6 +312,10 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 /* Pedidos abandonados (sin pago >24h) */
 .ped-card-abandonado{border-left:4px solid #dc2626;background:#fef2f2}
 
+/* Pedidos ocultos al cliente */
+.ped-card-oculto{opacity:.72;background:#f9fafb}
+.ped-oculto-tag{display:inline-block;background:#f59e0b;color:#fff;font-size:.62rem;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;letter-spacing:.3px}
+
 /* ADMIN PANEL */
 .modal-lg{max-width:1100px}
 .admin-tabs{display:flex;gap:4px;padding:14px 32px 0;border-bottom:1px solid var(--border);background:var(--wht);border-radius:22px 22px 0 0;overflow-x:auto}
@@ -2203,10 +2207,10 @@ function renderAdminPedidosList(filtro){
     const esAbandonado = pagoEstado==='esperando' && edadMs > 24*60*60*1000 && p.estado!=='cancelado';
     const horas = Math.floor(edadMs / (60*60*1000));
     
-    return `<div class="ped-card ${esAbandonado?'ped-card-abandonado':''}">
+    return `<div class="ped-card ${esAbandonado?'ped-card-abandonado':''} ${p.oculto_cliente?'ped-card-oculto':''}">
       <div class="ped-card-top">
         <div>
-          <div class="ped-card-id">Pedido #${String(p.id).slice(0,8)}</div>
+          <div class="ped-card-id">Pedido #${String(p.id).slice(0,8)} ${p.oculto_cliente?'<span class="ped-oculto-tag">OCULTO AL CLIENTE</span>':''}</div>
           <div class="ped-card-date">${fecha}${esAbandonado?` · <span style="color:#dc2626;font-weight:600">Sin pagar hace ${horas}h</span>`:''}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
@@ -2231,6 +2235,10 @@ function renderAdminPedidosList(filtro){
         <select class="admin-select" onchange="updOrder('${p.id}',this.value)">
           ${['pendiente','confirmado','procesando','enviado','entregado','cancelado'].map(e=>`<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('')}
         </select>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-out btn-sm" onclick="toggleOcultoCliente('${p.id}',${!p.oculto_cliente})" style="color:#b45309;border-color:#f59e0b" title="${p.oculto_cliente?'Mostrar de nuevo al cliente':'Ocultar al cliente (tú lo sigues viendo)'}">${p.oculto_cliente?'Mostrar al cliente':'Ocultar al cliente'}</button>
+          <button class="btn btn-out btn-sm" onclick="deletePedido('${p.id}')" style="color:var(--red);border-color:var(--red)" title="Eliminar permanentemente de la base de datos">Eliminar</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2247,6 +2255,58 @@ async function updOrder(id,estado){
     }
   }catch(e){
     showToast('Error actualizando');
+    console.error(e);
+  }
+}
+
+// Ocultar pedido al cliente (sin borrarlo)
+async function toggleOcultoCliente(id, oculto){
+  try{
+    await sbUpdate('pedidos', id, {oculto_cliente: oculto});
+    showToast(oculto ? 'Pedido oculto al cliente' : 'Pedido visible para el cliente');
+    if(window.__adminPedidos){
+      const idx = window.__adminPedidos.findIndex(p=>p.id===id);
+      if(idx>=0) window.__adminPedidos[idx].oculto_cliente = oculto;
+    }
+    // Re-renderizar el filtro activo
+    const activo = document.querySelector('.ped-filter.act');
+    if(activo) renderAdminPedidosList(activo.dataset.f);
+  }catch(e){
+    showToast('Error actualizando');
+    console.error(e);
+  }
+}
+
+// Eliminar pedido permanentemente de Supabase
+async function deletePedido(id){
+  const ped = (window.__adminPedidos||[]).find(p=>p.id===id);
+  const nombre = ped?.nombre_cliente || 'este pedido';
+  const total = ped?.total ? fmt(ped.total) : '';
+  
+  const confirmar = confirm(`¿Eliminar permanentemente el pedido de ${nombre}${total?' por '+total:''}?\n\nEsta acción NO se puede deshacer. El pedido desaparecerá de la base de datos y del historial.`);
+  if(!confirmar) return;
+  
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if(!res.ok){
+      const txt = await res.text();
+      throw new Error(txt);
+    }
+    showToast('Pedido eliminado');
+    // Quitar del array local
+    if(window.__adminPedidos){
+      window.__adminPedidos = window.__adminPedidos.filter(p=>p.id!==id);
+    }
+    // Re-renderizar
+    renderAdminTab('pedidos');
+  }catch(e){
+    showToast('Error eliminando');
     console.error(e);
   }
 }
@@ -2268,13 +2328,14 @@ async function openMisPedidos(){
       return;
     }
     
-    // Filtrar: ocultar pedidos "esperando pago" de hace más de 24h
+    // Filtrar: ocultar pedidos "esperando pago" de hace más de 24h, Y los marcados como ocultos por admin
     const ahora = Date.now();
     const MS_24H = 24 * 60 * 60 * 1000;
     const visibles = data.filter(p=>{
+      if(p.oculto_cliente) return false; // oculto manualmente por admin
       if(p.pago_estado === 'esperando' || !p.pago_estado){
         const edad = ahora - new Date(p.creado_en).getTime();
-        if(edad > MS_24H) return false; // ocultar
+        if(edad > MS_24H) return false; // ocultar auto
       }
       return true;
     });
