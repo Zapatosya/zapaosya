@@ -545,8 +545,48 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           <label>Contraseña</label>
           <input type="password" id="authPass" placeholder="Mínimo 6 caracteres" required minlength="6"/>
         </div>
+        <div style="text-align:right;margin-top:-8px" id="forgotLinkWrap">
+          <a onclick="showRecover()" style="font-size:.78rem;color:var(--red);cursor:pointer;text-decoration:none">¿Olvidaste tu contraseña?</a>
+        </div>
         <button type="submit" class="btn btn-red btn-full" id="authSubmit">Iniciar sesión</button>
       </form>
+      
+      <!-- Vista recuperación -->
+      <form class="auth-form" id="recoverForm" style="display:none">
+        <p style="font-size:.84rem;color:var(--gray);margin-bottom:10px;line-height:1.5">Te enviaremos un link a tu correo para restablecer tu contraseña.</p>
+        <div>
+          <label>Email</label>
+          <input type="email" id="recoverEmail" placeholder="tu@email.com" required/>
+        </div>
+        <button type="submit" class="btn btn-red btn-full">Enviar link de recuperación</button>
+        <div id="recoverMsg" style="margin-top:8px"></div>
+        <div style="text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <p style="font-size:.78rem;color:var(--gray);margin-bottom:8px">¿Problemas para recibir el correo?</p>
+          <a id="recoverWhatsapp" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:#25D366;font-weight:600;text-decoration:none">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            Contactar por WhatsApp
+          </a>
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <a onclick="hideRecover()" style="font-size:.8rem;color:var(--gray);cursor:pointer">← Volver a iniciar sesión</a>
+        </div>
+      </form>
+      
+      <!-- Vista nueva contraseña (después de clicar link del email) -->
+      <form class="auth-form" id="newPassForm" style="display:none">
+        <p style="font-size:.84rem;color:var(--gray);margin-bottom:10px">Ingresa tu nueva contraseña:</p>
+        <div>
+          <label>Nueva contraseña</label>
+          <input type="password" id="newPass1" placeholder="Mínimo 6 caracteres" required minlength="6"/>
+        </div>
+        <div>
+          <label>Confirmar contraseña</label>
+          <input type="password" id="newPass2" placeholder="Repite la contraseña" required minlength="6"/>
+        </div>
+        <button type="submit" class="btn btn-red btn-full">Guardar nueva contraseña</button>
+        <div id="newPassMsg" style="margin-top:8px"></div>
+      </form>
+      <div id="socialArea">
       <div class="auth-divider">o continúa con</div>
       <div class="social-btns">
         <button class="social-btn" onclick="loginSocial('google')">
@@ -557,6 +597,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       <div class="auth-footer">
         <span id="authSwitchText">¿No tienes cuenta? </span>
         <a onclick="toggleAuth()" id="authSwitch">Regístrate</a>
+      </div>
       </div>
     </div>
   </div>
@@ -1595,8 +1636,100 @@ function openAuth(mode='login'){
   document.getElementById("authModal").classList.add("open");
   document.body.style.overflow="hidden";
 }
-function closeAuth(){document.getElementById("authModal").classList.remove("open");document.body.style.overflow="";}
+function closeAuth(){document.getElementById("authModal").classList.remove("open");document.body.style.overflow="";hideRecover();}
 function toggleAuth(){openAuth(authMode==='login'?'signup':'login');}
+
+// ─── RECUPERACIÓN DE CONTRASEÑA ──────────────────────────────
+function showRecover(){
+  document.getElementById('authForm').style.display='none';
+  document.getElementById('socialArea').style.display='none';
+  document.getElementById('recoverForm').style.display='';
+  document.getElementById('recoverMsg').innerHTML='';
+  document.getElementById('recoverEmail').value=document.getElementById('authEmail').value||'';
+  // Construir link de WhatsApp con mensaje prellenado
+  const wa=document.getElementById('recoverWhatsapp');
+  if(wa){
+    const email=document.getElementById('authEmail').value||'';
+    const msg=encodeURIComponent(`Hola, olvidé mi contraseña de ZapatosYa.${email?' Mi email es: '+email:''}`);
+    wa.href=`https://wa.me/573107801564?text=${msg}`;
+  }
+}
+
+function hideRecover(){
+  document.getElementById('authForm').style.display='';
+  document.getElementById('socialArea').style.display='';
+  document.getElementById('recoverForm').style.display='none';
+  document.getElementById('newPassForm').style.display='none';
+}
+
+// Submit: enviar email de recuperación
+document.getElementById('recoverForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=e.target.querySelector('button[type="submit"]');
+  const msg=document.getElementById('recoverMsg');
+  const email=document.getElementById('recoverEmail').value.trim();
+  if(!email){return;}
+  btn.disabled=true; btn.textContent='Enviando...';
+  msg.innerHTML='';
+  try{
+    const redirectUrl=`${window.location.origin}/?recuperar=1`;
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl});
+    if(error) throw error;
+    msg.innerHTML='<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:10px;border-radius:8px;font-size:.84rem;text-align:center">Te enviamos un correo con el link para restablecer tu contraseña. Revisa tu bandeja (y spam).</div>';
+    btn.textContent='Correo enviado';
+  }catch(err){
+    msg.innerHTML=`<div class="auth-error">Error: ${err.message}</div>`;
+    btn.disabled=false; btn.textContent='Enviar link de recuperación';
+  }
+});
+
+// Submit: guardar nueva contraseña
+document.getElementById('newPassForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=e.target.querySelector('button[type="submit"]');
+  const msg=document.getElementById('newPassMsg');
+  const p1=document.getElementById('newPass1').value;
+  const p2=document.getElementById('newPass2').value;
+  msg.innerHTML='';
+  if(p1!==p2){
+    msg.innerHTML='<div class="auth-error">Las contraseñas no coinciden</div>';
+    return;
+  }
+  if(p1.length<6){
+    msg.innerHTML='<div class="auth-error">La contraseña debe tener al menos 6 caracteres</div>';
+    return;
+  }
+  btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error) throw error;
+    msg.innerHTML='<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:10px;border-radius:8px;font-size:.84rem;text-align:center">Contraseña actualizada. Ya puedes iniciar sesión.</div>';
+    // Limpiar parametro URL
+    history.replaceState(null,'',window.location.pathname);
+    setTimeout(()=>{
+      hideRecover();
+      // Mostrar form de login listo
+      document.getElementById('newPass1').value='';
+      document.getElementById('newPass2').value='';
+    },2500);
+  }catch(err){
+    msg.innerHTML=`<div class="auth-error">Error: ${err.message}</div>`;
+    btn.disabled=false; btn.textContent='Guardar nueva contraseña';
+  }
+});
+
+// Detectar si el usuario viene del link de recuperación
+sb && sb.auth && sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    // Abrir modal en modo "nueva contraseña"
+    openAuth('login');
+    document.getElementById('authForm').style.display='none';
+    document.getElementById('socialArea').style.display='none';
+    document.getElementById('recoverForm').style.display='none';
+    document.getElementById('newPassForm').style.display='';
+    document.getElementById('newPassMsg').innerHTML='';
+  }
+});
 
 document.getElementById("authForm").addEventListener("submit",async e=>{
   e.preventDefault();
