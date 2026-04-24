@@ -302,6 +302,13 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .ped-card-actions{display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
 .ped-filter.act{background:var(--red);color:#fff;border-color:var(--red)}
 
+/* Pago badges (estado del pago separado) */
+.pago-badge{display:inline-block;padding:4px 10px;border-radius:50px;font-size:.68rem;font-weight:800;font-family:var(--fh);letter-spacing:.5px;white-space:nowrap}
+.pago-confirmado{background:#16a34a;color:#fff}
+.pago-esperando{background:#f59e0b;color:#fff}
+.pago-rechazado{background:#dc2626;color:#fff}
+.pago-contraentrega{background:#2563eb;color:#fff}
+
 /* ADMIN PANEL */
 .modal-lg{max-width:1100px}
 .admin-tabs{display:flex;gap:4px;padding:14px 32px 0;border-bottom:1px solid var(--border);background:var(--wht);border-radius:22px 22px 0 0;overflow-x:auto}
@@ -1600,7 +1607,8 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     total: totalCompleto,
     notas: document.getElementById("coNotes").value,
     estado: 'pendiente',
-    metodo_pago: metodoPago === 'contraentrega' ? 'contraentrega' : 'pago_completo'
+    metodo_pago: metodoPago === 'contraentrega' ? 'contraentrega' : 'pago_completo',
+    pago_estado: 'esperando'
   };
   
   try{
@@ -2176,13 +2184,27 @@ function renderAdminPedidosList(filtro){
     const fecha = new Date(p.creado_en).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
     const items = (p.items||[]).map(it=>`${it.name} (T${it.size||'-'}, ${it.color||'-'}) x${it.qty}`).join(' · ');
     const metodo = p.metodo_pago==='contraentrega'?'Contraentrega':'Pago completo';
+    
+    // Badge del estado de pago (separado del estado del pedido)
+    const pagoEstado = p.pago_estado || 'esperando';
+    const pagoLabels = {
+      'esperando': {txt:'ESPERANDO PAGO', cls:'pago-esperando'},
+      'confirmado': {txt:'PAGO CONFIRMADO', cls:'pago-confirmado'},
+      'rechazado': {txt:'PAGO RECHAZADO', cls:'pago-rechazado'},
+      'contraentrega': {txt:'CONTRAENTREGA', cls:'pago-contraentrega'}
+    };
+    const pagoInfo = pagoLabels[pagoEstado] || pagoLabels.esperando;
+    
     return `<div class="ped-card">
       <div class="ped-card-top">
         <div>
           <div class="ped-card-id">Pedido #${String(p.id).slice(0,8)}</div>
           <div class="ped-card-date">${fecha}</div>
         </div>
-        <span class="estado-badge est-${p.estado}">${p.estado}</span>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="pago-badge ${pagoInfo.cls}">${pagoInfo.txt}</span>
+          <span class="estado-badge est-${p.estado}">${p.estado}</span>
+        </div>
       </div>
       <div class="ped-card-body">
         <div><strong>${p.nombre_cliente||'Cliente'}</strong> · ${p.telefono||'-'} · ${p.email||''}</div>
@@ -2197,7 +2219,7 @@ function renderAdminPedidosList(filtro){
         ${p.notas?`<div style="margin-top:6px;font-size:.82rem;background:#fff7ed;border-left:3px solid #f59e0b;padding:6px 10px;border-radius:4px"><strong>Notas:</strong> ${p.notas}</div>`:''}
       </div>
       <div class="ped-card-actions">
-        <label style="font-size:.82rem;color:var(--gray)">Cambiar estado:</label>
+        <label style="font-size:.82rem;color:var(--gray)">Estado del pedido:</label>
         <select class="admin-select" onchange="updOrder('${p.id}',this.value)">
           ${['pendiente','confirmado','procesando','enviado','entregado','cancelado'].map(e=>`<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('')}
         </select>
@@ -2263,13 +2285,26 @@ async function openMisPedidos(){
       
       const metodo = p.metodo_pago==='contraentrega'?'Contraentrega':'Pago completo';
       
+      // Badge de pago
+      const pagoEstado = p.pago_estado || 'esperando';
+      const pagoLabels = {
+        'esperando': {txt:'ESPERANDO PAGO', cls:'pago-esperando'},
+        'confirmado': {txt:'PAGO CONFIRMADO', cls:'pago-confirmado'},
+        'rechazado': {txt:'PAGO RECHAZADO', cls:'pago-rechazado'},
+        'contraentrega': {txt:'CONTRAENTREGA', cls:'pago-contraentrega'}
+      };
+      const pagoInfo = pagoLabels[pagoEstado] || pagoLabels.esperando;
+      
       return `<div class="mp-card">
         <div class="mp-card-hd">
           <div>
             <div class="mp-card-id">Pedido #${String(p.id).slice(0,8).toUpperCase()}</div>
             <div class="mp-card-date">${fecha}</div>
           </div>
-          <span class="estado-badge est-${p.estado}">${p.estado}</span>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <span class="pago-badge ${pagoInfo.cls}">${pagoInfo.txt}</span>
+            <span class="estado-badge est-${p.estado}">${p.estado}</span>
+          </div>
         </div>
         <div class="mp-card-status">${estadoTexto}</div>
         <div class="mp-items">${items}</div>
