@@ -2120,6 +2120,17 @@ async function renderAdminTab(tab){
   }
   else if(tab==='pedidos'){
     c.innerHTML='<div class="loading">Cargando pedidos...</div>';
+    
+    // Verificar recordatorios en segundo plano (sin bloquear)
+    fetch('/recordatorio-pago', {method:'POST'})
+      .then(r=>r.json())
+      .then(data=>{
+        if(data.enviados > 0){
+          showToast(`${data.enviados} recordatorio(s) enviado(s) a Telegram`);
+        }
+      })
+      .catch(e=>console.warn('Recordatorio:', e.message));
+    
     const data = await sbSelect('pedidos', 'order=creado_en.desc&select=*');
     if(!data||!data.length){c.innerHTML='<div class="acc-empty"><p>No hay pedidos aún</p></div>';return;}
     
