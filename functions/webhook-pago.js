@@ -9,7 +9,7 @@ function fmtCop(n){
 }
 
 // ─── Helper: Enviar notificación de PAGO a Telegram ────────────
-async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
+async function notificarPagoTelegram(env, pedido, payment, pagoEstado) {
   const token = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
@@ -18,9 +18,9 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
   }
   try {
     let titulo;
-    if (nuevoEstado === 'confirmado') {
+    if (pagoEstado === 'confirmado') {
       titulo = 'PAGO CONFIRMADO';
-    } else if (nuevoEstado === 'cancelado') {
+    } else if (pagoEstado === 'rechazado') {
       titulo = 'PAGO RECHAZADO';
     } else {
       titulo = 'PAGO PENDIENTE';
@@ -69,7 +69,7 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
       });
     }
     
-    if (nuevoEstado === 'confirmado') {
+    if (pagoEstado === 'confirmado') {
       if (esContraentrega) {
         msg += `\n*Acción:* Generar guía y despachar. Cobrar ${fmtCop(subtotal)} al cliente al entregar.`;
       } else {
@@ -137,14 +137,22 @@ export async function onRequestPost(context) {
     const status = payment.status;
     const metodoPago = payment.payment_method_id || 'mercadopago';
 
-    let nuevoEstado;
+    // pago_estado (estado del pago en MP, controlado automáticamente)
+    let pagoEstado;
     switch (status) {
-      case 'approved': nuevoEstado = 'confirmado'; break;
-      case 'pending':
-      case 'in_process': nuevoEstado = 'pendiente'; break;
+      case 'approved': pagoEstado = 'confirmado'; break;
       case 'rejected':
-      case 'cancelled': nuevoEstado = 'cancelado'; break;
-      default: nuevoEstado = 'pendiente';
+      case 'cancelled': pagoEstado = 'rechazado'; break;
+      default: pagoEstado = 'esperando';
+    }
+
+    // estado del pedido: solo se actualiza a "confirmado" si el pago es aprobado
+    // Los demás estados (procesando, enviado, entregado) los maneja el admin manualmente
+    let updateData = { pago_estado: pagoEstado, metodo_pago: metodoPago };
+    if (pagoEstado === 'confirmado') {
+      updateData.estado = 'confirmado';
+    } else if (pagoEstado === 'rechazado') {
+      updateData.estado = 'cancelado';
     }
 
     let pedido = null;
@@ -171,7 +179,7 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({ estado: nuevoEstado, metodo_pago: metodoPago })
+      body: JSON.stringify(updateData)
     });
 
     if (!updateRes.ok) {
@@ -180,11 +188,11 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Error actualizando pedido' }), { status: 500, headers });
     }
 
-    console.log(`Pedido ${pedidoId} actualizado a: ${nuevoEstado}`);
+    console.log(`Pedido ${pedidoId} — pago: ${pagoEstado}`);
 
-    context.waitUntil(notificarPagoTelegram(env, pedido, payment, nuevoEstado));
+    context.waitUntil(notificarPagoTelegram(env, pedido, payment, pagoEstado));
 
-    return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, estado: nuevoEstado }), { status: 200, headers });
+    return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, pago_estado: pagoEstado }), { status: 200, headers });
 
   } catch (err) {
     console.error('Error webhook:', err.message);
