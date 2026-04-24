@@ -285,6 +285,21 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .checkout-summary{background:var(--wht);border-radius:12px;padding:16px 18px;margin-bottom:18px}
 .cs-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.88rem}
 .cs-total{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;font-family:var(--fh);font-weight:800;font-size:1.1rem}
+.cs-shipdays{font-size:.76rem;color:#16a34a;font-weight:600;text-align:right;padding:2px 0 6px;font-style:italic}
+.co-promo-ship{background:linear-gradient(135deg,#16a34a15,#16a34a08);border:1px dashed #16a34a;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:.82rem;color:#14532d;text-align:center}
+.co-promo-ship strong{color:#16a34a}
+
+/* Métodos de pago */
+.pay-methods{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.pay-methods-title{font-family:var(--fh);font-weight:700;font-size:.88rem;margin-bottom:4px}
+.pay-opt{display:flex;gap:12px;align-items:flex-start;padding:14px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:var(--tr);background:#fff}
+.pay-opt:hover{border-color:var(--red)}
+.pay-opt input[type="radio"]{width:18px;height:18px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--red)}
+.pay-opt-selected,.pay-opt:has(input:checked){border-color:var(--red);background:#fff5f5}
+.pay-opt-body{flex:1}
+.pay-opt-title{font-family:var(--fh);font-weight:700;font-size:.92rem;margin-bottom:3px}
+.pay-opt-desc{font-size:.78rem;color:var(--gray);line-height:1.45}
+.pay-opt-desc strong{color:var(--blk)}
 
 /* LIGHTBOX ZOOM */
 .lbox{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
@@ -614,13 +629,39 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           </div>
           <div><label>Notas (opcional)</label><textarea id="coNotes" rows="2" placeholder="Instrucciones especiales..."></textarea></div>
         </div>
+        
+        <!-- Selector de método de pago -->
+        <div class="pay-methods">
+          <div class="pay-methods-title">¿Cómo prefieres pagar?</div>
+          <label class="pay-opt pay-opt-selected">
+            <input type="radio" name="payMethod" value="completo" checked onchange="actualizarResumenPago()">
+            <div class="pay-opt-body">
+              <div class="pay-opt-title">💳 Pago completo</div>
+              <div class="pay-opt-desc">Paga <strong>producto + envío</strong> ahora por Mercado Pago (tarjeta, PSE, Nequi)</div>
+            </div>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="payMethod" value="contraentrega" onchange="actualizarResumenPago()">
+            <div class="pay-opt-body">
+              <div class="pay-opt-title">📦 Contraentrega</div>
+              <div class="pay-opt-desc">Paga <strong>solo el envío</strong> ahora. El producto lo pagas al mensajero cuando recibas el paquete.</div>
+            </div>
+          </label>
+        </div>
+        
         <div class="checkout-summary" style="margin-top:18px">
-          <div class="cs-row"><span>Subtotal</span><span id="coSubtotal">$0</span></div>
-          <div class="cs-row"><span>Envío</span><span id="coShip">Gratis</span></div>
-          <div class="cs-total"><span>Total</span><span id="coTotal">$0</span></div>
+          <div id="coPromoShip" class="co-promo-ship" style="display:none"></div>
+          <div class="cs-row"><span>Subtotal productos</span><span id="coSubtotal">$0</span></div>
+          <div class="cs-row"><span>Envío</span><span id="coShip">Selecciona departamento</span></div>
+          <div id="coShipDays" class="cs-shipdays"></div>
+          <div class="cs-row" id="coRowContraentrega" style="display:none;color:#b45309"><span>Pagas al recibir</span><span id="coContraAmount">$0</span></div>
+          <div class="cs-total"><span id="coTotalLabel">Total a pagar ahora</span><span id="coTotal">$0</span></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
           <button type="submit" class="btn btn-red btn-full" id="coSubmit">Pagar con tarjeta / PSE / Nequi →</button>
+          <div id="coContraInfo" style="display:none;font-size:.78rem;color:var(--gray);text-align:center;padding:0 8px;line-height:1.5">
+            ℹ️ Al recibir el paquete, pagas <strong id="coContraInfoAmount"></strong> en efectivo al mensajero.
+          </div>
           <button type="button" class="btn btn-full" id="coWhatsapp" style="background:#25D366;color:#fff;box-shadow:0 4px 20px rgba(37,211,102,.35)">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="margin-right:6px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
             Comprar por WhatsApp
@@ -1167,16 +1208,159 @@ function populateDeptSelect(){
   });
 }
 
+// ─── TARIFAS DE ENVÍO POR ZONA (desde Bogotá) ──────────────────
+// Si el subtotal es >= $280.000, el envío es GRATIS
+const ENVIO_GRATIS_MIN = 280000;
+
+// Zonas con sus tarifas y tiempos
+const ZONAS_ENVIO = {
+  // Zona Bogotá (local)
+  BOGOTA: { precio: 8000, dias: '1 día hábil', deptos: ['Bogotá D.C.'] },
+  // Cundinamarca
+  CUNDINAMARCA: { precio: 10000, dias: '1-2 días hábiles', deptos: ['Cundinamarca'] },
+  // Principales ciudades del país
+  PRINCIPALES: { precio: 13000, dias: '2-3 días hábiles', deptos: ['Antioquia','Valle del Cauca','Atlántico','Bolívar','Santander'] },
+  // Eje cafetero
+  EJE_CAFETERO: { precio: 14000, dias: '2-3 días hábiles', deptos: ['Risaralda','Caldas','Quindío'] },
+  // Otras capitales / departamentos
+  OTRAS_CAPITALES: { precio: 16000, dias: '3-5 días hábiles', deptos: ['Norte de Santander','Nariño','Meta','Huila','Magdalena','Tolima','Cesar','Boyacá'] },
+  // Intermedias
+  INTERMEDIAS: { precio: 18000, dias: '4-5 días hábiles', deptos: ['Cauca','Córdoba','La Guajira','Sucre','Caquetá','Casanare'] },
+  // Pueblos y municipios pequeños (todo lo que no encaje)
+  PUEBLOS: { precio: 22000, dias: '5-8 días hábiles', deptos: ['Arauca','Putumayo','Chocó'] },
+  // Isla
+  INSULAR: { precio: 35000, dias: '7-10 días hábiles', deptos: ['San Andrés y Providencia'] },
+  // Remotas (zonas aisladas)
+  REMOTAS: { precio: 40000, dias: '7-10 días hábiles', deptos: ['Amazonas','Guainía','Vaupés','Vichada','Guaviare'] }
+};
+
+function calcularEnvio(departamento, subtotal){
+  // Envío gratis si supera el mínimo
+  if(subtotal >= ENVIO_GRATIS_MIN){
+    return { precio: 0, dias: '2-5 días hábiles', gratis: true, zona: 'GRATIS' };
+  }
+  if(!departamento){
+    return { precio: 0, dias: '', gratis: false, zona: null };
+  }
+  // Buscar la zona que contiene el departamento
+  for(const [nombreZona, data] of Object.entries(ZONAS_ENVIO)){
+    if(data.deptos.includes(departamento)){
+      return { precio: data.precio, dias: data.dias, gratis: false, zona: nombreZona };
+    }
+  }
+  // Si no se encontró, es zona remota (por defecto)
+  return { precio: ZONAS_ENVIO.PUEBLOS.precio, dias: ZONAS_ENVIO.PUEBLOS.dias, gratis: false, zona: 'PUEBLOS' };
+}
+
+function actualizarEnvioUI(){
+  const dept = document.getElementById('coDept')?.value || '';
+  const tot = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const envio = calcularEnvio(dept, tot);
+  
+  const shipEl = document.getElementById('coShip');
+  const daysEl = document.getElementById('coShipDays');
+  const totalEl = document.getElementById('coTotal');
+  
+  if(!dept){
+    shipEl.textContent = 'Selecciona departamento';
+    shipEl.style.color = 'var(--gray)';
+    if(daysEl) daysEl.textContent = '';
+    totalEl.textContent = fmt(tot);
+    actualizarResumenPago();
+    return;
+  }
+  
+  if(envio.gratis){
+    shipEl.innerHTML = '<span style="color:#16a34a;font-weight:700">GRATIS</span>';
+  }else{
+    shipEl.textContent = fmt(envio.precio);
+    shipEl.style.color = '';
+  }
+  if(daysEl){
+    daysEl.textContent = envio.dias ? `Entrega en ${envio.dias}` : '';
+  }
+  // Actualizar resumen según método de pago
+  actualizarResumenPago();
+}
+
+// Actualizar resumen y botón según método de pago
+function actualizarResumenPago(){
+  const metodo = document.querySelector('input[name="payMethod"]:checked')?.value || 'completo';
+  const dept = document.getElementById('coDept')?.value || '';
+  const tot = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const envio = calcularEnvio(dept, tot);
+  
+  const totalEl = document.getElementById('coTotal');
+  const totalLabel = document.getElementById('coTotalLabel');
+  const contraRow = document.getElementById('coRowContraentrega');
+  const contraAmount = document.getElementById('coContraAmount');
+  const btnSubmit = document.getElementById('coSubmit');
+  const contraInfo = document.getElementById('coContraInfo');
+  const contraInfoAmount = document.getElementById('coContraInfoAmount');
+  
+  // Marcar el radio seleccionado visualmente
+  document.querySelectorAll('.pay-opt').forEach(opt=>{
+    const input=opt.querySelector('input[type="radio"]');
+    opt.classList.toggle('pay-opt-selected', input?.checked);
+  });
+  
+  if(metodo === 'contraentrega'){
+    // Paga solo el envío ahora; producto se cobra al recibir
+    // ⚠️ Si envío es gratis, debe pagar mínimo $1 o algo para que MP funcione. En su lugar, obligamos a que NO elija contraentrega si es gratis.
+    totalLabel.textContent = 'Pagas ahora (envío)';
+    totalEl.textContent = envio.precio > 0 ? fmt(envio.precio) : fmt(tot);
+    contraRow.style.display = envio.precio > 0 ? '' : 'none';
+    if(envio.precio > 0) contraAmount.textContent = fmt(tot);
+    btnSubmit.textContent = 'Pagar envío y confirmar pedido →';
+    contraInfo.style.display = envio.precio > 0 ? '' : 'none';
+    if(contraInfoAmount) contraInfoAmount.textContent = fmt(tot);
+    // Si el envío es gratis, no tiene sentido contraentrega (no habría nada que cobrar adelantado)
+    if(envio.precio === 0 && dept){
+      // Forzar pago completo
+      document.querySelector('input[name="payMethod"][value="completo"]').checked = true;
+      showToast('Con envío gratis solo aplica pago completo');
+      actualizarResumenPago();
+      return;
+    }
+  }else{
+    // Pago completo = producto + envío
+    totalLabel.textContent = 'Total a pagar ahora';
+    totalEl.textContent = fmt(tot + envio.precio);
+    contraRow.style.display = 'none';
+    btnSubmit.textContent = 'Pagar con tarjeta / PSE / Nequi →';
+    contraInfo.style.display = 'none';
+  }
+}
+
 function openCheckout(){
   if(!cart.length){showToast("Carrito vacío");return;}
   closeCart();
   // Poblar selects si no se ha hecho
   populateDeptSelect();
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const ship=0;
   document.getElementById("coSubtotal").textContent=fmt(tot);
-  document.getElementById("coShip").textContent=ship?fmt(ship):'Gratis';
-  document.getElementById("coTotal").textContent=fmt(tot+ship);
+  // Inicializar UI del envío (aún sin departamento)
+  actualizarEnvioUI();
+  // Listener: cuando cambia departamento, recalcular envío
+  const deptSel = document.getElementById('coDept');
+  if(deptSel && !deptSel.__listenerShip){
+    deptSel.addEventListener('change', actualizarEnvioUI);
+    deptSel.__listenerShip = true;
+  }
+  // Mensaje promocional de envío gratis
+  const subMin = ENVIO_GRATIS_MIN;
+  const falta = subMin - tot;
+  const promoEl = document.getElementById('coPromoShip');
+  if(promoEl){
+    if(falta > 0){
+      promoEl.innerHTML = `🎁 Agrega <strong>${fmt(falta)}</strong> más y tu envío es <strong>GRATIS</strong>`;
+      promoEl.style.display = '';
+    }else{
+      promoEl.innerHTML = `✨ ¡Envío <strong>GRATIS</strong> incluido!`;
+      promoEl.style.display = '';
+    }
+  }
+  
   if(currentUser){
     document.getElementById("coEmail").value=currentUser.email||'';
     if(currentProfile){
@@ -1196,7 +1380,17 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   msg.innerHTML='';
   
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const ship=0;
+  const deptVal = document.getElementById("coDept").value;
+  const envioCalc = calcularEnvio(deptVal, tot);
+  const ship = envioCalc.precio;
+  const metodoPago = document.querySelector('input[name="payMethod"]:checked')?.value || 'completo';
+  
+  // Calcular montos según método
+  const totalCompleto = tot + ship;
+  // Si es contraentrega, MP solo cobra el envío; el producto queda pendiente de cobro al recibir
+  const aPagarAhora = metodoPago === 'contraentrega' ? ship : totalCompleto;
+  const saldoPendiente = metodoPago === 'contraentrega' ? tot : 0;
+  
   const pedido={
     user_id: currentUser?currentUser.id:null,
     email: document.getElementById("coEmail").value,
@@ -1206,9 +1400,10 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
     items: cart,
     subtotal: tot,
     envio: ship,
-    total: tot+ship,
+    total: totalCompleto,
     notas: document.getElementById("coNotes").value,
-    estado: 'pendiente'
+    estado: 'pendiente',
+    metodo_pago: metodoPago === 'contraentrega' ? 'contraentrega' : 'pago_completo'
   };
   
   try{
@@ -1221,19 +1416,48 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
       throw new Error('No se pudo crear el pedido');
     }
     
-    // 2) Llamar a la función de Netlify para crear link de pago
+    // 2) Preparar items para MP según método de pago
+    let itemsMP;
+    let tituloMP;
+    if(metodoPago === 'contraentrega'){
+      // Solo cobramos el envío
+      itemsMP = [{
+        name: `Envío ${envioCalc.dias} - Contraentrega`,
+        size: '',
+        color: '',
+        price: ship,
+        qty: 1
+      }];
+      tituloMP = `Envío (producto se paga al recibir: ${fmt(tot)})`;
+    } else {
+      // Cobramos todo: productos + envío
+      itemsMP = [...cart];
+      if(ship > 0){
+        itemsMP.push({
+          name: `Envío ${envioCalc.dias}`,
+          size: '',
+          color: '',
+          price: ship,
+          qty: 1
+        });
+      }
+    }
+    
+    // 3) Llamar a la función de Cloudflare para crear link de pago
     btn.textContent='Conectando con Mercado Pago...';
     const payRes = await fetch('/crear-pago', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         pedido_id: pedidoCreado.id,
-        items: cart,
-        total: tot+ship,
+        items: itemsMP,
+        total: aPagarAhora,
         email: pedido.email,
         nombre: pedido.nombre_cliente,
         telefono: pedido.telefono,
-        direccion: pedido.direccion_completa
+        direccion: pedido.direccion_completa,
+        metodo_pago: metodoPago,
+        saldo_pendiente: saldoPendiente
       })
     });
     
@@ -1280,6 +1504,9 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   btn.textContent = 'Preparando...';
   
   const tot = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const envioCalc = calcularEnvio(dept, tot);
+  const ship = envioCalc.precio;
+  const total = tot + ship;
   const dirCompleta = `${addr}${apt?', '+apt:''}, ${city}, ${dept}`;
   
   // Guardar pedido en Supabase con estado pendiente
@@ -1288,7 +1515,7 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
       user_id: currentUser ? currentUser.id : null,
       email, nombre_cliente: name, telefono: phone,
       direccion_completa: dirCompleta,
-      items: cart, subtotal: tot, envio: 0, total: tot,
+      items: cart, subtotal: tot, envio: ship, total: total,
       notas: notes, estado: 'pendiente', metodo_pago: 'whatsapp'
     };
     await sbInsert('pedidos', pedido);
@@ -1305,7 +1532,9 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   cart.forEach(it=>{
     msg += `• ${it.name} (Talla ${it.size}, ${it.color}) x${it.qty} - ${fmt(it.price*it.qty)}\n`;
   });
-  msg += `\n*TOTAL: ${fmt(tot)}*\n\nQuiero confirmar mi pedido, gracias.`;
+  msg += `\n*Subtotal:* ${fmt(tot)}`;
+  msg += `\n*Envío:* ${ship===0?'GRATIS':fmt(ship)} (${envioCalc.dias})`;
+  msg += `\n*TOTAL: ${fmt(total)}*\n\nQuiero confirmar mi pedido, gracias.`;
   
   // Número de WhatsApp de la tienda (CAMBIAR ESTE)
   const WHATSAPP_NUMBER = '573107801564'; // 57 = Colombia, sin espacios
