@@ -307,6 +307,7 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pago-confirmado{background:#16a34a;color:#fff}
 .pago-esperando{background:#f59e0b;color:#fff}
 .pago-rechazado{background:#dc2626;color:#fff}
+.pago-devuelto{background:#7c3aed;color:#fff}
 .pago-contraentrega{background:#2563eb;color:#fff}
 
 /* Pedidos abandonados (sin pago >24h) */
@@ -2209,6 +2210,7 @@ function renderAdminPedidosList(filtro){
       'esperando': {txt:'ESPERANDO PAGO', cls:'pago-esperando'},
       'confirmado': {txt:'PAGO CONFIRMADO', cls:'pago-confirmado'},
       'rechazado': {txt:'PAGO RECHAZADO', cls:'pago-rechazado'},
+      'devuelto': {txt:'PAGO DEVUELTO', cls:'pago-devuelto'},
       'contraentrega': {txt:'CONTRAENTREGA', cls:'pago-contraentrega'}
     };
     const pagoInfo = pagoLabels[pagoEstado] || pagoLabels.esperando;
@@ -2391,6 +2393,7 @@ async function openMisPedidos(){
         'esperando': {txt:'ESPERANDO PAGO', cls:'pago-esperando'},
         'confirmado': {txt:'PAGO CONFIRMADO', cls:'pago-confirmado'},
         'rechazado': {txt:'PAGO RECHAZADO', cls:'pago-rechazado'},
+        'devuelto': {txt:'PAGO DEVUELTO', cls:'pago-devuelto'},
         'contraentrega': {txt:'CONTRAENTREGA', cls:'pago-contraentrega'}
       };
       const pagoInfo = pagoLabels[pagoEstado] || pagoLabels.esperando;
