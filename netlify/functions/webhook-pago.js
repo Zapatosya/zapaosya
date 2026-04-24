@@ -4,6 +4,10 @@
 // Endpoint: https://zapatosya.com/webhook-pago
 // ═══════════════════════════════════════════════════════════════
 
+function fmtCop(n){
+  return '$' + (Number(n)||0).toLocaleString('es-CO');
+}
+
 // ─── Helper: Enviar notificación de PAGO a Telegram ────────────
 async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
   const token = env.TELEGRAM_BOT_TOKEN;
@@ -13,17 +17,13 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
     return;
   }
   try {
-    // Elegir emoji e ícono según el estado
-    let titulo, emoji;
+    let titulo;
     if (nuevoEstado === 'confirmado') {
-      titulo = 'PAGO CONFIRMADO ✅';
-      emoji = '🎉';
+      titulo = 'PAGO CONFIRMADO';
     } else if (nuevoEstado === 'cancelado') {
-      titulo = 'PAGO RECHAZADO ❌';
-      emoji = '⚠️';
+      titulo = 'PAGO RECHAZADO';
     } else {
-      titulo = 'PAGO PENDIENTE ⏳';
-      emoji = '🕐';
+      titulo = 'PAGO PENDIENTE';
     }
 
     const pedidoId = pedido?.id || payment?.external_reference || 'desconocido';
@@ -33,21 +33,34 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
     const direccion = pedido?.direccion_completa || '';
     const metodoPago = payment?.payment_method_id || 'mercadopago';
     const items = pedido?.items || [];
+    const metodoPedido = pedido?.metodo_pago || 'pago_completo';
+    const subtotal = pedido?.subtotal || 0;
+    const montoPagado = payment?.transaction_amount || 0;
+    const esContraentrega = metodoPedido === 'contraentrega';
 
-    let msg = `${emoji} *${titulo}*\n`;
-    msg += `🧾 Pedido: \`#${String(pedidoId).slice(0,8)}\`\n\n`;
+    let msg = `*${titulo}*\n`;
+    msg += `Pedido: \`#${String(pedidoId).slice(0,8)}\`\n\n`;
     
-    if (nombre) msg += `👤 *Cliente:* ${nombre}\n`;
-    if (telefono) msg += `📱 *Teléfono:* ${telefono}\n`;
-    if (direccion) msg += `📍 *Dirección:* ${direccion}\n`;
+    if (nombre) msg += `*Cliente:* ${nombre}\n`;
+    if (telefono) msg += `*Teléfono:* ${telefono}\n`;
+    if (direccion) msg += `*Dirección:* ${direccion}\n`;
     
-    msg += `\n💳 *Método:* ${metodoPago}\n`;
-    msg += `💰 *Monto:* $${Number(total).toLocaleString('es-CO')}\n`;
+    msg += `\n*Método de pago MP:* ${metodoPago}\n`;
+    
+    if (esContraentrega) {
+      msg += `*Tipo pedido:* Contraentrega\n`;
+      msg += `*Monto pagado (envío):* ${fmtCop(montoPagado)}\n`;
+      msg += `*Cobrar al entregar:* ${fmtCop(subtotal)}\n`;
+      msg += `*Total general:* ${fmtCop(total)}\n`;
+    } else {
+      msg += `*Tipo pedido:* Pago completo\n`;
+      msg += `*Monto pagado:* ${fmtCop(montoPagado)}\n`;
+    }
     
     if (items.length) {
-      msg += `\n🛍 *Productos:*\n`;
+      msg += `\n*Productos:*\n`;
       items.forEach(it => {
-        msg += `• ${it.name || 'Producto'}`;
+        msg += `- ${it.name || 'Producto'}`;
         const detalles = [];
         if (it.size) detalles.push(`Talla ${it.size}`);
         if (it.color) detalles.push(it.color);
@@ -57,7 +70,11 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
     }
     
     if (nuevoEstado === 'confirmado') {
-      msg += `\n📦 *Acción:* Preparar envío`;
+      if (esContraentrega) {
+        msg += `\n*Acción:* Generar guía y despachar. Cobrar ${fmtCop(subtotal)} al cliente al entregar.`;
+      } else {
+        msg += `\n*Acción:* Generar guía y despachar.`;
+      }
     }
 
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -71,7 +88,7 @@ async function notificarPagoTelegram(env, pedido, payment, nuevoEstado) {
       })
     });
     if (!res.ok) console.error('Telegram error:', res.status, await res.text());
-    else console.log('Telegram pago OK ✓');
+    else console.log('Telegram pago OK');
   } catch (e) {
     console.error('Error Telegram pago:', e.message);
   }
@@ -106,7 +123,6 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Variables de entorno faltan' }), { status: 500, headers });
     }
 
-    // 1) Consultar detalles del pago en MP
     const paymentRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: { 'Authorization': `Bearer ${MP_ACCESS_TOKEN}` }
     });
@@ -121,7 +137,6 @@ export async function onRequestPost(context) {
     const status = payment.status;
     const metodoPago = payment.payment_method_id || 'mercadopago';
 
-    // 2) Mapear estado de MP al estado interno
     let nuevoEstado;
     switch (status) {
       case 'approved': nuevoEstado = 'confirmado'; break;
@@ -132,7 +147,6 @@ export async function onRequestPost(context) {
       default: nuevoEstado = 'pendiente';
     }
 
-    // 3) Obtener el pedido completo (para poder notificar con datos)
     let pedido = null;
     try {
       const pedRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${pedidoId}&select=*`, {
@@ -149,7 +163,6 @@ export async function onRequestPost(context) {
       console.warn('No se pudo obtener pedido:', e.message);
     }
 
-    // 4) Actualizar el pedido en Supabase
     const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${pedidoId}`, {
       method: 'PATCH',
       headers: {
@@ -169,7 +182,6 @@ export async function onRequestPost(context) {
 
     console.log(`Pedido ${pedidoId} actualizado a: ${nuevoEstado}`);
 
-    // 5) 🔔 Notificación a Telegram (no bloqueante)
     context.waitUntil(notificarPagoTelegram(env, pedido, payment, nuevoEstado));
 
     return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, estado: nuevoEstado }), { status: 200, headers });
@@ -180,7 +192,6 @@ export async function onRequestPost(context) {
   }
 }
 
-// Aceptar también GET para verificación de Mercado Pago
 export async function onRequestGet() {
   return new Response('webhook-pago OK', { status: 200 });
 }

@@ -5,7 +5,6 @@
 // Soporta: Pago completo y Contraentrega (solo cobra envío)
 // ═══════════════════════════════════════════════════════════════
 
-// ─── Helper: formatear precios ────────────────────────────────
 function fmtCop(n){
   return '$' + (Number(n)||0).toLocaleString('es-CO');
 }
@@ -23,24 +22,24 @@ async function notificarTelegram(env, datos) {
     
     const esContraentrega = metodo_pago === 'contraentrega';
     
-    let msg = `🛒 *NUEVO PEDIDO* \`#${String(pedido_id).slice(0,8)}\`\n`;
+    let msg = `*NUEVO PEDIDO* \`#${String(pedido_id).slice(0,8)}\`\n`;
     if (esContraentrega) {
-      msg += `📦 *Método:* CONTRAENTREGA\n`;
-      msg += `⏰ _Esperando pago del envío_\n\n`;
+      msg += `*Método:* CONTRAENTREGA\n`;
+      msg += `_Esperando pago del envío_\n\n`;
     } else {
-      msg += `💳 *Método:* Pago completo por MP\n`;
-      msg += `⏰ _Esperando pago en Mercado Pago_\n\n`;
+      msg += `*Método:* Pago completo por MP\n`;
+      msg += `_Esperando pago en Mercado Pago_\n\n`;
     }
     
-    if (nombre) msg += `👤 *Cliente:* ${nombre}\n`;
-    if (telefono) msg += `📱 *Teléfono:* ${telefono}\n`;
-    if (email) msg += `📧 *Email:* ${email}\n`;
-    if (direccion) msg += `📍 *Dirección:* ${direccion}\n`;
+    if (nombre) msg += `*Cliente:* ${nombre}\n`;
+    if (telefono) msg += `*Teléfono:* ${telefono}\n`;
+    if (email) msg += `*Email:* ${email}\n`;
+    if (direccion) msg += `*Dirección:* ${direccion}\n`;
     
-    msg += `\n🛍 *Productos:*\n`;
+    msg += `\n*Productos:*\n`;
     (items_originales || []).forEach(it => {
       const sub = (it.price || 0) * (it.qty || 1);
-      msg += `• ${it.name || 'Producto'}`;
+      msg += `- ${it.name || 'Producto'}`;
       const detalles = [];
       if (it.size) detalles.push(`Talla ${it.size}`);
       if (it.color) detalles.push(it.color);
@@ -48,17 +47,17 @@ async function notificarTelegram(env, datos) {
       msg += ` x${it.qty || 1} — ${fmtCop(sub)}\n`;
     });
     
-    msg += `\n💵 Subtotal productos: ${fmtCop(total_productos)}`;
-    msg += `\n🚚 Envío: ${total_envio > 0 ? fmtCop(total_envio) : 'GRATIS'}`;
+    msg += `\nSubtotal productos: ${fmtCop(total_productos)}`;
+    msg += `\nEnvío: ${total_envio > 0 ? fmtCop(total_envio) : 'GRATIS'}`;
     msg += `\n━━━━━━━━━━━━━━`;
     
     if (esContraentrega) {
-      msg += `\n💳 *Paga ahora (envío):* ${fmtCop(total_envio)}`;
-      msg += `\n💰 *Cobrar al entregar:* ${fmtCop(saldo_pendiente || total_productos)}`;
-      msg += `\n📊 Total general: ${fmtCop(total_general)}`;
-      msg += `\n\n⚠️ *IMPORTANTE:* Solo despachar cuando se confirme el pago del envío.`;
+      msg += `\n*Paga ahora (envío):* ${fmtCop(total_envio)}`;
+      msg += `\n*Cobrar al entregar:* ${fmtCop(saldo_pendiente || total_productos)}`;
+      msg += `\nTotal general: ${fmtCop(total_general)}`;
+      msg += `\n\n*IMPORTANTE:* Solo despachar cuando se confirme el pago del envío.`;
     } else {
-      msg += `\n💰 *TOTAL: ${fmtCop(total_general)}*`;
+      msg += `\n*TOTAL: ${fmtCop(total_general)}*`;
     }
 
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -72,7 +71,7 @@ async function notificarTelegram(env, datos) {
       })
     });
     if (!res.ok) console.error('Telegram error:', res.status, await res.text());
-    else console.log('Telegram OK ✓');
+    else console.log('Telegram OK');
   } catch (e) {
     console.error('Error Telegram:', e.message);
   }
