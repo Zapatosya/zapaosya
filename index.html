@@ -309,6 +309,9 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pago-rechazado{background:#dc2626;color:#fff}
 .pago-contraentrega{background:#2563eb;color:#fff}
 
+/* Pedidos abandonados (sin pago >24h) */
+.ped-card-abandonado{border-left:4px solid #dc2626;background:#fef2f2}
+
 /* ADMIN PANEL */
 .modal-lg{max-width:1100px}
 .admin-tabs{display:flex;gap:4px;padding:14px 32px 0;border-bottom:1px solid var(--border);background:var(--wht);border-radius:22px 22px 0 0;overflow-x:auto}
@@ -2195,11 +2198,16 @@ function renderAdminPedidosList(filtro){
     };
     const pagoInfo = pagoLabels[pagoEstado] || pagoLabels.esperando;
     
-    return `<div class="ped-card">
+    // ¿Es un pedido viejo sin pagar (>24h)?
+    const edadMs = Date.now() - new Date(p.creado_en).getTime();
+    const esAbandonado = pagoEstado==='esperando' && edadMs > 24*60*60*1000 && p.estado!=='cancelado';
+    const horas = Math.floor(edadMs / (60*60*1000));
+    
+    return `<div class="ped-card ${esAbandonado?'ped-card-abandonado':''}">
       <div class="ped-card-top">
         <div>
           <div class="ped-card-id">Pedido #${String(p.id).slice(0,8)}</div>
-          <div class="ped-card-date">${fecha}</div>
+          <div class="ped-card-date">${fecha}${esAbandonado?` · <span style="color:#dc2626;font-weight:600">Sin pagar hace ${horas}h</span>`:''}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
           <span class="pago-badge ${pagoInfo.cls}">${pagoInfo.txt}</span>
@@ -2259,7 +2267,27 @@ async function openMisPedidos(){
       </div>`;
       return;
     }
-    c.innerHTML = data.map(p=>{
+    
+    // Filtrar: ocultar pedidos "esperando pago" de hace más de 24h
+    const ahora = Date.now();
+    const MS_24H = 24 * 60 * 60 * 1000;
+    const visibles = data.filter(p=>{
+      if(p.pago_estado === 'esperando' || !p.pago_estado){
+        const edad = ahora - new Date(p.creado_en).getTime();
+        if(edad > MS_24H) return false; // ocultar
+      }
+      return true;
+    });
+    
+    if(!visibles.length){
+      c.innerHTML = `<div class="acc-empty">
+        <p style="margin-bottom:14px">No tienes pedidos activos</p>
+        <button class="btn btn-red btn-sm" onclick="closeMisPedidos();document.getElementById('productos').scrollIntoView({behavior:'smooth'})">Ver productos</button>
+      </div>`;
+      return;
+    }
+    
+    c.innerHTML = visibles.map(p=>{
       const fecha = new Date(p.creado_en).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
       const items = (p.items||[]).map(it=>`
         <div class="mp-item">
@@ -2318,6 +2346,11 @@ async function openMisPedidos(){
             <div style="font-weight:800;color:var(--red);font-size:1.05rem">${fmt(p.total||0)}</div>
           </div>
         </div>
+        ${(pagoEstado==='esperando' && p.estado!=='cancelado') ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <button class="btn btn-red btn-full btn-sm" onclick="reintentarPago('${p.id}')">Reintentar pago ahora</button>
+          <p style="text-align:center;font-size:.72rem;color:var(--gray);margin-top:6px">Si no completas el pago en 24h, este pedido se ocultará.</p>
+        </div>` : ''}
       </div>`;
     }).join('');
   }catch(e){
@@ -2329,6 +2362,66 @@ async function openMisPedidos(){
 function closeMisPedidos(){
   document.getElementById("misPedidosModal").classList.remove("open");
   document.body.style.overflow="";
+}
+
+// Reintentar pago de un pedido existente
+async function reintentarPago(pedidoId){
+  if(!currentUser) return;
+  try{
+    showToast('Conectando con Mercado Pago...');
+    // Obtener el pedido completo
+    const data = await sbSelect('pedidos', `id=eq.${pedidoId}&select=*`);
+    const pedido = Array.isArray(data)?data[0]:data;
+    if(!pedido){ showToast('Pedido no encontrado'); return; }
+    
+    const esContraentrega = pedido.metodo_pago === 'contraentrega';
+    const tot = pedido.subtotal || 0;
+    const ship = pedido.envio || 0;
+    const aPagarAhora = esContraentrega ? ship : (tot + ship);
+    
+    let itemsMP;
+    if(esContraentrega){
+      itemsMP = [{
+        name: `Envío - Contraentrega`,
+        size:'', color:'',
+        price: ship, qty: 1
+      }];
+    } else {
+      itemsMP = [...(pedido.items||[])];
+      if(ship > 0){
+        itemsMP.push({
+          name: 'Envío',
+          size:'', color:'',
+          price: ship, qty: 1
+        });
+      }
+    }
+    
+    const payRes = await fetch('/crear-pago', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        pedido_id: pedido.id,
+        items: itemsMP,
+        total: aPagarAhora,
+        email: pedido.email,
+        nombre: pedido.nombre_cliente,
+        telefono: pedido.telefono,
+        direccion: pedido.direccion_completa,
+        metodo_pago: esContraentrega ? 'contraentrega' : 'completo',
+        saldo_pendiente: esContraentrega ? tot : 0
+      })
+    });
+    const payData = await payRes.json();
+    if(!payRes.ok || !payData.init_point){
+      throw new Error(payData.error || 'Error creando link de pago');
+    }
+    // Redirigir a MP
+    window.location.href = payData.init_point;
+  }catch(e){
+    console.error('Error reintentando pago:', e);
+    showToast('Error: ' + e.message);
+  }
 }
 
 async function toggleProd(id,activo){
