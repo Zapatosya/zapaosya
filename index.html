@@ -302,7 +302,41 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .ped-card-actions{display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
 .ped-filter.act{background:var(--red);color:#fff;border-color:var(--red)}
 
-/* Pago badges (estado del pago separado) */
+/* RESEÑAS */
+.reviews-section{padding:24px 32px 32px;border-top:1px solid var(--border);background:#fafafa}
+.reviews-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.reviews-hd h3{font-family:var(--fh);font-weight:700;font-size:1.05rem}
+.reviews-summary{display:flex;align-items:center;gap:8px}
+.rs-rating{font-family:var(--fh);font-weight:800;font-size:1.4rem;color:var(--blk)}
+.rs-stars{color:#f59e0b;letter-spacing:1px;font-size:1rem}
+.rs-count{font-size:.82rem;color:var(--gray)}
+
+.review-form{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px}
+.rating-input{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.86rem}
+.stars-input{display:flex;gap:2px}
+.stars-input button{font-size:1.6rem;color:#d1d5db;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s}
+.stars-input button:hover,.stars-input button.active{color:#f59e0b}
+.review-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:.88rem;resize:vertical;min-height:60px}
+.review-form textarea:focus{outline:none;border-color:var(--red)}
+
+.reviews-list{display:flex;flex-direction:column;gap:12px}
+.review-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.review-item-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.review-item-name{font-family:var(--fh);font-weight:700;font-size:.92rem}
+.review-item-stars{color:#f59e0b;font-size:.88rem;letter-spacing:1px;margin-top:2px}
+.review-item-date{font-size:.72rem;color:var(--gray);white-space:nowrap}
+.review-item-text{font-size:.88rem;color:#333;line-height:1.55;margin-top:6px;white-space:pre-wrap;word-wrap:break-word}
+.reviews-empty{text-align:center;padding:30px 16px;color:var(--gray);font-size:.88rem;background:#fff;border:1px dashed var(--border);border-radius:10px}
+
+/* Rating en card de producto */
+.pc-rate{display:flex;align-items:center;gap:5px;margin:4px 0 6px;font-size:.78rem}
+.pc-stars{color:#f59e0b;letter-spacing:1px}
+.pc-count{color:var(--gray);font-size:.74rem}
+
+@media(max-width:620px){
+  .reviews-section{padding:18px 18px 24px}
+  .reviews-hd{flex-direction:column;align-items:flex-start}
+}
 .pago-badge{display:inline-block;padding:4px 10px;border-radius:50px;font-size:.68rem;font-weight:800;font-family:var(--fh);letter-spacing:.5px;white-space:nowrap}
 .pago-confirmado{background:#16a34a;color:#fff}
 .pago-esperando{background:#f59e0b;color:#fff}
@@ -554,10 +588,9 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
         <a href="#productos" class="btn btn-red">Comprar ahora →</a>
       </div>
       <div class="hero-trust">
-        <span class="stars">★★★★★</span>
-        <span>+12.000 clientes</span>
-        <span class="pipe">|</span>
         <span>Entrega segura y confiable</span>
+        <span class="pipe">|</span>
+        <span>Pago contraentrega disponible</span>
       </div>
     </div>
     <div class="hero-vis">
@@ -652,6 +685,48 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           <span>Cambios gratis</span>
         </div>
       </div>
+    </div>
+    
+    <!-- SECCIÓN DE RESEÑAS -->
+    <div class="reviews-section" id="reviewsSection">
+      <div class="reviews-hd">
+        <h3>Reseñas del producto</h3>
+        <div class="reviews-summary" id="reviewsSummary">
+          <span class="rs-rating" id="rsRating">—</span>
+          <span class="rs-stars" id="rsStars">☆☆☆☆☆</span>
+          <span class="rs-count" id="rsCount">Sin reseñas</span>
+        </div>
+      </div>
+      
+      <!-- Formulario para dejar reseña -->
+      <div class="review-form" id="reviewForm">
+        <div id="reviewFormBody">
+          <p style="font-size:.86rem;color:var(--gray);margin-bottom:10px">Comparte tu experiencia con este producto:</p>
+          <div class="rating-input">
+            <span>Tu calificación:</span>
+            <div class="stars-input" id="starsInput">
+              <button type="button" data-r="1" aria-label="1 estrella">★</button>
+              <button type="button" data-r="2" aria-label="2 estrellas">★</button>
+              <button type="button" data-r="3" aria-label="3 estrellas">★</button>
+              <button type="button" data-r="4" aria-label="4 estrellas">★</button>
+              <button type="button" data-r="5" aria-label="5 estrellas">★</button>
+            </div>
+          </div>
+          <textarea id="reviewText" rows="3" placeholder="Cuéntanos qué te pareció el producto..." maxlength="500"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <small style="color:var(--gray);font-size:.74rem"><span id="reviewCharCount">0</span>/500</small>
+            <button class="btn btn-red btn-sm" id="submitReview">Publicar reseña</button>
+          </div>
+          <div id="reviewMsg" style="margin-top:8px"></div>
+        </div>
+        <div id="reviewLoginPrompt" style="display:none;text-align:center;padding:20px;background:#f9fafb;border-radius:10px">
+          <p style="margin-bottom:10px;color:var(--gray)">Inicia sesión para dejar una reseña</p>
+          <button class="btn btn-red btn-sm" onclick="closeMod();openAuth('login')">Iniciar sesión</button>
+        </div>
+      </div>
+      
+      <!-- Lista de reseñas -->
+      <div class="reviews-list" id="reviewsList"></div>
     </div>
   </div>
 </div>
@@ -778,6 +853,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       <button class="acc-tab act" data-at="dashboard">Dashboard</button>
       <button class="acc-tab" data-at="pedidos">Pedidos</button>
       <button class="acc-tab" data-at="productos">Productos</button>
+      <button class="acc-tab" data-at="resenas">Reseñas</button>
       <button class="acc-tab" data-at="clientes">Clientes</button>
     </div>
     <div class="admin-content" id="adminContent"></div>
@@ -1047,6 +1123,7 @@ function render(f="todos"){
       <div class="pc-info">
         <div class="pc-cat">${p.categoria}</div>
         <div class="pc-name">${p.nombre}</div>
+        <div class="pc-rate" id="pcRate-${p.id}" style="display:none"></div>
         <div class="pc-pr">
           <span class="price">${fmt(p.precio)}</span>
           ${p.precio_original?`<span class="orig">${fmt(p.precio_original)}</span><span class="disc">-${disc(p.precio_original,p.precio)}%</span>`:''}
@@ -1058,6 +1135,36 @@ function render(f="todos"){
     el.addEventListener("click",()=>openModal(el.dataset.id));
     el.addEventListener("keydown",e=>e.key==="Enter"&&openModal(el.dataset.id));
   });
+  // Cargar ratings de cada producto en background
+  loadProductRatings(data);
+}
+
+// Carga las reseñas de TODOS los productos visibles y las muestra en sus cards
+async function loadProductRatings(productos){
+  try{
+    const reviews = await sbSelect('resenas', 'aprobada=eq.true&select=producto_id,rating');
+    if(!reviews) return;
+    // Agrupar por producto
+    const byProd = {};
+    reviews.forEach(r=>{
+      if(!byProd[r.producto_id]) byProd[r.producto_id] = [];
+      byProd[r.producto_id].push(r.rating);
+    });
+    // Pintar en cada card
+    productos.forEach(p=>{
+      const ratings = byProd[p.id] || [];
+      if(!ratings.length) return;
+      const avg = ratings.reduce((s,r)=>s+r,0) / ratings.length;
+      const full = Math.round(avg);
+      const el = document.getElementById('pcRate-'+p.id);
+      if(el){
+        el.innerHTML = `<span class="pc-stars">${'★'.repeat(full)}${'☆'.repeat(5-full)}</span> <span class="pc-count">(${ratings.length})</span>`;
+        el.style.display = '';
+      }
+    });
+  }catch(e){
+    console.warn('Error cargando ratings:', e);
+  }
 }
 
 function openModal(id){
@@ -1124,8 +1231,157 @@ function openModal(id){
   }));
   document.getElementById("pModal").classList.add("open");
   document.body.style.overflow="hidden";
+  
+  // Cargar reseñas del producto
+  loadReviews(id);
 }
 function closeModal(){document.getElementById("pModal").classList.remove("open");document.body.style.overflow="";}
+
+// ─── RESEÑAS ─────────────────────────────────────────────────
+let __currentReviewProductId = null;
+let __selectedRating = 0;
+
+async function loadReviews(productId){
+  __currentReviewProductId = productId;
+  const list = document.getElementById('reviewsList');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:14px;color:var(--gray);font-size:.84rem">Cargando reseñas...</div>';
+  
+  // Resetear form
+  __selectedRating = 0;
+  document.querySelectorAll('#starsInput button').forEach(b=>b.classList.remove('active'));
+  const txt = document.getElementById('reviewText');
+  if(txt) txt.value = '';
+  const msg = document.getElementById('reviewMsg');
+  if(msg) msg.innerHTML = '';
+  const cc = document.getElementById('reviewCharCount');
+  if(cc) cc.textContent = '0';
+  
+  // Mostrar form solo si está logueado
+  document.getElementById('reviewFormBody').style.display = currentUser ? '' : 'none';
+  document.getElementById('reviewLoginPrompt').style.display = currentUser ? 'none' : '';
+  
+  try{
+    const reviews = await sbSelect('resenas', `producto_id=eq.${productId}&aprobada=eq.true&order=creada_en.desc&select=*`);
+    renderReviews(reviews||[]);
+  }catch(e){
+    console.error('Error cargando reseñas:', e);
+    list.innerHTML = '<div class="reviews-empty">No se pudieron cargar las reseñas</div>';
+  }
+}
+
+function renderReviews(reviews){
+  const list = document.getElementById('reviewsList');
+  const ratingEl = document.getElementById('rsRating');
+  const starsEl = document.getElementById('rsStars');
+  const countEl = document.getElementById('rsCount');
+  
+  if(!reviews.length){
+    ratingEl.textContent = '—';
+    starsEl.textContent = '☆☆☆☆☆';
+    countEl.textContent = 'Sin reseñas aún';
+    list.innerHTML = '<div class="reviews-empty">Sé el primero en dejar una reseña de este producto</div>';
+    return;
+  }
+  
+  // Calcular promedio
+  const sum = reviews.reduce((s,r)=>s+(r.rating||0), 0);
+  const avg = sum / reviews.length;
+  const avgRound = Math.round(avg*10)/10;
+  ratingEl.textContent = avgRound.toFixed(1);
+  
+  // Estrellas (rellenas según promedio)
+  const full = Math.round(avg);
+  starsEl.textContent = '★'.repeat(full) + '☆'.repeat(5-full);
+  countEl.textContent = `${reviews.length} ${reviews.length===1?'reseña':'reseñas'}`;
+  
+  // Lista
+  list.innerHTML = reviews.map(r=>{
+    const fecha = new Date(r.creada_en).toLocaleDateString('es-CO',{year:'numeric',month:'short',day:'numeric'});
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5-r.rating);
+    const escapedText = (r.comentario||'').replace(/[<>]/g, c=>({'<':'&lt;','>':'&gt;'}[c]));
+    return `<div class="review-item">
+      <div class="review-item-hd">
+        <div>
+          <div class="review-item-name">${r.nombre||'Anónimo'}</div>
+          <div class="review-item-stars">${stars}</div>
+        </div>
+        <div class="review-item-date">${fecha}</div>
+      </div>
+      ${escapedText?`<div class="review-item-text">${escapedText}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// Seleccionar rating con click en estrellas
+document.addEventListener('click', e=>{
+  if(e.target.matches('#starsInput button')){
+    __selectedRating = +e.target.dataset.r;
+    document.querySelectorAll('#starsInput button').forEach((b,i)=>{
+      b.classList.toggle('active', i < __selectedRating);
+    });
+  }
+});
+
+// Hover en estrellas (efecto preview)
+document.addEventListener('mouseover', e=>{
+  if(e.target.matches('#starsInput button')){
+    const r = +e.target.dataset.r;
+    document.querySelectorAll('#starsInput button').forEach((b,i)=>{
+      b.style.color = i < r ? '#f59e0b' : '';
+    });
+  }
+});
+document.addEventListener('mouseout', e=>{
+  if(e.target.matches('#starsInput button')){
+    document.querySelectorAll('#starsInput button').forEach((b,i)=>{
+      b.style.color = '';
+    });
+  }
+});
+
+// Contador de caracteres
+document.addEventListener('input', e=>{
+  if(e.target.id === 'reviewText'){
+    const cc = document.getElementById('reviewCharCount');
+    if(cc) cc.textContent = e.target.value.length;
+  }
+});
+
+// Submit reseña
+document.addEventListener('click', async e=>{
+  if(e.target.id === 'submitReview'){
+    if(!currentUser){ openAuth('login'); return; }
+    if(!__currentReviewProductId) return;
+    if(!__selectedRating){
+      document.getElementById('reviewMsg').innerHTML = '<div class="auth-error">Selecciona una calificación</div>';
+      return;
+    }
+    const txt = document.getElementById('reviewText').value.trim();
+    const btn = e.target;
+    const msg = document.getElementById('reviewMsg');
+    btn.disabled = true;
+    btn.textContent = 'Publicando...';
+    try{
+      const nombre = (currentUser.user_metadata?.full_name) || (currentUser.email?.split('@')[0]) || 'Cliente';
+      await sbInsert('resenas', {
+        producto_id: __currentReviewProductId,
+        user_id: currentUser.id,
+        nombre: nombre,
+        rating: __selectedRating,
+        comentario: txt,
+        aprobada: true
+      });
+      msg.innerHTML = '<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:8px;border-radius:6px;font-size:.84rem">Reseña publicada. Gracias por tu opinión.</div>';
+      // Recargar
+      setTimeout(()=>loadReviews(__currentReviewProductId), 800);
+    }catch(err){
+      msg.innerHTML = `<div class="auth-error">Error: ${err.message||'No se pudo publicar'}</div>`;
+      btn.disabled = false;
+      btn.textContent = 'Publicar reseña';
+    }
+  }
+});
 
 // ─── NAV IMÁGENES EN MODAL ──────────────────────────────────
 function setupImageNav(p){
@@ -2176,6 +2432,39 @@ async function renderAdminTab(tab){
           </td>
         </tr>`).join('')}</tbody></table></div>`;
   }
+  else if(tab==='resenas'){
+    c.innerHTML='<div class="loading">Cargando reseñas...</div>';
+    const data = await sbSelect('resenas', 'order=creada_en.desc&select=*');
+    if(!data||!data.length){c.innerHTML='<div class="acc-empty"><p>Aún no hay reseñas</p></div>';return;}
+    
+    // Cargar productos para mapear nombres
+    const prodMap = {};
+    PRODUCTS.forEach(p=>{prodMap[p.id]=p.nombre;});
+    
+    c.innerHTML = `<div style="margin-bottom:14px;color:var(--gray);font-size:.88rem">Total: ${data.length} reseña(s)</div>
+    ${data.map(r=>{
+      const fecha = new Date(r.creada_en).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
+      const stars = '★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
+      const prodName = prodMap[r.producto_id] || 'Producto eliminado';
+      const escapedText = (r.comentario||'').replace(/[<>]/g, c=>({'<':'&lt;','>':'&gt;'}[c]));
+      return `<div class="ped-card ${!r.aprobada?'ped-card-oculto':''}">
+        <div class="ped-card-top">
+          <div>
+            <div class="ped-card-id">${r.nombre||'Anónimo'} ${!r.aprobada?'<span class="ped-oculto-tag">OCULTA</span>':''}</div>
+            <div class="ped-card-date">${fecha} · Producto: <strong>${prodName}</strong></div>
+          </div>
+          <div style="color:#f59e0b;font-size:1.1rem;letter-spacing:2px">${stars}</div>
+        </div>
+        <div class="ped-card-body">
+          ${escapedText?`<div style="background:#f9fafb;padding:10px;border-radius:8px;font-size:.9rem;line-height:1.5">${escapedText}</div>`:'<div style="color:var(--gray);font-style:italic;font-size:.84rem">Sin comentario</div>'}
+        </div>
+        <div class="ped-card-actions">
+          <button class="btn btn-out btn-sm" onclick="toggleResenaAprobada('${r.id}',${!r.aprobada})" style="color:${r.aprobada?'#b45309':'#16a34a'};border-color:${r.aprobada?'#f59e0b':'#16a34a'}">${r.aprobada?'Ocultar reseña':'Mostrar reseña'}</button>
+          <button class="btn btn-out btn-sm" onclick="deleteResena('${r.id}')" style="margin-left:auto;color:var(--red);border-color:var(--red)">Eliminar</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+  }
   else if(tab==='clientes'){
     const {data}=await sb.from('profiles').select('*').order('creado_en',{ascending:false});
     if(!data||!data.length){c.innerHTML='<div class="acc-empty"><p>No hay clientes</p></div>';return;}
@@ -2496,6 +2785,38 @@ async function reintentarPago(pedidoId){
   }catch(e){
     console.error('Error reintentando pago:', e);
     showToast('Error: ' + e.message);
+  }
+}
+
+// Reseñas: aprobar/ocultar
+async function toggleResenaAprobada(id, aprobada){
+  try{
+    await sbUpdate('resenas', id, {aprobada});
+    showToast(aprobada?'Reseña visible':'Reseña oculta');
+    renderAdminTab('resenas');
+  }catch(e){
+    showToast('Error');
+    console.error(e);
+  }
+}
+
+// Eliminar reseña
+async function deleteResena(id){
+  if(!confirm('¿Eliminar esta reseña permanentemente?')) return;
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/resenas?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if(!res.ok) throw new Error(await res.text());
+    showToast('Reseña eliminada');
+    renderAdminTab('resenas');
+  }catch(e){
+    showToast('Error eliminando');
+    console.error(e);
   }
 }
 
