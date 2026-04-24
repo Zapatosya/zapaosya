@@ -3,12 +3,60 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ZapatosYa — Rápido y Seguro</title>
+
+<!-- SEO básico -->
+<title>ZapatosYa — Tenis y calzado deportivo en Colombia | Envío gratis</title>
+<meta name="description" content="Compra tenis deportivos y casuales en Colombia con envío a todo el país. Pago contraentrega, envío gratis en compras mayores a $280.000. Marcas como Diesel y más."/>
+<meta name="keywords" content="tenis colombia, zapatos deportivos, calzado online, tenis diesel, comprar zapatos colombia, contraentrega zapatos, envío gratis"/>
+<meta name="author" content="ZapatosYa"/>
+<meta name="robots" content="index, follow"/>
+<meta name="theme-color" content="#E63946"/>
+<link rel="canonical" href="https://zapatosya.com/"/>
+
+<!-- Open Graph (WhatsApp, Facebook, etc.) -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://zapatosya.com/"/>
+<meta property="og:title" content="ZapatosYa — Tenis y calzado deportivo | Envío gratis en Colombia"/>
+<meta property="og:description" content="Los mejores tenis deportivos con envío a todo Colombia. Pago contraentrega disponible. Envío gratis en compras mayores a $280.000."/>
+<meta property="og:locale" content="es_CO"/>
+<meta property="og:site_name" content="ZapatosYa"/>
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="ZapatosYa — Tenis con envío gratis en Colombia"/>
+<meta name="twitter:description" content="Tenis deportivos en Colombia. Pago contraentrega. Envío gratis desde $280.000."/>
+
+<!-- Performance: preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://unpkg.com"/>
+<link rel="preconnect" href="https://xcflrhjcpowyjguxvhdt.supabase.co" crossorigin/>
+<link rel="dns-prefetch" href="https://api.mercadopago.com"/>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+
+<!-- JSON-LD Schema (ayuda SEO) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "ZapatosYa",
+  "description": "Tienda online de tenis y calzado deportivo en Colombia",
+  "url": "https://zapatosya.com",
+  "telephone": "+573212970591",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "CO",
+    "addressRegion": "Bogotá D.C."
+  },
+  "sameAs": ["https://wa.me/573212970591"]
+}
+</script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--red:#E63946;--red2:#c0303c;--blk:#111;--blk2:#1a1a1a;--wht:#F5F5F5;--yel:#FFB703;--gray:#888;--border:#e2e2e2;--fh:'Poppins',sans-serif;--fb:'DM Sans',sans-serif;--tr:.24s cubic-bezier(.4,0,.2,1);--shd:0 20px 60px rgba(0,0,0,.2)}
+:root{--red:#E63946;--red2:#c0303c;--blk:#111;--blk2:#1a1a1a;--wht:#F5F5F5;--yel:#FFB703;--gray:#6b6b6b;--gray-light:#8a8a8a;--border:#e2e2e2;--fh:'Poppins',sans-serif;--fb:'DM Sans',sans-serif;--tr:.24s cubic-bezier(.4,0,.2,1);--shd:0 20px 60px rgba(0,0,0,.2)}
 html{scroll-behavior:smooth}
 body{font-family:var(--fb);background:var(--wht);color:var(--blk);overflow-x:hidden;line-height:1.6}
 a{text-decoration:none;color:inherit}
@@ -223,9 +271,36 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .estado-badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:.7rem;font-weight:700;font-family:var(--fh);text-transform:uppercase;letter-spacing:.5px}
 .est-pendiente{background:#fef3c7;color:#92400e}
 .est-confirmado{background:#dbeafe;color:#1e40af}
+.est-procesando{background:#ede9fe;color:#5b21b6}
 .est-enviado{background:#e0e7ff;color:#3730a3}
 .est-entregado{background:#dcfce7;color:#166534}
 .est-cancelado{background:#fee2e2;color:#991b1b}
+
+/* Mis Pedidos (cliente) */
+.mp-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;transition:var(--tr)}
+.mp-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.mp-card-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:12px}
+.mp-card-id{font-family:var(--fh);font-weight:700;font-size:.95rem}
+.mp-card-date{font-size:.78rem;color:var(--gray);margin-top:2px}
+.mp-card-status{background:#f9fafb;padding:8px 12px;border-radius:8px;font-size:.85rem;color:var(--blk);margin-bottom:12px;border-left:3px solid var(--red)}
+.mp-items{border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px}
+.mp-item{display:flex;align-items:center;gap:10px;padding:6px 0}
+.mp-item-ico{width:44px;height:44px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mp-item-ico img{width:100%;height:100%;object-fit:cover}
+.mp-item-info{flex:1;min-width:0}
+.mp-item-name{font-weight:600;font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp-item-meta{font-size:.74rem;color:var(--gray)}
+.mp-item-price{font-weight:700;font-size:.86rem}
+.mp-card-foot{border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+
+/* Admin Pedidos cards */
+.ped-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.ped-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ped-card-id{font-family:var(--fh);font-weight:700;font-size:.9rem}
+.ped-card-date{font-size:.74rem;color:var(--gray);margin-top:2px}
+.ped-card-body{font-size:.86rem;margin-bottom:10px}
+.ped-card-actions{display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
+.ped-filter.act{background:var(--red);color:#fff;border-color:var(--red)}
 
 /* ADMIN PANEL */
 .modal-lg{max-width:1100px}
@@ -446,6 +521,8 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   </div>
 </header>
 
+<main>
+
 <section class="hero">
   <div class="hero-bg">
     <div class="blob b1"></div>
@@ -517,6 +594,8 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- MODAL PRODUCTO -->
 <div class="ov" id="pModal">
@@ -662,6 +741,18 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 </div>
 
 <!-- MODAL ADMIN -->
+<!-- MODAL MIS PEDIDOS (cliente) -->
+<div class="ov" id="misPedidosModal">
+  <div class="modal modal-lg">
+    <button class="mc" onclick="closeMisPedidos()">✕</button>
+    <div style="padding:28px 32px 0">
+      <h2 style="font-family:var(--fh);font-weight:800;font-size:1.4rem">Mis pedidos</h2>
+      <p style="color:var(--gray);font-size:.88rem;margin-top:4px">Historial de todas tus compras</p>
+    </div>
+    <div class="admin-content" id="misPedidosContent" style="padding:20px 32px 32px"></div>
+  </div>
+</div>
+
 <div class="ov" id="adminModal">
   <div class="modal modal-lg">
     <button class="mc" onclick="closeAdmin()">✕</button>
@@ -699,12 +790,12 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           <div><label>Torre / Apartamento <span style="color:var(--gray);font-weight:400">(opcional)</span></label><input type="text" id="coApt" placeholder="Ej: Torre 2, Apto 504"/></div>
           <div class="checkout-grid-2">
             <div><label>Departamento</label>
-              <select id="coDept" required>
+              <select id="coDept" required aria-label="Selecciona tu departamento">
                 <option value="">Selecciona...</option>
               </select>
             </div>
             <div><label>Ciudad</label>
-              <select id="coCity" required disabled>
+              <select id="coCity" required disabled aria-label="Selecciona tu ciudad">
                 <option value="">Primero elige departamento</option>
               </select>
             </div>
@@ -1862,6 +1953,7 @@ function toggleUserMenu(force){
         <div>${currentUser.email}</div>
       </div>
       <button class="user-menu-item" data-act="account">Mi cuenta</button>
+      <button class="user-menu-item" data-act="pedidos">Mis pedidos</button>
       ${isAdmin?'<button class="user-menu-item" data-act="admin">Panel admin</button>':''}
       <button class="user-menu-item danger" data-act="logout">Cerrar sesión</button>`;
   }else{
@@ -1876,6 +1968,7 @@ function toggleUserMenu(force){
       const act=btn.dataset.act;
       toggleUserMenu(false);
       if(act==='account') openAccount();
+      else if(act==='pedidos') openMisPedidos();
       else if(act==='admin') openAdmin();
       else if(act==='logout') logout();
       else if(act==='login') openAuth('login');
@@ -2011,22 +2104,33 @@ async function renderAdminTab(tab){
       </div>`;
   }
   else if(tab==='pedidos'){
-    const {data}=await sb.from('pedidos').select('*').order('creado_en',{ascending:false});
+    c.innerHTML='<div class="loading">Cargando pedidos...</div>';
+    const data = await sbSelect('pedidos', 'order=creado_en.desc&select=*');
     if(!data||!data.length){c.innerHTML='<div class="acc-empty"><p>No hay pedidos aún</p></div>';return;}
-    c.innerHTML=`<div class="admin-wrap"><table class="admin-table">
-      <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Fecha</th><th>Estado</th></tr></thead>
-      <tbody>${data.map(p=>`
-        <tr>
-          <td><strong>#${p.numero_pedido}</strong></td>
-          <td>${p.nombre_cliente}<br><small style="color:var(--gray)">${p.email}</small></td>
-          <td><strong>${fmt(p.total)}</strong></td>
-          <td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td>
-          <td>
-            <select class="admin-select" onchange="updOrder('${p.id}',this.value)">
-              ${['pendiente','confirmado','enviado','entregado','cancelado'].map(e=>`<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('')}
-            </select>
-          </td>
-        </tr>`).join('')}</tbody></table></div>`;
+    
+    // Filtros
+    c.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-out btn-sm ped-filter act" data-f="todos">Todos (${data.length})</button>
+        <button class="btn btn-out btn-sm ped-filter" data-f="pendiente">Pendientes (${data.filter(p=>p.estado==='pendiente').length})</button>
+        <button class="btn btn-out btn-sm ped-filter" data-f="confirmado">Confirmados (${data.filter(p=>p.estado==='confirmado').length})</button>
+        <button class="btn btn-out btn-sm ped-filter" data-f="procesando">Procesando (${data.filter(p=>p.estado==='procesando').length})</button>
+        <button class="btn btn-out btn-sm ped-filter" data-f="enviado">Enviados (${data.filter(p=>p.estado==='enviado').length})</button>
+        <button class="btn btn-out btn-sm ped-filter" data-f="entregado">Entregados (${data.filter(p=>p.estado==='entregado').length})</button>
+      </div>
+      <div id="adminPedidosList"></div>`;
+    
+    // Guardar pedidos y renderizar
+    window.__adminPedidos = data;
+    renderAdminPedidosList('todos');
+    
+    c.querySelectorAll('.ped-filter').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        c.querySelectorAll('.ped-filter').forEach(x=>x.classList.remove('act'));
+        b.classList.add('act');
+        renderAdminPedidosList(b.dataset.f);
+      });
+    });
   }
   else if(tab==='productos'){
     c.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-red btn-sm" onclick="addProduct()">+ Nuevo producto</button></div>
@@ -2061,14 +2165,147 @@ async function renderAdminTab(tab){
   }
 }
 
-async function updOrder(id,estado){
-  await sb.from('pedidos').update({estado}).eq('id',id);
-  showToast('Estado actualizado');
+// Renderizar lista de pedidos admin (como cards)
+function renderAdminPedidosList(filtro){
+  const list = document.getElementById('adminPedidosList');
+  if(!list) return;
+  const data = (window.__adminPedidos||[]).filter(p=>filtro==='todos'||p.estado===filtro);
+  if(!data.length){ list.innerHTML = '<div class="acc-empty"><p>No hay pedidos en este estado</p></div>'; return; }
+  
+  list.innerHTML = data.map(p=>{
+    const fecha = new Date(p.creado_en).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
+    const items = (p.items||[]).map(it=>`${it.name} (T${it.size||'-'}, ${it.color||'-'}) x${it.qty}`).join(' · ');
+    const metodo = p.metodo_pago==='contraentrega'?'Contraentrega':'Pago completo';
+    return `<div class="ped-card">
+      <div class="ped-card-top">
+        <div>
+          <div class="ped-card-id">Pedido #${String(p.id).slice(0,8)}</div>
+          <div class="ped-card-date">${fecha}</div>
+        </div>
+        <span class="estado-badge est-${p.estado}">${p.estado}</span>
+      </div>
+      <div class="ped-card-body">
+        <div><strong>${p.nombre_cliente||'Cliente'}</strong> · ${p.telefono||'-'} · ${p.email||''}</div>
+        <div style="color:var(--gray);font-size:.85rem;margin-top:4px">${p.direccion_completa||''}</div>
+        <div style="margin-top:8px;font-size:.86rem">${items}</div>
+        <div style="margin-top:8px;display:flex;gap:14px;font-size:.88rem;flex-wrap:wrap">
+          <span>Subtotal: <strong>${fmt(p.subtotal||0)}</strong></span>
+          <span>Envío: <strong>${p.envio>0?fmt(p.envio):'GRATIS'}</strong></span>
+          <span>Total: <strong style="color:var(--red)">${fmt(p.total||0)}</strong></span>
+          <span>Método: <strong>${metodo}</strong></span>
+        </div>
+        ${p.notas?`<div style="margin-top:6px;font-size:.82rem;background:#fff7ed;border-left:3px solid #f59e0b;padding:6px 10px;border-radius:4px"><strong>Notas:</strong> ${p.notas}</div>`:''}
+      </div>
+      <div class="ped-card-actions">
+        <label style="font-size:.82rem;color:var(--gray)">Cambiar estado:</label>
+        <select class="admin-select" onchange="updOrder('${p.id}',this.value)">
+          ${['pendiente','confirmado','procesando','enviado','entregado','cancelado'].map(e=>`<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+async function updOrder(id,estado){
+  try{
+    await sbUpdate('pedidos', id, {estado});
+    showToast('Estado actualizado');
+    // Refrescar la lista local
+    if(window.__adminPedidos){
+      const idx = window.__adminPedidos.findIndex(p=>p.id===id);
+      if(idx>=0) window.__adminPedidos[idx].estado = estado;
+    }
+  }catch(e){
+    showToast('Error actualizando');
+    console.error(e);
+  }
+}
+// ─── MIS PEDIDOS (CLIENTE) ───────────────────────────────────
+async function openMisPedidos(){
+  if(!currentUser){ openAuth('login'); return; }
+  document.getElementById("misPedidosModal").classList.add("open");
+  document.body.style.overflow="hidden";
+  const c = document.getElementById('misPedidosContent');
+  c.innerHTML = '<div class="loading">Cargando tus pedidos...</div>';
+  try{
+    // Traer solo los pedidos del usuario actual
+    const data = await sbSelect('pedidos', `user_id=eq.${currentUser.id}&order=creado_en.desc&select=*`);
+    if(!data||!data.length){
+      c.innerHTML = `<div class="acc-empty">
+        <p style="margin-bottom:14px">Aún no has hecho ningún pedido</p>
+        <button class="btn btn-red btn-sm" onclick="closeMisPedidos();document.getElementById('productos').scrollIntoView({behavior:'smooth'})">Ver productos</button>
+      </div>`;
+      return;
+    }
+    c.innerHTML = data.map(p=>{
+      const fecha = new Date(p.creado_en).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+      const items = (p.items||[]).map(it=>`
+        <div class="mp-item">
+          <div class="mp-item-ico" style="background:${it.bg||'#f5f5f5'}">
+            ${it.img?`<img src="${it.img}" alt="${it.name}">`:''}
+          </div>
+          <div class="mp-item-info">
+            <div class="mp-item-name">${it.name}</div>
+            <div class="mp-item-meta">Talla ${it.size||'-'} · ${it.color||'-'} · x${it.qty}</div>
+          </div>
+          <div class="mp-item-price">${fmt((it.price||0)*(it.qty||1))}</div>
+        </div>`).join('');
+      
+      // Texto según estado
+      const estadoTexto = {
+        'pendiente': 'Esperando confirmación de pago',
+        'confirmado': 'Pago confirmado, preparando tu pedido',
+        'procesando': 'Preparando tu pedido para envío',
+        'enviado': 'Tu pedido ya salió en camino',
+        'entregado': 'Pedido entregado',
+        'cancelado': 'Pedido cancelado'
+      }[p.estado] || p.estado;
+      
+      const metodo = p.metodo_pago==='contraentrega'?'Contraentrega':'Pago completo';
+      
+      return `<div class="mp-card">
+        <div class="mp-card-hd">
+          <div>
+            <div class="mp-card-id">Pedido #${String(p.id).slice(0,8).toUpperCase()}</div>
+            <div class="mp-card-date">${fecha}</div>
+          </div>
+          <span class="estado-badge est-${p.estado}">${p.estado}</span>
+        </div>
+        <div class="mp-card-status">${estadoTexto}</div>
+        <div class="mp-items">${items}</div>
+        <div class="mp-card-foot">
+          <div>
+            <div style="color:var(--gray);font-size:.78rem">Método de pago</div>
+            <div style="font-weight:600">${metodo}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--gray);font-size:.78rem">Total</div>
+            <div style="font-weight:800;color:var(--red);font-size:1.05rem">${fmt(p.total||0)}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    c.innerHTML = '<div class="acc-empty"><p>No se pudieron cargar los pedidos. Intenta de nuevo.</p></div>';
+    console.error('Error mis pedidos:', e);
+  }
+}
+
+function closeMisPedidos(){
+  document.getElementById("misPedidosModal").classList.remove("open");
+  document.body.style.overflow="";
+}
+
 async function toggleProd(id,activo){
-  await sb.from('productos').update({activo}).eq('id',id);
-  await loadProducts();
-  renderAdminTab('productos');
+  try{
+    await sbUpdate('productos', id, {activo});
+    await loadProducts();
+    renderAdminTab('productos');
+    showToast(activo?'Producto activado':'Producto desactivado');
+  }catch(e){
+    showToast('Error cambiando estado');
+    console.error(e);
+  }
 }
 async function addProduct(){
   openProductEditor(null);
