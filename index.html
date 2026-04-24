@@ -1509,6 +1509,10 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   const total = tot + ship;
   const dirCompleta = `${addr}${apt?', '+apt:''}, ${city}, ${dept}`;
   
+  // Leer método de pago seleccionado
+  const metodoPago = document.querySelector('input[name="payMethod"]:checked')?.value || 'completo';
+  const esContraentrega = metodoPago === 'contraentrega' && ship > 0;
+  
   // Guardar pedido en Supabase con estado pendiente
   try{
     const pedido = {
@@ -1516,13 +1520,15 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
       email, nombre_cliente: name, telefono: phone,
       direccion_completa: dirCompleta,
       items: cart, subtotal: tot, envio: ship, total: total,
-      notas: notes, estado: 'pendiente', metodo_pago: 'whatsapp'
+      notas: notes, estado: 'pendiente',
+      metodo_pago: esContraentrega ? 'whatsapp_contraentrega' : 'whatsapp_completo'
     };
     await sbInsert('pedidos', pedido);
   }catch(e){ console.warn('No se pudo guardar pedido:', e); }
   
   // Construir mensaje de WhatsApp
   let msg = `*Nuevo pedido - ZapatosYa*\n\n`;
+  msg += `*Método de pago:* ${esContraentrega ? 'CONTRAENTREGA' : 'Pago completo'}\n`;
   msg += `*Cliente:* ${name}\n`;
   msg += `*Teléfono:* ${phone}\n`;
   msg += `*Email:* ${email}\n`;
@@ -1530,11 +1536,20 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   if(notes) msg += `*Notas:* ${notes}\n`;
   msg += `\n*Productos:*\n`;
   cart.forEach(it=>{
-    msg += `• ${it.name} (Talla ${it.size}, ${it.color}) x${it.qty} - ${fmt(it.price*it.qty)}\n`;
+    msg += `- ${it.name} (Talla ${it.size}, ${it.color}) x${it.qty} - ${fmt(it.price*it.qty)}\n`;
   });
   msg += `\n*Subtotal:* ${fmt(tot)}`;
   msg += `\n*Envío:* ${ship===0?'GRATIS':fmt(ship)} (${envioCalc.dias})`;
-  msg += `\n*TOTAL: ${fmt(total)}*\n\nQuiero confirmar mi pedido, gracias.`;
+  
+  if(esContraentrega){
+    msg += `\n\n*Pago adelantado (envío):* ${fmt(ship)}`;
+    msg += `\n*Pagaré al recibir:* ${fmt(tot)}`;
+    msg += `\n*Total general: ${fmt(total)}*`;
+    msg += `\n\nQuiero confirmar mi pedido con contraentrega. Gracias.`;
+  } else {
+    msg += `\n*TOTAL: ${fmt(total)}*`;
+    msg += `\n\nQuiero confirmar mi pedido, gracias.`;
+  }
   
   // Número de WhatsApp de la tienda (CAMBIAR ESTE)
   const WHATSAPP_NUMBER = '573107801564'; // 57 = Colombia, sin espacios
