@@ -590,7 +590,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 <header class="hdr" id="hdr">
   <div class="hdr-in">
     <a href="#" class="logo-link">
-      <img src="/img/logo-07a8d55f.webp" alt="ZapatosYa" class="logo-img" width="600" height="142" fetchpriority="high" decoding="async"/>
+      <img src="/img/logo-header.webp" alt="ZapatosYa" class="logo-img" width="254" height="60" fetchpriority="high" decoding="async"/>
     </a>
     <nav class="nav">
     </nav>
@@ -635,7 +635,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
     </div>
     <div class="hero-vis">
       <div class="logo-stage">
-        <img src="/img/logo-7b5ec6d2.webp" alt="ZapatosYa" class="hero-logo" width="600" height="600" fetchpriority="high" decoding="async"/>
+        <img src="/img/logo-hero.webp" alt="ZapatosYa" class="hero-logo" width="600" height="600" fetchpriority="high" decoding="async"/>
         <div class="fl fl1">Más vendido</div>
         <div class="fl fl2">-30% OFF</div>
         <div class="fl fl3">Nuevo 2026</div>
@@ -784,7 +784,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
     <button class="mc" onclick="closeAuth()">✕</button>
     <div class="auth-body">
       <div class="auth-hd">
-        <img src="/img/logo-7b5ec6d2.webp" alt="ZapatosYa" width="600" height="600" loading="lazy" decoding="async"/>
+        <img src="/img/logo-small.webp" alt="ZapatosYa" width="200" height="200" loading="lazy" decoding="async"/>
         <h2 id="authTitle">Inicia sesión</h2>
         <p id="authSubtitle">Accede a tu cuenta para continuar</p>
       </div>
@@ -995,7 +995,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 <aside class="cdw" id="cDw">
   <div class="cdh">
     <div class="cdh-logo">
-      <img src="/img/logo-7b5ec6d2.webp" alt="ZapatosYa" width="600" height="600" loading="lazy" decoding="async"/>
+      <img src="/img/logo-small.webp" alt="ZapatosYa" width="200" height="200" loading="lazy" decoding="async"/>
       <h2>Tu carrito</h2>
     </div>
     <button class="cdc" id="cClose">✕</button>
@@ -1170,12 +1170,26 @@ const fmt=p=>"$"+(p||0).toLocaleString("es-CO");
 const disc=(o,c)=>Math.round(((o-c)/o)*100);
 const lblHTML=ls=>(ls||[]).map(l=>({h:'<span class="lbl lbl-h">Más vendido</span>',n:'<span class="lbl lbl-n">Nuevo</span>',s:'<span class="lbl lbl-s">Oferta</span>',l:'<span class="lbl lbl-l">Limitado</span>'}[l]||'')).join('');
 const getSVG=(p)=>(SVGS[p.svg_tipo]||SVGS.sneaker)(p.color_principal,p.color_secundario);
+// Helper: optimiza URL de Supabase para redimensionar al vuelo
+const optimizeImg=(url,w=400,q=75)=>{
+  if(!url) return url;
+  // Solo procesar URLs de Supabase Storage
+  if(url.includes('/storage/v1/object/public/')){
+    const optimized=url.replace('/storage/v1/object/public/','/storage/v1/render/image/public/');
+    const sep=optimized.includes('?')?'&':'?';
+    return `${optimized}${sep}width=${w}&quality=${q}`;
+  }
+  return url;
+};
+
 // Helper: devuelve HTML de imagen real o SVG fallback
 const getProductVisual=(p,colorIdx=0)=>{
   const imgs=p.imagenes||[];
   if(imgs.length>0){
-    const url=imgs[colorIdx]||imgs[0];
-    return `<img src="${url}" alt="${p.nombre}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    const orig=imgs[colorIdx]||imgs[0];
+    const src=optimizeImg(orig,360);
+    const src2x=optimizeImg(orig,720);
+    return `<img src="${src}" srcset="${src} 1x, ${src2x} 2x" alt="${p.nombre}" width="360" height="360" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -1697,7 +1711,7 @@ function renderCart(){
   }
   body.innerHTML=cart.map(it=>`
     <div class="citem">
-      <div class="citem-ico" style="background:${it.bg||'var(--wht)'}">${it.img?`<img src="${it.img}" alt="${it.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
+      <div class="citem-ico" style="background:${it.bg||'var(--wht)'}">${it.img?`<img src="${optimizeImg(it.img,160)}" alt="${it.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
       <div style="flex:1">
         <div class="ci-name">${it.name}</div>
         <div class="ci-meta">Talla ${it.size} · ${it.color}</div>
@@ -2856,7 +2870,7 @@ async function openMisPedidos(){
       const items = (p.items||[]).map(it=>`
         <div class="mp-item">
           <div class="mp-item-ico" style="background:${it.bg||'#f5f5f5'}">
-            ${it.img?`<img src="${it.img}" alt="${it.name}" loading="lazy" decoding="async">`:''}
+            ${it.img?`<img src="${optimizeImg(it.img,200)}" alt="${it.name}" loading="lazy" decoding="async">`:''}
           </div>
           <div class="mp-item-info">
             <div class="mp-item-name">${it.name}</div>
