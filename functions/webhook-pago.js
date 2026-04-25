@@ -77,6 +77,9 @@ async function notificarPagoTelegram(env, pedido, payment, pagoEstado) {
       } else {
         msg += `\n*Acción:* Generar guía y despachar.`;
       }
+      // Link al recibo
+      const SITE_URL = env.SITE_URL || 'https://zapatosya.com';
+      msg += `\n\n[Ver recibo](${SITE_URL}/recibo?id=${pedidoId})`;
     }
 
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
