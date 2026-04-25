@@ -2584,13 +2584,72 @@ function renderAdminPedidosList(filtro){
         <select class="admin-select" onchange="updOrder('${p.id}',this.value)">
           ${['pendiente','confirmado','procesando','enviado','entregado','cancelado'].map(e=>`<option value="${e}" ${p.estado===e?'selected':''}>${e}</option>`).join('')}
         </select>
-        <div style="margin-left:auto;display:flex;gap:6px">
+        <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+          ${pagoEstado==='esperando' ? `<button class="btn btn-out btn-sm" onclick="marcarPagado('${p.id}')" style="color:#16a34a;border-color:#16a34a;font-weight:600" title="Confirmar el pago manualmente (uso para WhatsApp, Nequi directo, transferencia, etc.)">Marcar pagado</button>` : ''}
+          ${pagoEstado==='confirmado' && p.metodo_pago && p.metodo_pago.startsWith('whatsapp') ? `<button class="btn btn-out btn-sm" onclick="revertirPago('${p.id}')" style="color:#b45309;border-color:#f59e0b" title="Revertir confirmación manual del pago">Revertir pago</button>` : ''}
           <button class="btn btn-out btn-sm" onclick="toggleOcultoCliente('${p.id}',${!p.oculto_cliente})" style="color:#b45309;border-color:#f59e0b" title="${p.oculto_cliente?'Mostrar de nuevo al cliente':'Ocultar al cliente (tú lo sigues viendo)'}">${p.oculto_cliente?'Mostrar al cliente':'Ocultar al cliente'}</button>
           <button class="btn btn-out btn-sm" onclick="deletePedido('${p.id}')" style="color:var(--red);border-color:var(--red)" title="Eliminar permanentemente de la base de datos">Eliminar</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+// Marcar pago manualmente (WhatsApp, Nequi directo, transferencia, etc.)
+async function marcarPagado(id){
+  const ped = (window.__adminPedidos||[]).find(p=>p.id===id);
+  const nombre = ped?.nombre_cliente || 'este pedido';
+  const total = ped?.total ? fmt(ped.total) : '';
+  
+  if(!confirm(`¿Confirmar que ${nombre} ya pagó ${total}?\n\nEsto marcará el pago como CONFIRMADO. Úsalo solo si ya verificaste que el dinero llegó.`)) return;
+  
+  try{
+    await sbUpdate('pedidos', id, {
+      pago_estado: 'confirmado',
+      estado: 'confirmado',
+      ultima_notif_pago: 'confirmado'
+    });
+    showToast('Pago marcado como confirmado');
+    if(window.__adminPedidos){
+      const idx = window.__adminPedidos.findIndex(p=>p.id===id);
+      if(idx>=0){
+        window.__adminPedidos[idx].pago_estado = 'confirmado';
+        window.__adminPedidos[idx].estado = 'confirmado';
+      }
+    }
+    // Re-renderizar
+    const activo = document.querySelector('.ped-filter.act');
+    if(activo) renderAdminPedidosList(activo.dataset.f);
+  }catch(e){
+    showToast('Error: '+e.message);
+    console.error(e);
+  }
+}
+
+// Revertir pago manual (en caso de error)
+async function revertirPago(id){
+  if(!confirm('¿Revertir el pago a "esperando"?\n\nEsto solo aplica para pedidos confirmados manualmente. Si el pago fue por Mercado Pago, no toques esto.')) return;
+  
+  try{
+    await sbUpdate('pedidos', id, {
+      pago_estado: 'esperando',
+      estado: 'pendiente',
+      ultima_notif_pago: null
+    });
+    showToast('Pago revertido a esperando');
+    if(window.__adminPedidos){
+      const idx = window.__adminPedidos.findIndex(p=>p.id===id);
+      if(idx>=0){
+        window.__adminPedidos[idx].pago_estado = 'esperando';
+        window.__adminPedidos[idx].estado = 'pendiente';
+      }
+    }
+    const activo = document.querySelector('.ped-filter.act');
+    if(activo) renderAdminPedidosList(activo.dataset.f);
+  }catch(e){
+    showToast('Error: '+e.message);
+    console.error(e);
+  }
 }
 
 async function updOrder(id,estado){
