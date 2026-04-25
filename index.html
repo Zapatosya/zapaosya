@@ -803,7 +803,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           <input type="password" id="authPass" name="authPass" autocomplete="current-password" placeholder="Mínimo 6 caracteres" required minlength="6">
         </div>
         <div style="text-align:right;margin-top:-8px" id="forgotLinkWrap">
-          <a onclick="showRecover()" style="font-size:.78rem;color:var(--red);cursor:pointer;text-decoration:none">¿Olvidaste tu contraseña?</a>
+          <a href="#" role="button" onclick="showRecover();return false" style="font-size:.78rem;color:var(--red);cursor:pointer;text-decoration:none">¿Olvidaste tu contraseña?</a>
         </div>
         <button type="submit" class="btn btn-red btn-full" id="authSubmit">Iniciar sesión</button>
       </form>
@@ -825,7 +825,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           </a>
         </div>
         <div style="text-align:center;margin-top:10px">
-          <a onclick="hideRecover()" style="font-size:.8rem;color:var(--gray);cursor:pointer">← Volver a iniciar sesión</a>
+          <a href="#" role="button" onclick="hideRecover();return false" style="font-size:.8rem;color:var(--gray);cursor:pointer">← Volver a iniciar sesión</a>
         </div>
       </form>
       
@@ -853,7 +853,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       </div>
       <div class="auth-footer">
         <span id="authSwitchText">¿No tienes cuenta? </span>
-        <a onclick="toggleAuth()" id="authSwitch">Regístrate</a>
+        <a href="#" role="button" onclick="toggleAuth();return false" id="authSwitch">Regístrate</a>
       </div>
       </div>
     </div>
@@ -1081,11 +1081,11 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       <div class="footer-logo-line"><strong>ZapatosYa</strong> · Rápido y Seguro</div>
       <p style="opacity:.6;font-size:.78rem;margin-top:4px">© 2026 ZapatosYa. Todos los derechos reservados.</p>
       <div class="flinks">
-        <a onclick="openLegal('about')" style="cursor:pointer">Sobre nosotros</a>
-        <a onclick="openLegal('terminos')" style="cursor:pointer">Términos</a>
-        <a onclick="openLegal('privacidad')" style="cursor:pointer">Privacidad</a>
-        <a onclick="openLegal('devoluciones')" style="cursor:pointer">Devoluciones</a>
-        <a onclick="chatWhatsapp()" style="cursor:pointer">Contacto</a>
+        <a href="#" role="button" onclick="openLegal('about');return false" style="cursor:pointer">Sobre nosotros</a>
+        <a href="#" role="button" onclick="openLegal('terminos');return false" style="cursor:pointer">Términos</a>
+        <a href="#" role="button" onclick="openLegal('privacidad');return false" style="cursor:pointer">Privacidad</a>
+        <a href="#" role="button" onclick="openLegal('devoluciones');return false" style="cursor:pointer">Devoluciones</a>
+        <a href="#" role="button" onclick="chatWhatsapp();return false" style="cursor:pointer">Contacto</a>
       </div>
     </div>
   </div>
@@ -1175,7 +1175,7 @@ const getProductVisual=(p,colorIdx=0)=>{
   const imgs=p.imagenes||[];
   if(imgs.length>0){
     const url=imgs[colorIdx]||imgs[0];
-    return `<img src="${url}" alt="${p.nombre}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`;
+    return `<img src="${url}" alt="${p.nombre}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -1697,7 +1697,7 @@ function renderCart(){
   }
   body.innerHTML=cart.map(it=>`
     <div class="citem">
-      <div class="citem-ico" style="background:${it.bg||'var(--wht)'}">${it.img?`<img src="${it.img}" alt="${it.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
+      <div class="citem-ico" style="background:${it.bg||'var(--wht)'}">${it.img?`<img src="${it.img}" alt="${it.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:(SVGS[it.svg]||SVGS.sneaker)(it.c1,it.c2)}</div>
       <div style="flex:1">
         <div class="ci-name">${it.name}</div>
         <div class="ci-meta">Talla ${it.size} · ${it.color}</div>
@@ -2856,7 +2856,7 @@ async function openMisPedidos(){
       const items = (p.items||[]).map(it=>`
         <div class="mp-item">
           <div class="mp-item-ico" style="background:${it.bg||'#f5f5f5'}">
-            ${it.img?`<img src="${it.img}" alt="${it.name}">`:''}
+            ${it.img?`<img src="${it.img}" alt="${it.name}" loading="lazy" decoding="async">`:''}
           </div>
           <div class="mp-item-info">
             <div class="mp-item-name">${it.name}</div>
