@@ -170,6 +170,7 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .lbl-s{background:var(--yel);color:var(--blk)}
 .lbl-h{background:var(--red);color:#fff}
 .lbl-l{background:#6200ea;color:#fff}
+.lbl-eg{background:#16a34a;color:#fff}
 .pc-ov{position:absolute;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--tr)}
 .pc:hover .pc-ov{opacity:1}
 .pc-ov .btn{transform:translateY(12px);transition:var(--tr) .04s}
@@ -1134,7 +1135,7 @@ function render(f="todos"){
     <article class="pc" data-id="${p.id}" style="animation-delay:${i*.07}s" tabindex="0">
       <div class="pc-img" style="background:${p.fondo}">
         ${getProductVisual(p,0)}
-        <div class="pc-labels">${lblHTML(p.etiquetas)}</div>
+        <div class="pc-labels">${lblHTML(p.etiquetas)}${p.envio_gratis?'<span class="lbl lbl-eg">Envío gratis</span>':''}</div>
         <div class="pc-ov"><button class="btn btn-red">Ver más →</button></div>
       </div>
       <div class="pc-info">
@@ -1220,7 +1221,7 @@ function openModal(id){
   // Configurar navegación (flechas + dots)
   setupImageNav(p);
   
-  document.getElementById("mBadge").innerHTML=(p.etiquetas||[]).includes("h")?'<span class="lbl lbl-h">Más vendido</span>':(p.etiquetas||[]).includes("l")?'<span class="lbl lbl-l">Limitado</span>':'';
+  document.getElementById("mBadge").innerHTML=((p.etiquetas||[]).includes("h")?'<span class="lbl lbl-h">Más vendido</span>':(p.etiquetas||[]).includes("l")?'<span class="lbl lbl-l">Limitado</span>':'') + (p.envio_gratis?'<span class="lbl lbl-eg" style="margin-left:6px">Envío gratis</span>':'');
   document.getElementById("mCat").textContent=p.categoria;
   document.getElementById("mTit").textContent=p.nombre;
   document.getElementById("mPrice").textContent=fmt(p.precio);
@@ -1588,9 +1589,10 @@ function addToCart(){
   else cart.push({
     key,id:p.id,name:p.nombre,
     svg:p.svg_tipo,c1:p.color_principal,c2:p.color_secundario,
-    img:(p.imagenes||[])[selC]||'', // imagen real del color seleccionado
+    img:(p.imagenes||[])[selC]||'',
     bg:(p.fondos||[])[selC]||p.fondo||'#F5F5F5',
-    price:p.precio,size:selS,color:cn[selC]||'',qty:1
+    price:p.precio,size:selS,color:cn[selC]||'',qty:1,
+    envio_gratis: !!p.envio_gratis
   });
   saveCart(); updateCartUI(); closeModal(); showToast(`${p.nombre} agregado al carrito`);
 }
@@ -1740,6 +1742,10 @@ const ZONAS_ENVIO = {
 };
 
 function calcularEnvio(departamento, subtotal){
+  // Si TODOS los items del carrito son envío gratis → gratis
+  if(cart.length > 0 && cart.every(i=>i.envio_gratis)){
+    return { precio: 0, dias: '2-5 días hábiles', gratis: true, zona: 'GRATIS_PRODUCTO' };
+  }
   // Envío gratis si supera el mínimo
   if(subtotal >= ENVIO_GRATIS_MIN){
     return { precio: 0, dias: '2-5 días hábiles', gratis: true, zona: 'GRATIS' };
@@ -1856,8 +1862,12 @@ function openCheckout(){
   const subMin = ENVIO_GRATIS_MIN;
   const falta = subMin - tot;
   const promoEl = document.getElementById('coPromoShip');
+  const todosGratis = cart.length > 0 && cart.every(i=>i.envio_gratis);
   if(promoEl){
-    if(falta > 0){
+    if(todosGratis){
+      promoEl.innerHTML = `¡Envío <strong>GRATIS</strong> en estos productos!`;
+      promoEl.style.display = '';
+    }else if(falta > 0){
       promoEl.innerHTML = `Agrega <strong>${fmt(falta)}</strong> más y tu envío es <strong>GRATIS</strong>`;
       promoEl.style.display = '';
     }else{
@@ -2919,6 +2929,13 @@ function openProductEditor(p){
           <div><label>Precio *</label><input id="pePrice" type="number" value="${p?.precio||''}" placeholder="139900"></div>
           <div><label>Precio original (opcional)</label><input id="pePriceOrig" type="number" value="${p?.precio_original||''}" placeholder="169900"></div>
         </div>
+        <div style="background:#16a34a08;border:1px solid #16a34a40;border-radius:10px;padding:12px;margin-top:6px">
+          <label class="pe-chk" style="font-weight:600">
+            <input type="checkbox" id="peEnvioGratis" ${p?.envio_gratis?'checked':''}> 
+            Envío gratis para este producto
+          </label>
+          <p style="font-size:.78rem;color:var(--gray);margin-top:4px;margin-left:24px">Si el carrito tiene SOLO productos con esta opción activa, el envío será gratis. Útil para promociones.</p>
+        </div>
         <div><label>Descripción</label><textarea id="peDesc" rows="3" placeholder="Descripción del producto...">${p?.descripcion||''}</textarea></div>
         <div class="pe-row">
           <div><label>Mensaje de stock</label><input id="peStock" value="${p?.stock_mensaje||''}" placeholder="¡Últimas 8 unidades!"></div>
@@ -3061,6 +3078,7 @@ async function saveProduct(){
   const precio_original=parseInt(document.getElementById('pePriceOrig').value)||null;
   const descripcion=document.getElementById('peDesc').value.trim();
   const stock_mensaje=document.getElementById('peStock').value.trim();
+  const envio_gratis=document.getElementById('peEnvioGratis')?.checked||false;
   if(!nombre||!categoria||!precio){showToast('Completa nombre, categoría y precio'); return;}
   const etiquetas=Array.from(document.querySelectorAll('.peTag:checked')).map(x=>x.value);
   const tallas=Array.from(document.querySelectorAll('.peSize:checked')).map(x=>parseInt(x.value));
@@ -3073,7 +3091,7 @@ async function saveProduct(){
     fondos.push(r.querySelector('.peColorBg').value);
   });
   const payload={
-    nombre,categoria,precio,precio_original,descripcion,stock_mensaje,
+    nombre,categoria,precio,precio_original,descripcion,stock_mensaje,envio_gratis,
     colores,nombres_colores,imagenes,fondos,tallas,etiquetas,
     color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
     fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
