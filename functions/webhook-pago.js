@@ -175,6 +175,14 @@ export async function onRequestPost(context) {
       console.warn('No se pudo obtener pedido:', e.message);
     }
 
+    // ANTI-DUPLICADOS: solo notificar si el estado cambió desde la última notificación
+    const ultimaNotif = pedido?.ultima_notif_pago || '';
+    const debeNotificar = ultimaNotif !== pagoEstado;
+    
+    if (debeNotificar) {
+      updateData.ultima_notif_pago = pagoEstado;
+    }
+
     const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${pedidoId}`, {
       method: 'PATCH',
       headers: {
@@ -192,11 +200,16 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Error actualizando pedido' }), { status: 500, headers });
     }
 
-    console.log(`Pedido ${pedidoId} — pago: ${pagoEstado}`);
+    console.log(`Pedido ${pedidoId} — pago: ${pagoEstado} — notificar: ${debeNotificar}`);
 
-    context.waitUntil(notificarPagoTelegram(env, pedido, payment, pagoEstado));
+    // Solo notificar si es un cambio nuevo
+    if (debeNotificar) {
+      context.waitUntil(notificarPagoTelegram(env, pedido, payment, pagoEstado));
+    } else {
+      console.log('Notificación omitida (duplicado)');
+    }
 
-    return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, pago_estado: pagoEstado }), { status: 200, headers });
+    return new Response(JSON.stringify({ ok: true, pedido_id: pedidoId, pago_estado: pagoEstado, notificado: debeNotificar }), { status: 200, headers });
 
   } catch (err) {
     console.error('Error webhook:', err.message);
