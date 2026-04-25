@@ -199,8 +199,8 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .mc:hover{background:var(--blk);color:#fff;border-color:var(--blk)}
 
 /* MODAL PRODUCTO */
-.mb{display:grid;grid-template-columns:1fr 1fr;clear:both;align-items:stretch}
-.mi{border-radius:22px 0 0 0;display:flex;align-items:center;justify-content:center;position:relative;padding:0;min-height:340px;overflow:hidden}
+.mb{display:grid;grid-template-columns:1fr 1fr;clear:both}
+.mi{border-radius:22px 0 0 22px;display:flex;align-items:center;justify-content:center;position:relative;padding:0;min-height:340px;overflow:hidden}
 .mi svg{width:80%;max-width:270px;height:auto;filter:drop-shadow(0 16px 36px rgba(0,0,0,.14));transition:transform .4s ease}
 .mi img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .4s ease,opacity .2s ease;opacity:1}
 .mi-badge{position:absolute;top:20px;left:20px;z-index:5}
@@ -302,31 +302,40 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .ped-card-actions{display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
 .ped-filter.act{background:var(--red);color:#fff;border-color:var(--red)}
 
-/* RESEÑAS */
-.reviews-section{padding:26px 32px 32px;background:#fff;border-top:1px solid var(--border);border-radius:0 0 22px 22px}
-.reviews-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px}
-.reviews-hd h3{font-family:var(--fh);font-weight:700;font-size:1.05rem}
-.reviews-summary{display:flex;align-items:center;gap:8px}
-.rs-rating{font-family:var(--fh);font-weight:800;font-size:1.4rem;color:var(--blk)}
-.rs-stars{color:#f59e0b;letter-spacing:1px;font-size:1rem}
-.rs-count{font-size:.82rem;color:var(--gray)}
+/* RESEÑAS (desplegable) */
+.reviews-section{background:#fff;border-top:1px solid var(--border);border-radius:0 0 22px 22px;overflow:hidden}
 
-.review-form{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px}
+.reviews-toggle{width:100%;background:#fff;border:none;padding:18px 32px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;text-align:left;transition:background .2s;font-family:inherit}
+.reviews-toggle:hover{background:#fafafa}
+.reviews-toggle-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.reviews-toggle-title{font-family:var(--fh);font-weight:700;font-size:1rem;color:var(--blk)}
+.reviews-toggle-arrow{transition:transform .3s ease;color:var(--gray);flex-shrink:0;margin-left:12px}
+.reviews-toggle[aria-expanded="true"] .reviews-toggle-arrow{transform:rotate(180deg)}
+
+.reviews-summary{display:flex;align-items:center;gap:6px}
+.rs-rating{font-family:var(--fh);font-weight:800;font-size:1rem;color:var(--blk)}
+.rs-stars{color:#f59e0b;letter-spacing:1px;font-size:.92rem}
+.rs-count{font-size:.78rem;color:var(--gray)}
+
+.reviews-content{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 32px}
+.reviews-section.open .reviews-content{max-height:1500px;padding:6px 32px 28px}
+
+.review-form{background:#f9fafb;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px}
 .rating-input{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.86rem}
 .stars-input{display:flex;gap:2px}
 .stars-input button{font-size:1.6rem;color:#d1d5db;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s}
 .stars-input button:hover,.stars-input button.active{color:#f59e0b}
-.review-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:.88rem;resize:vertical;min-height:60px}
+.review-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:inherit;font-size:.88rem;resize:vertical;min-height:60px;background:#fff}
 .review-form textarea:focus{outline:none;border-color:var(--red)}
 
-.reviews-list{display:flex;flex-direction:column;gap:12px}
-.review-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.reviews-list{display:flex;flex-direction:column;gap:10px}
+.review-item{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
 .review-item-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
 .review-item-name{font-family:var(--fh);font-weight:700;font-size:.92rem}
 .review-item-stars{color:#f59e0b;font-size:.88rem;letter-spacing:1px;margin-top:2px}
 .review-item-date{font-size:.72rem;color:var(--gray);white-space:nowrap}
 .review-item-text{font-size:.88rem;color:#333;line-height:1.55;margin-top:6px;white-space:pre-wrap;word-wrap:break-word}
-.reviews-empty{text-align:center;padding:30px 16px;color:var(--gray);font-size:.88rem;background:#fff;border:1px dashed var(--border);border-radius:10px}
+.reviews-empty{text-align:center;padding:24px 16px;color:var(--gray);font-size:.86rem;background:#f9fafb;border:1px dashed var(--border);border-radius:10px}
 
 /* Rating en card de producto */
 .pc-rate{display:flex;align-items:center;gap:5px;margin:4px 0 6px;font-size:.78rem}
@@ -334,8 +343,11 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pc-count{color:var(--gray);font-size:.74rem}
 
 @media(max-width:620px){
-  .reviews-section{padding:18px 18px 24px}
-  .reviews-hd{flex-direction:column;align-items:flex-start}
+  .reviews-toggle{padding:14px 18px}
+  .reviews-toggle-left{gap:8px}
+  .reviews-toggle-title{font-size:.92rem}
+  .reviews-content{padding:0 18px}
+  .reviews-section.open .reviews-content{padding:4px 18px 22px}
 }
 .pago-badge{display:inline-block;padding:4px 10px;border-radius:50px;font-size:.68rem;font-weight:800;font-family:var(--fh);letter-spacing:.5px;white-space:nowrap}
 .pago-confirmado{background:#16a34a;color:#fff}
@@ -687,46 +699,53 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       </div>
     </div>
     
-    <!-- SECCIÓN DE RESEÑAS -->
+    <!-- SECCIÓN DE RESEÑAS (desplegable) -->
     <div class="reviews-section" id="reviewsSection">
-      <div class="reviews-hd">
-        <h3>Reseñas del producto</h3>
-        <div class="reviews-summary" id="reviewsSummary">
-          <span class="rs-rating" id="rsRating">—</span>
-          <span class="rs-stars" id="rsStars">☆☆☆☆☆</span>
-          <span class="rs-count" id="rsCount">Sin reseñas</span>
+      <button class="reviews-toggle" id="reviewsToggle" onclick="toggleReviews()" aria-expanded="false">
+        <div class="reviews-toggle-left">
+          <span class="reviews-toggle-title">Reseñas del producto</span>
+          <span class="reviews-summary" id="reviewsSummary">
+            <span class="rs-rating" id="rsRating">—</span>
+            <span class="rs-stars" id="rsStars">☆☆☆☆☆</span>
+            <span class="rs-count" id="rsCount">Sin reseñas</span>
+          </span>
         </div>
-      </div>
+        <svg class="reviews-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
       
-      <!-- Formulario para dejar reseña -->
-      <div class="review-form" id="reviewForm">
-        <div id="reviewFormBody">
-          <p style="font-size:.86rem;color:var(--gray);margin-bottom:10px">Comparte tu experiencia con este producto:</p>
-          <div class="rating-input">
-            <span>Tu calificación:</span>
-            <div class="stars-input" id="starsInput">
-              <button type="button" data-r="1" aria-label="1 estrella">★</button>
-              <button type="button" data-r="2" aria-label="2 estrellas">★</button>
-              <button type="button" data-r="3" aria-label="3 estrellas">★</button>
-              <button type="button" data-r="4" aria-label="4 estrellas">★</button>
-              <button type="button" data-r="5" aria-label="5 estrellas">★</button>
+      <div class="reviews-content" id="reviewsContent">
+        <!-- Formulario para dejar reseña -->
+        <div class="review-form" id="reviewForm">
+          <div id="reviewFormBody">
+            <p style="font-size:.86rem;color:var(--gray);margin-bottom:10px">Comparte tu experiencia con este producto:</p>
+            <div class="rating-input">
+              <span>Tu calificación:</span>
+              <div class="stars-input" id="starsInput">
+                <button type="button" data-r="1" aria-label="1 estrella">★</button>
+                <button type="button" data-r="2" aria-label="2 estrellas">★</button>
+                <button type="button" data-r="3" aria-label="3 estrellas">★</button>
+                <button type="button" data-r="4" aria-label="4 estrellas">★</button>
+                <button type="button" data-r="5" aria-label="5 estrellas">★</button>
+              </div>
             </div>
+            <textarea id="reviewText" rows="3" placeholder="Cuéntanos qué te pareció el producto..." maxlength="500"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+              <small style="color:var(--gray);font-size:.74rem"><span id="reviewCharCount">0</span>/500</small>
+              <button class="btn btn-red btn-sm" id="submitReview">Publicar reseña</button>
+            </div>
+            <div id="reviewMsg" style="margin-top:8px"></div>
           </div>
-          <textarea id="reviewText" rows="3" placeholder="Cuéntanos qué te pareció el producto..." maxlength="500"></textarea>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <small style="color:var(--gray);font-size:.74rem"><span id="reviewCharCount">0</span>/500</small>
-            <button class="btn btn-red btn-sm" id="submitReview">Publicar reseña</button>
+          <div id="reviewLoginPrompt" style="display:none;text-align:center;padding:20px;background:#f9fafb;border-radius:10px">
+            <p style="margin-bottom:10px;color:var(--gray)">Inicia sesión para dejar una reseña</p>
+            <button class="btn btn-red btn-sm" onclick="closeMod();openAuth('login')">Iniciar sesión</button>
           </div>
-          <div id="reviewMsg" style="margin-top:8px"></div>
         </div>
-        <div id="reviewLoginPrompt" style="display:none;text-align:center;padding:20px;background:#f9fafb;border-radius:10px">
-          <p style="margin-bottom:10px;color:var(--gray)">Inicia sesión para dejar una reseña</p>
-          <button class="btn btn-red btn-sm" onclick="closeMod();openAuth('login')">Iniciar sesión</button>
-        </div>
+        
+        <!-- Lista de reseñas -->
+        <div class="reviews-list" id="reviewsList"></div>
       </div>
-      
-      <!-- Lista de reseñas -->
-      <div class="reviews-list" id="reviewsList"></div>
     </div>
   </div>
 </div>
@@ -1247,6 +1266,12 @@ async function loadReviews(productId){
   if(!list) return;
   list.innerHTML = '<div style="text-align:center;padding:14px;color:var(--gray);font-size:.84rem">Cargando reseñas...</div>';
   
+  // Resetear desplegable: cerrado al abrir cada producto
+  const section = document.getElementById('reviewsSection');
+  const toggle = document.getElementById('reviewsToggle');
+  if(section) section.classList.remove('open');
+  if(toggle) toggle.setAttribute('aria-expanded','false');
+  
   // Resetear form
   __selectedRating = 0;
   document.querySelectorAll('#starsInput button').forEach(b=>b.classList.remove('active'));
@@ -1267,6 +1292,20 @@ async function loadReviews(productId){
   }catch(e){
     console.error('Error cargando reseñas:', e);
     list.innerHTML = '<div class="reviews-empty">No se pudieron cargar las reseñas</div>';
+  }
+}
+
+// Toggle del desplegable
+function toggleReviews(){
+  const section = document.getElementById('reviewsSection');
+  const toggle = document.getElementById('reviewsToggle');
+  const isOpen = section.classList.contains('open');
+  if(isOpen){
+    section.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+  }else{
+    section.classList.add('open');
+    toggle.setAttribute('aria-expanded','true');
   }
 }
 
