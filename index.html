@@ -303,6 +303,30 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .ped-card-actions{display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);padding-top:10px}
 .ped-filter.act{background:var(--red);color:#fff;border-color:var(--red)}
 
+/* Footer trust badges */
+.footer-trust{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:20px}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:.84rem;opacity:.85}
+.footer-payments{text-align:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px}
+.footer-payments-title{font-size:.78rem;opacity:.6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.footer-payment-icons{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.pay-tag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:5px 11px;border-radius:6px;font-size:.74rem;font-family:var(--fh);font-weight:600}
+.pay-tag-mp{background:#00b1ea;border-color:#00b1ea;color:#fff}
+.footer-bottom{text-align:center;padding-top:8px}
+.footer-logo-line{font-family:var(--fh);font-size:1rem}
+.footer-logo-line strong{color:var(--red)}
+@media(max-width:620px){
+  .footer-trust{gap:14px;padding:14px 0}
+  .trust-item{font-size:.78rem}
+}
+
+/* Modal legal */
+.legal-body{padding:32px;max-height:80vh;overflow-y:auto}
+.legal-body p{margin-bottom:10px}
+.legal-body h3{color:var(--blk)}
+@media(max-width:620px){
+  .legal-body{padding:22px 18px}
+}
+
 /* RESEÑAS (desplegable - tarjeta independiente) */
 .reviews-section{background:#fff;margin:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
 
@@ -617,13 +641,13 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 
 <div class="urg">
   <div class="urg-in">
-    <span>Oferta termina en: <strong id="cd">02:47:33</strong></span>
-    <span class="urg-sep">•</span>
-    <span>Pocas unidades disponibles</span>
-    <span class="urg-sep">•</span>
     <span>Pago 100% seguro</span>
     <span class="urg-sep">•</span>
-    <span>Envío express</span>
+    <span>Contraentrega disponible</span>
+    <span class="urg-sep">•</span>
+    <span>Envío a todo Colombia</span>
+    <span class="urg-sep">•</span>
+    <span>Atención por WhatsApp</span>
   </div>
 </div>
 
@@ -941,6 +965,10 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
           <button type="submit" class="btn btn-red btn-full" id="coSubmit">Pagar con tarjeta / PSE / Nequi →</button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;color:var(--gray);padding:8px 0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Pago 100% seguro · Procesado por Mercado Pago
+          </div>
           <div id="coContraInfo" style="display:none;font-size:.78rem;color:var(--gray);text-align:center;padding:0 8px;line-height:1.5">
             Al recibir el paquete, pagas <strong id="coContraInfoAmount"></strong> en efectivo al mensajero.
           </div>
@@ -982,6 +1010,17 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 <!-- ==================== PRODUCT EDITOR MODAL ==================== -->
 <div class="pe" id="prodEditor"></div>
 
+<!-- MODAL PÁGINAS LEGALES -->
+<div class="ov" id="legalModal">
+  <div class="modal modal-lg">
+    <button class="mc" onclick="closeLegal()">✕</button>
+    <div class="legal-body">
+      <h2 id="legalTitle" style="font-family:var(--fh);font-weight:800;font-size:1.5rem;margin-bottom:18px"></h2>
+      <div id="legalContent" style="font-size:.92rem;line-height:1.7;color:#333"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Chat widget -->
 <button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Abrir chat de ayuda">
   <svg id="chatFabOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1010,18 +1049,35 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 
 <footer>
   <div class="fin">
-    <div class="footer-logo">
-      <img src="data:image/webp;base64,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" alt="ZapatosYa"/>
-      <div>
-        <div class="footer-logo-text">ZapatosYa</div>
-        <div class="footer-logo-tag">Rápido y Seguro</div>
+    <div class="footer-trust">
+      <div class="trust-item"><span>Compra protegida</span></div>
+      <div class="trust-item"><span>SSL seguro</span></div>
+      <div class="trust-item"><span>Envío a todo el país</span></div>
+      <div class="trust-item"><span>Atención lunes a sábado</span></div>
+    </div>
+    <div class="footer-payments">
+      <div class="footer-payments-title">Métodos de pago aceptados</div>
+      <div class="footer-payment-icons">
+        <span class="pay-tag">Visa</span>
+        <span class="pay-tag">Mastercard</span>
+        <span class="pay-tag">PSE</span>
+        <span class="pay-tag">Nequi</span>
+        <span class="pay-tag">Daviplata</span>
+        <span class="pay-tag">Bancolombia</span>
+        <span class="pay-tag">Efecty</span>
+        <span class="pay-tag pay-tag-mp">Mercado Pago</span>
       </div>
     </div>
-    <p>© 2026 ZapatosYa. Todos los derechos reservados.</p>
-    <div class="flinks">
-      <a href="#">Términos</a>
-      <a href="#">Privacidad</a>
-      <a href="#">Contacto</a>
+    <div class="footer-bottom">
+      <div class="footer-logo-line"><strong>ZapatosYa</strong> · Rápido y Seguro</div>
+      <p style="opacity:.6;font-size:.78rem;margin-top:4px">© 2026 ZapatosYa. Todos los derechos reservados.</p>
+      <div class="flinks">
+        <a onclick="openLegal('about')" style="cursor:pointer">Sobre nosotros</a>
+        <a onclick="openLegal('terminos')" style="cursor:pointer">Términos</a>
+        <a onclick="openLegal('privacidad')" style="cursor:pointer">Privacidad</a>
+        <a onclick="openLegal('devoluciones')" style="cursor:pointer">Devoluciones</a>
+        <a onclick="chatWhatsapp()" style="cursor:pointer">Contacto</a>
+      </div>
     </div>
   </div>
 </footer>
@@ -1398,6 +1454,10 @@ document.addEventListener('click', async e=>{
     const txt = document.getElementById('reviewText').value.trim();
     const btn = e.target;
     const msg = document.getElementById('reviewMsg');
+    if(typeof tieneInsultos==='function' && tieneInsultos(txt)){
+      msg.innerHTML = '<div class="auth-error">Tu reseña contiene lenguaje inapropiado. Por favor reformúlala.</div>';
+      return;
+    }
     btn.disabled = true;
     btn.textContent = 'Publicando...';
     try{
@@ -1888,11 +1948,30 @@ function openCheckout(){
 }
 function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open");document.body.style.overflow="";}
 
+// Filtro de palabras ofensivas
+const PALABRAS_PROHIBIDAS = ['malparid','marica','hpta','hijuep','huevon','güevon','gonorrea','perra','puta','mierd','pendej','imbécil','imbecil','pendejo','idiota','culero','chimba','chupav','chupa v','chupame','chúpame','culiao','culiad','verga','vrg','pirobo','pirov','careverga','careverg','careculo','care culo','careculiao','careculiada'];
+
+function tieneInsultos(texto){
+  if(!texto) return false;
+  const limpio = texto.toLowerCase().replace(/[áéíóúü]/g, c=>({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u'}[c]));
+  return PALABRAS_PROHIBIDAS.some(p => limpio.includes(p));
+}
+
 document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const btn=document.getElementById("coSubmit"); btn.disabled=true; btn.textContent='Procesando...';
   const msg=document.getElementById("checkoutMsg");
   msg.innerHTML='';
+  
+  // Validar lenguaje en notas y nombre
+  const notas = document.getElementById("coNotes").value;
+  const nombreCliente = document.getElementById("coName").value;
+  if(tieneInsultos(notas) || tieneInsultos(nombreCliente)){
+    msg.innerHTML = '<div class="auth-error">Por favor revisa los campos. Detectamos lenguaje inapropiado. No podemos procesar pedidos con insultos.</div>';
+    btn.disabled = false;
+    btn.textContent = 'Pagar con tarjeta / PSE / Nequi →';
+    return;
+  }
   
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
   const deptVal = document.getElementById("coDept").value;
@@ -2012,6 +2091,11 @@ document.getElementById("coWhatsapp").addEventListener("click", async ()=>{
   
   if(!name || !phone || !email || !addr || !city || !dept){
     document.getElementById("checkoutMsg").innerHTML='<div class="auth-error">Por favor completa todos los datos primero</div>';
+    return;
+  }
+  
+  if(tieneInsultos(notes) || tieneInsultos(name)){
+    document.getElementById("checkoutMsg").innerHTML='<div class="auth-error">Detectamos lenguaje inapropiado. Por favor revisa los campos.</div>';
     return;
   }
   
@@ -3260,6 +3344,146 @@ document.getElementById("userBtn").addEventListener("click",e=>{e.stopPropagatio
 document.getElementById("adminBtn").addEventListener("click",openAdmin);
 document.getElementById("pModal").addEventListener("click",e=>{if(e.target===document.getElementById("pModal"))closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeCart();closeAuth();closeAccount();closeAdmin();closeCheckout();}});
+
+// ─── PÁGINAS LEGALES ─────────────────────────────────────────
+const LEGAL_PAGES = {
+  about: {
+    title: 'Sobre ZapatosYa',
+    content: `
+      <p><strong>ZapatosYa</strong> es una tienda online colombiana especializada en calzado deportivo y casual. Nacimos con el objetivo de ofrecer zapatos de calidad a precios justos, con la facilidad de comprarlos desde cualquier lugar de Colombia y recibirlos en la puerta de tu casa.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Nuestra promesa</h3>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li><strong>Calidad real:</strong> Solo trabajamos con productos verificados.</li>
+        <li><strong>Envíos confiables:</strong> Cobertura a todo Colombia con tiempos claros.</li>
+        <li><strong>Pago seguro:</strong> Procesamos pagos a través de Mercado Pago, líder en pagos digitales en Latinoamérica.</li>
+        <li><strong>Contraentrega disponible:</strong> Si no quieres pagar online, puedes pagar al recibir.</li>
+        <li><strong>Atención humana:</strong> No usamos bots para resolver dudas. Hablas con una persona real por WhatsApp.</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Contáctanos</h3>
+      <p>WhatsApp: <a href="https://wa.me/573212970591" style="color:var(--red)">+57 321 297 0591</a><br>
+      Horario de atención: Lunes a Sábado, 9:00 AM - 7:00 PM<br>
+      Bogotá D.C., Colombia</p>
+    `
+  },
+  terminos: {
+    title: 'Términos y Condiciones',
+    content: `
+      <p style="color:var(--gray);font-size:.84rem">Última actualización: ${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">1. Aceptación de los términos</h3>
+      <p>Al acceder y utilizar ZapatosYa.com, aceptas cumplir con los presentes Términos y Condiciones. Si no estás de acuerdo, te pedimos no usar el sitio.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">2. Productos y precios</h3>
+      <p>Los precios están expresados en pesos colombianos (COP) e incluyen IVA cuando aplique. Nos reservamos el derecho de modificar precios sin previo aviso. La disponibilidad de productos puede variar.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">3. Pedidos y pagos</h3>
+      <p>Los pagos son procesados por Mercado Pago Colombia. Aceptamos tarjetas de crédito/débito, PSE, Nequi, Daviplata y otros medios habilitados. La opción de contraentrega requiere el pago anticipado del envío.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">4. Envíos</h3>
+      <p>Los tiempos de entrega varían según la zona del país (1 a 10 días hábiles). El envío es gratuito en compras superiores a $280.000. No nos hacemos responsables por demoras de las transportadoras debido a causas de fuerza mayor.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">5. Derecho de retracto</h3>
+      <p>De acuerdo con el Estatuto del Consumidor (Ley 1480 de 2011), tienes derecho a retractarte de tu compra dentro de los 5 días hábiles siguientes a la entrega del producto, siempre que el producto esté en perfecto estado, sin uso y con empaque original.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">6. Garantía legal</h3>
+      <p>Todos nuestros productos cuentan con la garantía legal de 6 meses establecida por la ley colombiana, contados a partir de la entrega del producto.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">7. Cuentas de usuario</h3>
+      <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña. ZapatosYa no se hace responsable por pérdidas debidas al uso no autorizado de tu cuenta.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">8. Conducta del usuario</h3>
+      <p>Está prohibido el uso de lenguaje ofensivo en cualquier campo del sitio (notas de pedido, reseñas, etc.). Nos reservamos el derecho de cancelar pedidos o cuentas que violen esta norma.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">9. Modificaciones</h3>
+      <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones serán publicadas en esta página.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">10. Contacto</h3>
+      <p>Para cualquier consulta, escríbenos por WhatsApp al +57 321 297 0591.</p>
+    `
+  },
+  privacidad: {
+    title: 'Política de Privacidad',
+    content: `
+      <p style="color:var(--gray);font-size:.84rem">Última actualización: ${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p>
+      <p>En cumplimiento de la <strong>Ley 1581 de 2012</strong> de Protección de Datos Personales en Colombia, te informamos cómo manejamos tu información.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Datos que recopilamos</h3>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>Datos de identificación: nombre, email, teléfono</li>
+        <li>Dirección de envío</li>
+        <li>Información del pedido (productos, cantidades, métodos de pago)</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Para qué usamos tu información</h3>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>Procesar y entregar tus pedidos</li>
+        <li>Comunicarnos contigo sobre tu compra</li>
+        <li>Mejorar nuestros productos y servicios</li>
+        <li>Cumplir con obligaciones legales y fiscales</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Con quién compartimos tu información</h3>
+      <p>Tu información NO es vendida ni compartida con terceros con fines comerciales. Solo la compartimos con:</p>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li><strong>Mercado Pago:</strong> para procesar pagos de forma segura</li>
+        <li><strong>Empresas transportadoras:</strong> para realizar la entrega</li>
+        <li><strong>Autoridades:</strong> cuando sea legalmente requerido</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Tus derechos</h3>
+      <p>Como titular de tus datos personales tienes derecho a:</p>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>Conocer, actualizar y rectificar tus datos</li>
+        <li>Solicitar la eliminación de tus datos</li>
+        <li>Revocar la autorización del tratamiento</li>
+        <li>Presentar quejas ante la Superintendencia de Industria y Comercio</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Seguridad</h3>
+      <p>Tus datos se almacenan en servidores seguros con cifrado SSL. Las contraseñas se guardan encriptadas (nunca tenemos acceso a tu contraseña real).</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Cookies</h3>
+      <p>Usamos almacenamiento local del navegador para mantener tu sesión activa y recordar el contenido de tu carrito. No usamos cookies de seguimiento de terceros.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Contacto</h3>
+      <p>Para ejercer tus derechos o resolver dudas: WhatsApp +57 321 297 0591</p>
+    `
+  },
+  devoluciones: {
+    title: 'Política de Cambios y Devoluciones',
+    content: `
+      <h3 style="font-family:var(--fh);font-weight:700;margin-bottom:8px;font-size:1.05rem">Cambios por talla</h3>
+      <p>Si tu zapato no te quedó de la talla, puedes cambiarlo dentro de los <strong>5 días hábiles</strong> siguientes a la entrega, siempre que:</p>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>El producto esté en perfecto estado, sin uso</li>
+        <li>Conserve etiquetas y empaque original</li>
+        <li>El cliente asume el costo del envío del cambio</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Producto defectuoso</h3>
+      <p>Si el producto presenta defectos de fabricación o llega dañado:</p>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>Tienes <strong>6 meses de garantía</strong> según la Ley 1480 de 2011</li>
+        <li>El cambio o reembolso es totalmente <strong>gratis</strong> (asumimos el envío)</li>
+        <li>Debes contactarnos por WhatsApp con fotos del defecto</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Derecho de retracto</h3>
+      <p>De acuerdo al Estatuto del Consumidor, tienes <strong>5 días hábiles</strong> desde la entrega para arrepentirte de tu compra y solicitar la devolución del dinero, siempre que el producto:</p>
+      <ul style="margin-left:20px;margin-bottom:12px">
+        <li>No haya sido usado</li>
+        <li>Conserve empaque y etiquetas originales</li>
+        <li>Sea devuelto a nuestra dirección (el cliente cubre el envío de devolución)</li>
+      </ul>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Cómo iniciar un cambio o devolución</h3>
+      <ol style="margin-left:20px;margin-bottom:12px">
+        <li>Escríbenos por WhatsApp al <a href="https://wa.me/573212970591" style="color:var(--red)">+57 321 297 0591</a></li>
+        <li>Indícanos tu número de pedido y motivo</li>
+        <li>Te daremos las instrucciones de devolución</li>
+        <li>Una vez recibido y verificado el producto, procesamos el cambio o reembolso</li>
+      </ol>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Tiempos de reembolso</h3>
+      <p>Los reembolsos se procesan dentro de los 5 a 10 días hábiles siguientes a la recepción del producto en buen estado. El método de reembolso es el mismo del pago original.</p>
+      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Productos NO retornables</h3>
+      <p>Por razones de higiene, no aceptamos cambios ni devoluciones de productos que hayan sido usados o que muestren signos visibles de uso, salvo defecto de fabricación.</p>
+    `
+  }
+};
+
+function openLegal(seccion){
+  const page = LEGAL_PAGES[seccion];
+  if(!page) return;
+  document.getElementById('legalTitle').textContent = page.title;
+  document.getElementById('legalContent').innerHTML = page.content;
+  document.getElementById('legalModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLegal(){
+  document.getElementById('legalModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 // ─── CHAT BOT (FAQ) ──────────────────────────────────────────
 const CHAT_FAQ = {
