@@ -1,0 +1,33 @@
+{
+  "name": "ZapatosYa - Tenis y calzado deportivo",
+  "short_name": "ZapatosYa",
+  "description": "Tienda online de tenis y calzado deportivo en Colombia. Pago contraentrega, envío gratis desde $280.000.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#E63946",
+  "lang": "es-CO",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"]
+}
