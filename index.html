@@ -46,8 +46,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/></noscript>
 
-<!-- Supabase: cargar antes del JS principal para que esté disponible en login -->
-<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+<!-- Supabase con fallback automático a CDN secundario si unpkg falla -->
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"
+        onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js';document.head.appendChild(s);"></script>
 
 <!-- JSON-LD Schema (SEO + Rich Results) -->
 <script type="application/ld+json">
@@ -1335,15 +1336,34 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 // Inicialización protegida - si el CDN no carga, seguimos funcionando con fetch directo
 let sb = null;
-try {
-  if (typeof supabase !== 'undefined' && supabase.createClient) {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log('Supabase client OK');
-  } else {
-    console.warn('Supabase library no disponible - usando fetch directo');
+function initSupabase(){
+  try {
+    if (typeof supabase !== 'undefined' && supabase.createClient && !sb) {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('Supabase client OK');
+      return true;
+    }
+  } catch(e) {
+    console.warn('Error init Supabase:', e);
   }
-} catch(e) {
-  console.warn('Error init Supabase:', e);
+  return false;
+}
+// Intento inmediato
+if(!initSupabase()){
+  // Si no cargó aún, reintentar cada 200ms hasta 10 segundos
+  let tries = 0;
+  const retry = setInterval(()=>{
+    tries++;
+    if(initSupabase() || tries > 50){
+      clearInterval(retry);
+      if(sb){
+        // Disparar setup de auth listener si recién cargó
+        if(typeof setupAuthListener === 'function') setupAuthListener();
+      } else {
+        console.warn('Supabase no cargó después de 10s - funcionando con fetch directo');
+      }
+    }
+  }, 200);
 }
 
 // Helpers para fetch directo a Supabase REST API
@@ -2658,17 +2678,41 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
 });
 
 // Detectar si el usuario viene del link de recuperación
-sb && sb.auth && sb.auth.onAuthStateChange((event,session)=>{
-  if(event==='PASSWORD_RECOVERY'){
-    // Abrir modal en modo "nueva contraseña"
-    openAuth('login');
-    document.getElementById('authForm').style.display='none';
-    document.getElementById('socialArea').style.display='none';
-    document.getElementById('recoverForm').style.display='none';
-    document.getElementById('newPassForm').style.display='';
-    document.getElementById('newPassMsg').innerHTML='';
-  }
-});
+// Configuración de listeners de auth (se llama después de inicializar sb)
+let authListenersAttached = false;
+function setupAuthListener(){
+  if(authListenersAttached || !sb || !sb.auth) return;
+  authListenersAttached = true;
+
+  // Detectar password recovery
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      openAuth('login');
+      document.getElementById('authForm').style.display='none';
+      document.getElementById('socialArea').style.display='none';
+      document.getElementById('recoverForm').style.display='none';
+      document.getElementById('newPassForm').style.display='';
+      document.getElementById('newPassMsg').innerHTML='';
+    }
+  });
+
+  // Listener principal de sesión
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    currentUser=session?.user||null;
+    if(currentUser) await loadProfile();
+    else{currentProfile=null;isAdmin=false;updateUserUI();}
+  });
+
+  // Si hay sesión activa al cargar, traer el perfil
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(session && session.user){
+      currentUser = session.user;
+      loadProfile();
+    }
+  }).catch(e=>console.warn('getSession err:',e));
+}
+// Llamar inmediatamente si sb ya está listo
+setupAuthListener();
 
 document.getElementById("authForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -3697,12 +3741,6 @@ async function loadProfile(){
     updateUserUI();
   }
 }
-
-sb && sb.auth && sb.auth.onAuthStateChange(async(event,session)=>{
-  currentUser=session?.user||null;
-  if(currentUser) await loadProfile();
-  else{currentProfile=null;isAdmin=false;updateUserUI();}
-});
 
 // ─── TOAST ───────────────────────────────────────────────────
 let tt;
