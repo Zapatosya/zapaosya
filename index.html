@@ -49,22 +49,85 @@
 <!-- Supabase con defer para no bloquear el render -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" defer></script>
 
-<!-- JSON-LD Schema (ayuda SEO) -->
+<!-- JSON-LD Schema (SEO + Rich Results) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Store",
-  "name": "ZapatosYa",
-  "description": "Tienda online de tenis y calzado deportivo en Colombia",
-  "url": "https://zapatosya.com",
-  "telephone": "+573212970591",
-  "address": {
-    "@type": "PostalAddress",
-    "addressCountry": "CO",
-    "addressRegion": "Bogotá D.C."
-  },
-  "sameAs": ["https://wa.me/573212970591"]
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zapatosya.com/#organization",
+      "name": "ZapatosYa",
+      "alternateName": "ZapatosYa Colombia",
+      "url": "https://zapatosya.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://zapatosya.com/img/icon-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "description": "Tienda online colombiana de tenis y calzado deportivo. Envío a todo el país, pago contraentrega disponible.",
+      "telephone": "+573212970591",
+      "email": "contacto@zapatosya.com",
+      "foundingDate": "2026",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO",
+        "addressLocality": "Bogotá",
+        "addressRegion": "Bogotá D.C."
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+573212970591",
+        "contactType": "customer service",
+        "areaServed": "CO",
+        "availableLanguage": "Spanish"
+      },
+      "sameAs": ["https://wa.me/573212970591"]
+    },
+    {
+      "@type": "Store",
+      "@id": "https://zapatosya.com/#store",
+      "name": "ZapatosYa",
+      "image": "https://zapatosya.com/img/icon-512.png",
+      "url": "https://zapatosya.com",
+      "telephone": "+573212970591",
+      "priceRange": "$$",
+      "currenciesAccepted": "COP",
+      "paymentAccepted": "Tarjetas, PSE, Nequi, Daviplata, Bancolombia, Efecty, Contraentrega",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO",
+        "addressLocality": "Bogotá",
+        "addressRegion": "Bogotá D.C."
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Colombia"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zapatosya.com/#website",
+      "url": "https://zapatosya.com",
+      "name": "ZapatosYa",
+      "description": "Tenis con envío gratis en Colombia",
+      "publisher": { "@id": "https://zapatosya.com/#organization" },
+      "inLanguage": "es-CO"
+    }
+  ]
 }
+</script>
+
+<!-- Schema dinámico de productos (se llena cuando cargan desde Supabase) -->
+<script type="application/ld+json" id="productsSchema">
+{"@context":"https://schema.org","@type":"ItemList","name":"Catálogo de tenis ZapatosYa","numberOfItems":0,"itemListElement":[]}
 </script>
 
 <style>
@@ -705,11 +768,11 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
     </button>
   </div>
   <nav class="md-nav">
-    <a href="/" class="md-link"><span class="md-link-num">01</span><span class="md-link-text">Inicio</span></a>
-    <a href="/sobre-nosotros" class="md-link"><span class="md-link-num">02</span><span class="md-link-text">Sobre nosotros</span></a>
-    <a href="/devoluciones" class="md-link"><span class="md-link-num">03</span><span class="md-link-text">Devoluciones</span></a>
-    <a href="/terminos" class="md-link"><span class="md-link-num">04</span><span class="md-link-text">Términos</span></a>
-    <a href="/privacidad" class="md-link"><span class="md-link-num">05</span><span class="md-link-text">Privacidad</span></a>
+    <a href="/" class="md-link"><span class="md-link-text">Inicio</span></a>
+    <a href="/sobre-nosotros" class="md-link"><span class="md-link-text">Sobre nosotros</span></a>
+    <a href="/devoluciones" class="md-link"><span class="md-link-text">Devoluciones</span></a>
+    <a href="/terminos" class="md-link"><span class="md-link-text">Términos</span></a>
+    <a href="/privacidad" class="md-link"><span class="md-link-text">Privacidad</span></a>
   </nav>
   <div class="md-foot">
     <a href="https://wa.me/573212970591" target="_blank" rel="noopener" class="md-wa">
@@ -1373,10 +1436,91 @@ async function loadProducts(){
     const data = await sbSelect('productos', 'activo=eq.true&order=creado_en.asc&select=*');
     PRODUCTS = data || [];
     console.log('Productos cargados:', PRODUCTS.length);
+    updateProductsSchema(PRODUCTS);
     render();
   }catch(e){
     console.error('Error cargando productos:', e);
     document.getElementById("pg").innerHTML='<div class="loading">No se pudieron cargar los productos. Recarga la página.</div>';
+  }
+}
+
+// Genera Schema.org Product para cada item del catálogo (SEO + Rich Results)
+function updateProductsSchema(products){
+  try{
+    const items = products.map((p,i)=>{
+      const img = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'https://zapatosya.com/img/icon-512.png';
+      const slug = String(p.nombre||'producto').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const price = String(p.precio||0);
+      const product = {
+        "@type": "Product",
+        "@id": `https://zapatosya.com/#producto-${p.id}`,
+        "name": p.nombre,
+        "image": img,
+        "description": `${p.nombre} — ${p.categoria||'Calzado'} disponible en ZapatosYa con envío a todo Colombia.`,
+        "brand": { "@type": "Brand", "name": p.nombre },
+        "category": p.categoria || "Calzado",
+        "url": `https://zapatosya.com/#producto-${slug}`,
+        "offers": {
+          "@type": "Offer",
+          "url": `https://zapatosya.com/`,
+          "priceCurrency": "COP",
+          "price": price,
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "Organization", "name": "ZapatosYa" },
+          "areaServed": { "@type": "Country", "name": "Colombia" },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": p.envio_gratis ? "0" : "15000",
+              "currency": "COP"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "CO"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "businessDays": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] },
+              "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" },
+              "transitTime": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 10, "unitCode": "DAY" }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "CO",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 5,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnShippingFees"
+          }
+        }
+      };
+      // Si tiene precio original (descuento), agregarlo
+      if(p.precio_original && p.precio_original > p.precio){
+        product.offers.priceValidUntil = new Date(Date.now() + 30*24*60*60*1000).toISOString().slice(0,10);
+      }
+      return {
+        "@type": "ListItem",
+        "position": i + 1,
+        "item": product
+      };
+    });
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Catálogo de tenis ZapatosYa",
+      "description": "Tenis deportivos y casuales con envío a todo Colombia",
+      "numberOfItems": items.length,
+      "itemListOrder": "https://schema.org/ItemListOrderAscending",
+      "itemListElement": items
+    };
+
+    const el = document.getElementById('productsSchema');
+    if(el) el.textContent = JSON.stringify(schema);
+  }catch(e){
+    console.warn('Error generando schema de productos:', e);
   }
 }
 
@@ -1432,8 +1576,38 @@ async function loadProductRatings(productos){
         el.style.display = '';
       }
     });
+    // Actualizar schema con aggregateRating (estrellas en Google)
+    enrichSchemaWithRatings(productos, byProd);
   }catch(e){
     console.warn('Error cargando ratings:', e);
+  }
+}
+
+// Actualiza el schema de productos agregando aggregateRating donde haya reseñas
+function enrichSchemaWithRatings(productos, byProd){
+  try{
+    const el = document.getElementById('productsSchema');
+    if(!el) return;
+    const schema = JSON.parse(el.textContent);
+    if(!schema.itemListElement) return;
+    schema.itemListElement.forEach(li=>{
+      const id = li.item['@id'];
+      const prodId = id.replace('https://zapatosya.com/#producto-','');
+      const ratings = byProd[prodId];
+      if(ratings && ratings.length){
+        const avg = (ratings.reduce((s,r)=>s+r,0) / ratings.length).toFixed(1);
+        li.item.aggregateRating = {
+          "@type": "AggregateRating",
+          "ratingValue": String(avg),
+          "reviewCount": ratings.length,
+          "bestRating": 5,
+          "worstRating": 1
+        };
+      }
+    });
+    el.textContent = JSON.stringify(schema);
+  }catch(e){
+    console.warn('Error enriqueciendo schema:', e);
   }
 }
 
