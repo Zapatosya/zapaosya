@@ -558,13 +558,15 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
 footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-size:.82rem}
-.fin{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;max-width:1200px;margin:0 auto}
+.fin{display:flex;flex-direction:column;align-items:stretch;gap:0;max-width:1200px;margin:0 auto;padding:0 24px}
+.fin > *{width:100%}
 .footer-logo{display:flex;align-items:center;gap:12px}
 .footer-logo img{width:44px;height:44px;border-radius:50%}
 .footer-logo-text{font-family:var(--fh);font-weight:700;color:#fff;font-size:.95rem}
 .footer-logo-tag{font-size:.7rem;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
-.flinks{display:flex;gap:20px}
-.flinks a:hover{color:#fff;transition:var(--tr)}
+.flinks{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+.flinks a{font-size:.84rem;color:rgba(255,255,255,.65);transition:var(--tr)}
+.flinks a:hover{color:#fff}
 
 @media(max-width:900px){
   .hero{padding:90px 20px 60px}
@@ -588,7 +590,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   .feat-g{grid-template-columns:1fr 1fr}
   .urg-in{font-size:.74rem;gap:10px}
   .cdw{max-width:100%}
-  .fin{flex-direction:column;text-align:center}
+  .fin{padding:0 18px}
   .flinks{justify-content:center}
   .logo-img{height:30px}
   .checkout-grid-2{grid-template-columns:1fr}
@@ -1098,10 +1100,10 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       <div class="footer-logo-line"><strong>ZapatosYa</strong> · Rápido y Seguro</div>
       <p style="opacity:.6;font-size:.78rem;margin-top:4px">© 2026 ZapatosYa. Todos los derechos reservados.</p>
       <div class="flinks">
-        <a href="#" role="button" onclick="openLegal('about');return false" style="cursor:pointer">Sobre nosotros</a>
-        <a href="#" role="button" onclick="openLegal('terminos');return false" style="cursor:pointer">Términos</a>
-        <a href="#" role="button" onclick="openLegal('privacidad');return false" style="cursor:pointer">Privacidad</a>
-        <a href="#" role="button" onclick="openLegal('devoluciones');return false" style="cursor:pointer">Devoluciones</a>
+        <a href="/sobre-nosotros">Sobre nosotros</a>
+        <a href="/terminos">Términos</a>
+        <a href="/privacidad">Privacidad</a>
+        <a href="/devoluciones">Devoluciones</a>
         <a href="#" role="button" onclick="chatWhatsapp();return false" style="cursor:pointer">Contacto</a>
       </div>
     </div>
