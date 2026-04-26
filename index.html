@@ -46,8 +46,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/></noscript>
 
-<!-- Supabase con defer para no bloquear el render -->
-<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" defer></script>
+<!-- Supabase: cargar antes del JS principal para que esté disponible en login -->
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
 
 <!-- JSON-LD Schema (SEO + Rich Results) -->
 <script type="application/ld+json">
@@ -2600,6 +2600,11 @@ document.getElementById('recoverForm').addEventListener('submit',async e=>{
   if(!email){return;}
   btn.disabled=true; btn.textContent='Enviando...';
   msg.innerHTML='';
+  if(!sb || !sb.auth){
+    msg.innerHTML='<div class="auth-error">Cargando sistema, intenta en unos segundos…</div>';
+    btn.disabled=false; btn.textContent='Enviar link de recuperación';
+    return;
+  }
   try{
     const redirectUrl=`${window.location.origin}/?recuperar=1`;
     const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl});
@@ -2629,6 +2634,11 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
     return;
   }
   btn.disabled=true; btn.textContent='Guardando...';
+  if(!sb || !sb.auth){
+    msg.innerHTML='<div class="auth-error">Cargando sistema, intenta en unos segundos…</div>';
+    btn.disabled=false; btn.textContent='Guardar contraseña';
+    return;
+  }
   try{
     const {error}=await sb.auth.updateUser({password:p1});
     if(error) throw error;
@@ -2668,6 +2678,13 @@ document.getElementById("authForm").addEventListener("submit",async e=>{
   const pass=document.getElementById("authPass").value;
   const name=document.getElementById("authName").value;
   msg.innerHTML='';
+  // Guard: si Supabase aún no cargó, esperar o avisar
+  if(!sb || !sb.auth){
+    msg.innerHTML='<div class="auth-error">Cargando sistema de autenticación, intenta de nuevo en unos segundos…</div>';
+    btn.disabled=false;
+    btn.textContent=authMode==='login'?'Iniciar sesión':'Crear cuenta';
+    return;
+  }
   try{
     if(authMode==='login'){
       btn.textContent='Ingresando...';
@@ -2688,6 +2705,10 @@ document.getElementById("authForm").addEventListener("submit",async e=>{
 });
 
 async function loginSocial(provider){
+  if(!sb || !sb.auth){
+    showToast('Cargando sistema de autenticación, intenta en unos segundos…');
+    return;
+  }
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});
   if(error) showToast('Error: '+error.message);
 }
