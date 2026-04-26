@@ -62,8 +62,8 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--red:#E63946;--red2:#c0303c;--blk:#111;--blk2:#1a1a1a;--wht:#F5F5F5;--yel:#FFB703;--gray:#555555;--gray-light:#6e6e6e;--border:#e2e2e2;--fh:'Poppins',sans-serif;--fb:'DM Sans',sans-serif;--tr:.24s cubic-bezier(.4,0,.2,1);--shd:0 20px 60px rgba(0,0,0,.2)}
-html{scroll-behavior:smooth}
-body{font-family:var(--fb);background:var(--wht);color:var(--blk);overflow-x:hidden;line-height:1.6}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
+body{font-family:var(--fb);background:var(--wht);color:var(--blk);overflow-x:hidden;line-height:1.6;width:100%;position:relative}
 a{text-decoration:none;color:inherit}
 button{cursor:pointer;border:none;background:none;font-family:inherit;line-height:1}
 img{max-width:100%;display:block}
@@ -190,7 +190,7 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pc-dots{display:flex;gap:5px;margin-top:9px}
 .dot{width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border)}
 
-.feat{background:var(--blk);padding:72px 0}
+.feat{background:var(--blk);padding:72px 0;overflow:hidden}
 .feat-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;text-align:center}
 .fc-ico{font-size:2rem;margin-bottom:10px;display:block}
 .fc h3{font-family:var(--fh);font-weight:700;color:#fff;margin-bottom:6px;font-size:.97rem}
@@ -572,8 +572,10 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 }
 @media(max-width:620px){
   .nav{display:none}
+  .hero{padding:80px 16px 50px}
   .hero-title{font-size:clamp(2.5rem,12vw,4.5rem)}
   .hero-ctas{flex-direction:column}
+  .hero-ctas .btn{width:100%;box-sizing:border-box}
   .pgrid{grid-template-columns:repeat(2,1fr);gap:12px}
   .feat-g{grid-template-columns:1fr 1fr}
   .urg-in{font-size:.74rem;gap:10px}
@@ -582,6 +584,13 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   .flinks{justify-content:center}
   .logo-img{height:30px}
   .checkout-grid-2{grid-template-columns:1fr}
+  .logo-stage{width:260px}
+  .fl1{right:0;font-size:.7rem;padding:8px 14px}
+  .fl2{left:0;font-size:.7rem;padding:8px 14px}
+  .fl3{right:10px;font-size:.7rem;padding:8px 14px}
+  .b1{width:400px;height:400px;right:-100px;top:-100px}
+  .b2{width:300px;height:300px;left:-50px;bottom:-80px}
+  .ctr{padding:0 16px}
 }
 </style>
 </head>
