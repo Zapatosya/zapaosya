@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <!-- SEO básico -->
-<title>ZapatosYa — Tenis y calzado deportivo en Colombia | Envío gratis</title>
-<meta name="description" content="Compra tenis deportivos y casuales en Colombia con envío a todo el país. Pago contraentrega, envío gratis en compras mayores a $280.000. Marcas como Diesel y más."/>
+<title>ZapatosYa — Tenis con envío gratis en Colombia</title>
+<meta name="description" content="Tenis deportivos y casuales con envío a todo Colombia. Pago contraentrega disponible. Envío gratis desde $280.000. Atención por WhatsApp."/>
 <meta name="keywords" content="tenis colombia, zapatos deportivos, calzado online, tenis diesel, comprar zapatos colombia, contraentrega zapatos, envío gratis"/>
 <meta name="author" content="ZapatosYa"/>
 <meta name="robots" content="index, follow"/>
@@ -233,6 +233,34 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .fc-ico{font-size:2rem;margin-bottom:10px;display:block}
 .fc h3{font-family:var(--fh);font-weight:700;color:#fff;margin-bottom:6px;font-size:.97rem}
 .fc p{color:rgba(255,255,255,.42);font-size:.86rem;line-height:1.55}
+
+/* ───── FAQ SEO ───── */
+.faq-sec{background:var(--wht);padding:90px 0;position:relative}
+.faq-head{max-width:760px;margin:0 auto 50px;text-align:center}
+.faq-eyebrow{display:inline-block;font-family:var(--fh);font-weight:600;font-size:.7rem;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:18px}
+.faq-title{font-family:var(--fh);font-weight:800;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.1;letter-spacing:-1px;color:var(--blk);margin-bottom:18px}
+.faq-title em{font-style:normal;color:var(--red)}
+.faq-lead{font-size:1.02rem;color:var(--gray);line-height:1.7;max-width:580px;margin:0 auto}
+.faq-list{max-width:820px;margin:0 auto;border-top:1px solid var(--border)}
+.faq-item{border-bottom:1px solid var(--border);background:#fff;transition:background .2s}
+.faq-item[open]{background:#fafafa}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 26px;font-family:var(--fh);font-weight:600;font-size:1.02rem;color:var(--blk);cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent;line-height:1.4}
+.faq-q::-webkit-details-marker{display:none}
+.faq-q::marker{content:''}
+.faq-ico{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:600;line-height:1;transition:transform .3s ease;font-family:var(--fb)}
+.faq-item[open] .faq-ico{transform:rotate(45deg)}
+.faq-a{padding:0 26px 24px;animation:faqFade .35s ease both}
+.faq-a p{font-size:.96rem;color:var(--gray);line-height:1.75}
+.faq-a p strong{color:var(--blk);font-weight:600}
+.faq-a a{color:var(--red);font-weight:600;border-bottom:1px solid currentColor}
+@keyframes faqFade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:620px){
+  .faq-sec{padding:60px 0}
+  .faq-q{padding:18px 20px;font-size:.95rem;gap:14px}
+  .faq-a{padding:0 20px 20px}
+  .faq-a p{font-size:.92rem}
+  .faq-ico{width:26px;height:26px;font-size:1rem}
+}
 
 /* MODALES GENERALES */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -764,6 +792,82 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   </div>
 </section>
 
+<!-- ===================== FAQ SEO ===================== -->
+<section class="faq-sec" id="faq">
+  <div class="ctr">
+    <div class="faq-head">
+      <span class="faq-eyebrow">Preguntas frecuentes</span>
+      <h2 class="faq-title">Todo lo que necesitas saber<br/>antes de <em>comprar tus tenis.</em></h2>
+      <p class="faq-lead">Las dudas más comunes sobre envíos, pagos, tallas y devoluciones en ZapatosYa. Si te queda alguna pregunta, escríbenos por WhatsApp.</p>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Hacen envíos a todo Colombia?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Sí. Enviamos a todas las ciudades y municipios de Colombia con cobertura de las principales transportadoras del país. Los tiempos de entrega varían entre <strong>1 y 10 días hábiles</strong> según la zona: ciudades principales como Bogotá, Medellín, Cali, Barranquilla y Bucaramanga reciben en 1-3 días, mientras que zonas rurales o departamentos más alejados pueden tardar hasta 10 días hábiles. El envío es <strong>gratis para compras superiores a $280.000</strong>; en pedidos menores el costo se calcula según la ciudad de destino y se muestra al momento del checkout.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Cuáles son los métodos de pago disponibles?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Aceptamos múltiples medios de pago a través de Mercado Pago Colombia: <strong>tarjetas de crédito y débito</strong> (Visa, Mastercard, American Express, Diners), <strong>PSE</strong> con tu banco, <strong>Nequi</strong>, <strong>Daviplata</strong>, <strong>Bancolombia a la mano</strong> y <strong>Efecty</strong>. Si prefieres no pagar online, también ofrecemos la opción de <strong>pago contraentrega</strong>, donde solo necesitas pagar el envío por adelantado y cancelas el valor del producto cuando lo recibas en la puerta de tu casa.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Cómo funciona el pago contraentrega?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>El pago contraentrega es ideal si prefieres no usar tu tarjeta o cuenta digital online. Funciona así: al hacer el pedido eliges la opción "contraentrega" y solo pagas por adelantado el costo del envío (no el producto). Cuando el repartidor llegue a tu casa, le pagas en efectivo o por transferencia el valor del producto. Es la forma más segura de comprar si nunca nos has comprado antes y quieres asegurarte de recibir tu pedido antes de pagar el total.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Qué pasa si la talla no me queda?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Tienes <strong>5 días hábiles</strong> desde la entrega para solicitar un cambio de talla, siempre que el zapato esté en perfecto estado, sin uso, y conserve etiquetas y empaque original. Para iniciar el cambio escríbenos por WhatsApp con tu número de pedido y la talla nueva que necesitas. El cliente cubre el costo del envío del cambio. Te recomendamos revisar nuestra guía de tallas en cada producto antes de comprar para evitar inconvenientes; si tienes dudas sobre qué talla pedir, escríbenos y te asesoramos personalmente.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Tienen garantía los productos?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Sí, todos nuestros tenis cuentan con la <strong>garantía legal de 6 meses</strong> establecida por la Ley 1480 de 2011 (Estatuto del Consumidor de Colombia). Si tu producto presenta defectos de fabricación durante este tiempo, asumimos el costo del cambio o reembolso completo, incluido el envío de devolución. Solo necesitas contactarnos por WhatsApp con fotos del defecto y tu número de pedido. Esta garantía no cubre desgaste por uso normal ni daños causados por uso indebido.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Cómo puedo rastrear mi pedido?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Una vez tu pedido sea despachado, recibirás por WhatsApp el <strong>número de guía de la transportadora</strong> con el que puedes hacer seguimiento en tiempo real. También puedes ingresar a la sección <strong>"Mi cuenta"</strong> en zapatosya.com (icono de usuario en la parte superior derecha) para ver el estado de todos tus pedidos. Si tu pedido lleva más tiempo del esperado, escríbenos por WhatsApp y revisamos contigo qué está pasando.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Los productos son originales?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Sí. Todos los productos que vendemos son <strong>verificados y de calidad real</strong>. Trabajamos con proveedores autorizados y revisamos cada producto antes de despacharlo. No vendemos réplicas ni productos falsificados. Si por alguna razón tu producto no cumple con la calidad que esperabas, tienes nuestra garantía y el derecho de retracto para solicitar reembolso o cambio sin problema.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Puedo arrepentirme de mi compra?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>Sí. De acuerdo al Estatuto del Consumidor, tienes <strong>5 días hábiles</strong> desde la entrega para retractarte de tu compra y solicitar la devolución del dinero, siempre que el producto no haya sido usado, conserve empaque y etiquetas, y sea devuelto a nuestra dirección. El cliente cubre el envío de la devolución. El reembolso se procesa en 5 a 10 días hábiles tras recibir el producto, por el mismo método de pago original.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q"><span>¿Cómo me contacto si tengo un problema?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
+        <div class="faq-a">
+          <p>La forma más rápida de hablar con nosotros es por <strong>WhatsApp al +57 321 297 0591</strong>, donde te responde una persona real (no bots) de lunes a sábado entre 9:00 AM y 7:00 PM. También puedes usar el chat de la página haciendo click en el botón rojo de mensajes en la esquina inferior derecha. Para temas más formales, todos los procedimientos legales (devoluciones, cambios, derechos de consumidor) están detallados en nuestras páginas de <a href="/terminos">Términos</a> y <a href="/devoluciones">Devoluciones</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- MODAL PRODUCTO -->
@@ -783,7 +887,7 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
       </div>
       <div class="minfo">
         <div class="mcat" id="mCat"></div>
-        <h2 class="mtit" id="mTit"></h2>
+        <h2 class="mtit" id="mTit">Detalles del producto</h2>
         <div class="mpr">
           <span class="mprice" id="mPrice"></span>
           <span class="morig" id="mOrig"></span>
@@ -1099,17 +1203,6 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 
 <!-- ==================== PRODUCT EDITOR MODAL ==================== -->
 <div class="pe" id="prodEditor"></div>
-
-<!-- MODAL PÁGINAS LEGALES -->
-<div class="ov" id="legalModal">
-  <div class="modal modal-lg">
-    <button class="mc" onclick="closeLegal()">✕</button>
-    <div class="legal-body">
-      <h2 id="legalTitle" style="font-family:var(--fh);font-weight:800;font-size:1.5rem;margin-bottom:18px"></h2>
-      <div id="legalContent" style="font-size:.92rem;line-height:1.7;color:#333"></div>
-    </div>
-  </div>
-</div>
 
 <!-- Chat widget -->
 <button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Abrir chat de ayuda">
@@ -3239,7 +3332,7 @@ function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
       <button type="button" class="pe-del" onclick="this.closest('.pe-color-row').remove()">✕</button>
     </div>
     <div class="pe-color-img">
-      ${imgUrl?`<img src="${imgUrl}" class="pe-preview">`:'<div class="pe-preview pe-preview-empty">Sin imagen</div>'}
+      ${imgUrl?`<img src="${imgUrl}" alt="Vista previa del producto" class="pe-preview">`:'<div class="pe-preview pe-preview-empty">Sin imagen</div>'}
       <input type="hidden" value="${imgUrl}" class="peColorImg">
       <label class="btn btn-out btn-sm" style="cursor:pointer">
         Subir imagen
@@ -3479,146 +3572,6 @@ if(mobileBtn){
 }
 document.getElementById("pModal").addEventListener("click",e=>{if(e.target===document.getElementById("pModal"))closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeCart();closeAuth();closeAccount();closeAdmin();closeCheckout();closeMobileDrawer();}});
-
-// ─── PÁGINAS LEGALES ─────────────────────────────────────────
-const LEGAL_PAGES = {
-  about: {
-    title: 'Sobre ZapatosYa',
-    content: `
-      <p><strong>ZapatosYa</strong> es una tienda online colombiana especializada en calzado deportivo y casual. Nacimos con el objetivo de ofrecer zapatos de calidad a precios justos, con la facilidad de comprarlos desde cualquier lugar de Colombia y recibirlos en la puerta de tu casa.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Nuestra promesa</h3>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li><strong>Calidad real:</strong> Solo trabajamos con productos verificados.</li>
-        <li><strong>Envíos confiables:</strong> Cobertura a todo Colombia con tiempos claros.</li>
-        <li><strong>Pago seguro:</strong> Procesamos pagos a través de Mercado Pago, líder en pagos digitales en Latinoamérica.</li>
-        <li><strong>Contraentrega disponible:</strong> Si no quieres pagar online, puedes pagar al recibir.</li>
-        <li><strong>Atención humana:</strong> No usamos bots para resolver dudas. Hablas con una persona real por WhatsApp.</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Contáctanos</h3>
-      <p>WhatsApp: <a href="https://wa.me/573212970591" style="color:var(--red)">+57 321 297 0591</a><br>
-      Horario de atención: Lunes a Sábado, 9:00 AM - 7:00 PM<br>
-      Bogotá D.C., Colombia</p>
-    `
-  },
-  terminos: {
-    title: 'Términos y Condiciones',
-    content: `
-      <p style="color:var(--gray);font-size:.84rem">Última actualización: ${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">1. Aceptación de los términos</h3>
-      <p>Al acceder y utilizar ZapatosYa.com, aceptas cumplir con los presentes Términos y Condiciones. Si no estás de acuerdo, te pedimos no usar el sitio.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">2. Productos y precios</h3>
-      <p>Los precios están expresados en pesos colombianos (COP) e incluyen IVA cuando aplique. Nos reservamos el derecho de modificar precios sin previo aviso. La disponibilidad de productos puede variar.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">3. Pedidos y pagos</h3>
-      <p>Los pagos son procesados por Mercado Pago Colombia. Aceptamos tarjetas de crédito/débito, PSE, Nequi, Daviplata y otros medios habilitados. La opción de contraentrega requiere el pago anticipado del envío.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">4. Envíos</h3>
-      <p>Los tiempos de entrega varían según la zona del país (1 a 10 días hábiles). El envío es gratuito en compras superiores a $280.000. No nos hacemos responsables por demoras de las transportadoras debido a causas de fuerza mayor.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">5. Derecho de retracto</h3>
-      <p>De acuerdo con el Estatuto del Consumidor (Ley 1480 de 2011), tienes derecho a retractarte de tu compra dentro de los 5 días hábiles siguientes a la entrega del producto, siempre que el producto esté en perfecto estado, sin uso y con empaque original.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">6. Garantía legal</h3>
-      <p>Todos nuestros productos cuentan con la garantía legal de 6 meses establecida por la ley colombiana, contados a partir de la entrega del producto.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">7. Cuentas de usuario</h3>
-      <p>Eres responsable de mantener la confidencialidad de tu cuenta y contraseña. ZapatosYa no se hace responsable por pérdidas debidas al uso no autorizado de tu cuenta.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">8. Conducta del usuario</h3>
-      <p>Está prohibido el uso de lenguaje ofensivo en cualquier campo del sitio (notas de pedido, reseñas, etc.). Nos reservamos el derecho de cancelar pedidos o cuentas que violen esta norma.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">9. Modificaciones</h3>
-      <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones serán publicadas en esta página.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">10. Contacto</h3>
-      <p>Para cualquier consulta, escríbenos por WhatsApp al +57 321 297 0591.</p>
-    `
-  },
-  privacidad: {
-    title: 'Política de Privacidad',
-    content: `
-      <p style="color:var(--gray);font-size:.84rem">Última actualización: ${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p>
-      <p>En cumplimiento de la <strong>Ley 1581 de 2012</strong> de Protección de Datos Personales en Colombia, te informamos cómo manejamos tu información.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Datos que recopilamos</h3>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>Datos de identificación: nombre, email, teléfono</li>
-        <li>Dirección de envío</li>
-        <li>Información del pedido (productos, cantidades, métodos de pago)</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Para qué usamos tu información</h3>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>Procesar y entregar tus pedidos</li>
-        <li>Comunicarnos contigo sobre tu compra</li>
-        <li>Mejorar nuestros productos y servicios</li>
-        <li>Cumplir con obligaciones legales y fiscales</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Con quién compartimos tu información</h3>
-      <p>Tu información NO es vendida ni compartida con terceros con fines comerciales. Solo la compartimos con:</p>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li><strong>Mercado Pago:</strong> para procesar pagos de forma segura</li>
-        <li><strong>Empresas transportadoras:</strong> para realizar la entrega</li>
-        <li><strong>Autoridades:</strong> cuando sea legalmente requerido</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Tus derechos</h3>
-      <p>Como titular de tus datos personales tienes derecho a:</p>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>Conocer, actualizar y rectificar tus datos</li>
-        <li>Solicitar la eliminación de tus datos</li>
-        <li>Revocar la autorización del tratamiento</li>
-        <li>Presentar quejas ante la Superintendencia de Industria y Comercio</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Seguridad</h3>
-      <p>Tus datos se almacenan en servidores seguros con cifrado SSL. Las contraseñas se guardan encriptadas (nunca tenemos acceso a tu contraseña real).</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Cookies</h3>
-      <p>Usamos almacenamiento local del navegador para mantener tu sesión activa y recordar el contenido de tu carrito. No usamos cookies de seguimiento de terceros.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Contacto</h3>
-      <p>Para ejercer tus derechos o resolver dudas: WhatsApp +57 321 297 0591</p>
-    `
-  },
-  devoluciones: {
-    title: 'Política de Cambios y Devoluciones',
-    content: `
-      <h3 style="font-family:var(--fh);font-weight:700;margin-bottom:8px;font-size:1.05rem">Cambios por talla</h3>
-      <p>Si tu zapato no te quedó de la talla, puedes cambiarlo dentro de los <strong>5 días hábiles</strong> siguientes a la entrega, siempre que:</p>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>El producto esté en perfecto estado, sin uso</li>
-        <li>Conserve etiquetas y empaque original</li>
-        <li>El cliente asume el costo del envío del cambio</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Producto defectuoso</h3>
-      <p>Si el producto presenta defectos de fabricación o llega dañado:</p>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>Tienes <strong>6 meses de garantía</strong> según la Ley 1480 de 2011</li>
-        <li>El cambio o reembolso es totalmente <strong>gratis</strong> (asumimos el envío)</li>
-        <li>Debes contactarnos por WhatsApp con fotos del defecto</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Derecho de retracto</h3>
-      <p>De acuerdo al Estatuto del Consumidor, tienes <strong>5 días hábiles</strong> desde la entrega para arrepentirte de tu compra y solicitar la devolución del dinero, siempre que el producto:</p>
-      <ul style="margin-left:20px;margin-bottom:12px">
-        <li>No haya sido usado</li>
-        <li>Conserve empaque y etiquetas originales</li>
-        <li>Sea devuelto a nuestra dirección (el cliente cubre el envío de devolución)</li>
-      </ul>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Cómo iniciar un cambio o devolución</h3>
-      <ol style="margin-left:20px;margin-bottom:12px">
-        <li>Escríbenos por WhatsApp al <a href="https://wa.me/573212970591" style="color:var(--red)">+57 321 297 0591</a></li>
-        <li>Indícanos tu número de pedido y motivo</li>
-        <li>Te daremos las instrucciones de devolución</li>
-        <li>Una vez recibido y verificado el producto, procesamos el cambio o reembolso</li>
-      </ol>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Tiempos de reembolso</h3>
-      <p>Los reembolsos se procesan dentro de los 5 a 10 días hábiles siguientes a la recepción del producto en buen estado. El método de reembolso es el mismo del pago original.</p>
-      <h3 style="font-family:var(--fh);font-weight:700;margin-top:18px;margin-bottom:8px;font-size:1.05rem">Productos NO retornables</h3>
-      <p>Por razones de higiene, no aceptamos cambios ni devoluciones de productos que hayan sido usados o que muestren signos visibles de uso, salvo defecto de fabricación.</p>
-    `
-  }
-};
-
-function openLegal(seccion){
-  const page = LEGAL_PAGES[seccion];
-  if(!page) return;
-  document.getElementById('legalTitle').textContent = page.title;
-  document.getElementById('legalContent').innerHTML = page.content;
-  document.getElementById('legalModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLegal(){
-  document.getElementById('legalModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
 
 // ─── CHAT BOT (FAQ) ──────────────────────────────────────────
 const CHAT_FAQ = {
