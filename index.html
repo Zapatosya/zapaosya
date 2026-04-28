@@ -672,18 +672,21 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .chat-msg-bot{background:#fff;color:var(--blk);align-self:flex-start;border:1px solid var(--border);border-bottom-left-radius:4px}
 .chat-msg-user{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .chat-msg-bot strong{font-family:var(--fh);font-weight:700}
-.chat-options{display:flex;flex-direction:column;gap:6px;margin-top:4px;animation:msg-in .35s ease}
-.chat-opt{background:#fff;border:1px solid var(--red);color:var(--red);padding:9px 14px;border-radius:20px;font-size:.82rem;cursor:pointer;transition:var(--tr);text-align:left;font-family:inherit;font-weight:500}
-.chat-opt:hover{background:var(--red);color:#fff}
 .chat-typing{display:inline-flex;gap:4px;padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:4px;align-self:flex-start}
 .chat-typing span{width:7px;height:7px;background:#aaa;border-radius:50%;animation:typing 1.2s infinite}
 .chat-typing span:nth-child(2){animation-delay:.2s}
 .chat-typing span:nth-child(3){animation-delay:.4s}
 @keyframes typing{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
 
-.chat-footer{padding:10px 12px;border-top:1px solid var(--border);background:#fff}
-.chat-wa-btn{width:100%;background:#25D366;color:#fff;border:none;padding:10px;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:var(--tr);font-family:inherit}
-.chat-wa-btn:hover{background:#1eb858;transform:translateY(-1px)}
+.chat-footer{padding:10px 12px;border-top:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:6px}
+.chat-input-row{display:flex;gap:8px;align-items:center}
+.chat-input-row input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:.86rem;outline:none;transition:var(--tr)}
+.chat-input-row input:focus{border-color:var(--red);box-shadow:0 0 0 2px rgba(230,57,70,.1)}
+#chatSend{width:38px;height:38px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;transition:var(--tr)}
+#chatSend:hover{background:var(--red2);transform:scale(1.06)}
+#chatSend:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.chat-wa-btn-sm{background:none;border:none;color:#25D366;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0;font-family:inherit;transition:var(--tr)}
+.chat-wa-btn-sm:hover{text-decoration:underline}
 
 @media(max-width:620px){
   .chat-fab{bottom:16px;right:16px;width:54px;height:54px}
@@ -919,13 +922,6 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
         <summary class="faq-q"><span>¿Cómo puedo rastrear mi pedido?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
         <div class="faq-a">
           <p>Una vez tu pedido sea despachado, recibirás por WhatsApp el <strong>número de guía de la transportadora</strong> con el que puedes hacer seguimiento en tiempo real. También puedes ingresar a la sección <strong>"Mi cuenta"</strong> en zapatosya.com (icono de usuario en la parte superior derecha) para ver el estado de todos tus pedidos. Si tu pedido lleva más tiempo del esperado, escríbenos por WhatsApp y revisamos contigo qué está pasando.</p>
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary class="faq-q"><span>¿Los productos son originales?</span><span class="faq-ico" aria-hidden="true">+</span></summary>
-        <div class="faq-a">
-          <p>Sí. Todos los productos que vendemos son <strong>verificados y de calidad real</strong>. Trabajamos con proveedores autorizados y revisamos cada producto antes de despacharlo. No vendemos réplicas ni productos falsificados. Si por alguna razón tu producto no cumple con la calidad que esperabas, tienes nuestra garantía y el derecho de retracto para solicitar reembolso o cambio sin problema.</p>
         </div>
       </details>
 
@@ -1299,9 +1295,15 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   </div>
   <div class="chat-body" id="chatBody"></div>
   <div class="chat-footer">
-    <button class="chat-wa-btn" onclick="chatWhatsapp()">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-      Hablar por WhatsApp
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." autocomplete="off" maxlength="500">
+      <button id="chatSend" onclick="chatSendMessage()" aria-label="Enviar">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <button class="chat-wa-btn-sm" onclick="chatWhatsapp()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      ¿Necesitas hablar con una persona? WhatsApp
     </button>
   </div>
 </div>
@@ -3922,64 +3924,11 @@ if(mobileBtn){
 document.getElementById("pModal").addEventListener("click",e=>{if(e.target===document.getElementById("pModal"))closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeCart();closeAuth();closeAccount();closeAdmin();closeCheckout();closeMobileDrawer();}});
 
-// ─── CHAT BOT (FAQ) ──────────────────────────────────────────
-const CHAT_FAQ = {
-  menu: {
-    text: '¿En qué puedo ayudarte? Elige una opción:',
-    options: [
-      { label: 'Envíos y tiempos de entrega', goto: 'envios' },
-      { label: '¿Hay pago contraentrega?', goto: 'contraentrega' },
-      { label: 'Métodos de pago', goto: 'pagos' },
-      { label: 'Guía de tallas', goto: 'tallas' },
-      { label: 'Cambios y devoluciones', goto: 'cambios' },
-      { label: 'Estado de mi pedido', goto: 'estado' },
-      { label: 'Hablar con una persona', action: 'whatsapp' }
-    ]
-  },
-  envios: {
-    text: '<strong>Envíos a todo Colombia:</strong><br>• Bogotá: 1 día hábil - $8.000<br>• Cundinamarca: 1-2 días - $10.000<br>• Ciudades principales: 2-3 días - $13.000<br>• Otras ciudades: 3-5 días<br>• Pueblos: 5-8 días<br><br><strong>Envío GRATIS</strong> en compras superiores a $280.000.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' },
-      { label: 'Hablar con una persona', action: 'whatsapp' }
-    ]
-  },
-  contraentrega: {
-    text: '<strong>Sí, ofrecemos contraentrega.</strong><br><br>Al hacer el pedido solo pagas el valor del envío por adelantado. Cuando recibas el paquete, le pagas el producto al mensajero en efectivo.<br><br>Disponible a todo Colombia.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' },
-      { label: 'Métodos de pago', goto: 'pagos' }
-    ]
-  },
-  pagos: {
-    text: '<strong>Aceptamos:</strong><br>• Tarjetas débito/crédito (Visa, Mastercard, Amex)<br>• PSE (todos los bancos)<br>• Nequi (a través de PSE)<br>• Daviplata<br>• Bancolombia Transfiya<br>• Efecty<br>• Contraentrega<br><br>Todo procesado de forma segura con Mercado Pago.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' }
-    ]
-  },
-  tallas: {
-    text: '<strong>Nuestros tenis vienen en tallas 34 a 43</strong> (equivalencia colombiana).<br><br>Tip: Si estás entre dos tallas, te recomendamos elegir la más grande. Nuestros zapatos son de horma estándar.<br><br>¿No estás seguro de tu talla? Escríbenos por WhatsApp y te asesoramos.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' },
-      { label: 'Hablar con una persona', action: 'whatsapp' }
-    ]
-  },
-  cambios: {
-    text: '<strong>Política de cambios:</strong><br>• Puedes cambiar el producto por talla diferente sin problema.<br>• El producto debe estar en perfecto estado, sin uso y con empaque original.<br>• El costo del envío del cambio lo asume el cliente.<br><br>Para iniciar un cambio, contáctanos por WhatsApp con tu número de pedido.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' },
-      { label: 'Hablar con una persona', action: 'whatsapp' }
-    ]
-  },
-  estado: {
-    text: 'Para ver el estado de tu pedido, inicia sesión y ve a la sección <strong>"Mis pedidos"</strong> desde el ícono de perfil.<br><br>Si pagaste con Mercado Pago, también recibirás un email de confirmación. Si es contraentrega, te contactaremos apenas el pedido salga a despacho.',
-    options: [
-      { label: '← Volver al menú', goto: 'menu' },
-      { label: 'Hablar con una persona', action: 'whatsapp' }
-    ]
-  }
-};
-
+// ─── CHAT IA ──────────────────────────────────────────────────
+const CHAT_FN_URL = SUPABASE_URL + '/functions/v1/chat-ai';
+let chatHistory = [];
 let chatOpened = false;
+let chatSending = false;
 
 function toggleChat(){
   const win = document.getElementById('chatWindow');
@@ -3987,9 +3936,7 @@ function toggleChat(){
   const iconOpen = document.getElementById('chatFabOpen');
   const iconClose = document.getElementById('chatFabClose');
   const badge = document.getElementById('chatFabBadge');
-  
   const isOpen = win.classList.contains('open');
-  
   if(isOpen){
     win.classList.remove('open');
     fab.classList.remove('open');
@@ -4001,29 +3948,20 @@ function toggleChat(){
     iconOpen.style.display = 'none';
     iconClose.style.display = '';
     badge.classList.add('hide');
-    // Cargar primer mensaje si no se ha abierto
     if(!chatOpened){
       chatOpened = true;
-      chatRenderWelcome();
+      addChatMessage('¡Hola! Soy el asistente de ZapatosYa. Pregúntame lo que necesites sobre envíos, tallas, pagos, cambios o lo que quieras saber.', 'bot', 300);
     }
+    setTimeout(()=>{ const inp=document.getElementById('chatInput'); if(inp) inp.focus(); }, 400);
   }
 }
 
-function chatRenderWelcome(){
-  const body = document.getElementById('chatBody');
-  body.innerHTML = '';
-  addChatMessage('¡Hola! Soy el asistente de ZapatosYa.', 'bot', 300);
-  setTimeout(()=>{
-    renderMenu('menu');
-  }, 900);
-}
-
-function addChatMessage(html, type, delay=0){
+function addChatMessage(text, type, delay=0){
   const body = document.getElementById('chatBody');
   setTimeout(()=>{
     const msg = document.createElement('div');
     msg.className = 'chat-msg chat-msg-' + type;
-    msg.innerHTML = html;
+    msg.textContent = text;
     body.appendChild(msg);
     body.scrollTop = body.scrollHeight;
   }, delay);
@@ -4037,7 +3975,6 @@ function showTyping(){
   t.innerHTML = '<span></span><span></span><span></span>';
   body.appendChild(t);
   body.scrollTop = body.scrollHeight;
-  return t;
 }
 
 function hideTyping(){
@@ -4045,40 +3982,51 @@ function hideTyping(){
   if(t) t.remove();
 }
 
-function renderMenu(key){
-  const node = CHAT_FAQ[key];
-  if(!node) return;
-  const typing = showTyping();
-  setTimeout(()=>{
+async function chatSendMessage(){
+  if(chatSending) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  addChatMessage(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
+  chatSending = true;
+  document.getElementById('chatSend').disabled = true;
+  showTyping();
+  try {
+    const res = await fetch(CHAT_FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({ messages: chatHistory })
+    });
     hideTyping();
-    addChatMessage(node.text, 'bot');
-    // Renderizar opciones
-    setTimeout(()=>{
-      const body = document.getElementById('chatBody');
-      const wrap = document.createElement('div');
-      wrap.className = 'chat-options';
-      node.options.forEach(opt=>{
-        const btn = document.createElement('button');
-        btn.className = 'chat-opt';
-        btn.textContent = opt.label;
-        btn.onclick = ()=>{
-          // Mostrar la opción elegida como mensaje del usuario
-          addChatMessage(opt.label, 'user');
-          // Remover el menú anterior
-          wrap.remove();
-          if(opt.action === 'whatsapp'){
-            setTimeout(()=>chatWhatsapp(), 400);
-          }else if(opt.goto){
-            setTimeout(()=>renderMenu(opt.goto), 500);
-          }
-        };
-        wrap.appendChild(btn);
-      });
-      body.appendChild(wrap);
-      body.scrollTop = body.scrollHeight;
-    }, 300);
-  }, 700);
+    if(!res.ok){
+      console.error('[chat-ai] Error:', res.status);
+      addChatMessage('Lo siento, tuve un problema. Puedes escribirme por WhatsApp al +57 321 297 0591 para ayuda inmediata.', 'bot');
+      return;
+    }
+    const data = await res.json();
+    const reply = data.reply || 'No pude generar una respuesta. Intenta de nuevo.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    addChatMessage(reply, 'bot');
+    if(chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch(e){
+    console.error('[chat-ai]', e);
+    hideTyping();
+    addChatMessage('No me pude conectar. Revisa tu conexión o escríbenos por WhatsApp.', 'bot');
+  } finally {
+    chatSending = false;
+    document.getElementById('chatSend').disabled = false;
+    document.getElementById('chatInput').focus();
+  }
 }
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.activeElement?.id === 'chatInput'){
+    e.preventDefault();
+    chatSendMessage();
+  }
+});
 
 function chatWhatsapp(){
   const msg = encodeURIComponent('Hola, quisiera hablar con un asesor de ZapatosYa.');
