@@ -672,6 +672,17 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .chat-msg-bot{background:#fff;color:var(--blk);align-self:flex-start;border:1px solid var(--border);border-bottom-left-radius:4px}
 .chat-msg-user{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .chat-msg-bot strong{font-family:var(--fh);font-weight:700}
+.chat-msg p{margin:0}
+.chat-msg p+p{margin-top:8px}
+.chat-msg ul{margin:6px 0 6px 4px;padding:0;list-style:none}
+.chat-msg li{position:relative;padding:3px 0 3px 14px;line-height:1.45}
+.chat-msg li::before{content:'';position:absolute;left:2px;top:11px;width:5px;height:5px;background:var(--red);border-radius:50%}
+.chat-msg-user li::before{background:#fff}
+.chat-msg em{font-style:italic}
+.chat-msg code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:.85em;font-family:ui-monospace,monospace}
+.chat-msg-user code{background:rgba(255,255,255,.18)}
+.chat-msg a{color:var(--red);text-decoration:underline;font-weight:600}
+.chat-msg-user a{color:#fff;text-decoration:underline}
 .chat-typing{display:inline-flex;gap:4px;padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:4px;align-self:flex-start}
 .chat-typing span{width:7px;height:7px;background:#aaa;border-radius:50%;animation:typing 1.2s infinite}
 .chat-typing span:nth-child(2){animation-delay:.2s}
@@ -3956,12 +3967,39 @@ function toggleChat(){
   }
 }
 
+// Convierte markdown básico a HTML de forma segura (escapa HTML primero)
+function chatFormatMessage(text){
+  // 1. Escapar HTML peligroso
+  let html = String(text)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+  // 2. Negritas: **texto** o __texto__
+  html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  html = html.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  // 3. Itálica: *texto* o _texto_ (cuidado: no chocar con negrita ya procesada)
+  html = html.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g,'<em>$1</em>');
+  // 4. Código inline: `texto`
+  html = html.replace(/`([^`\n]+?)`/g,'<code>$1</code>');
+  // 5. Links: [texto](url) — solo http/https/wa.me/tel/mailto
+  html = html.replace(/\[([^\]]+?)\]\((https?:\/\/[^\s)]+|wa\.me\/[^\s)]+|tel:[^\s)]+|mailto:[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // 6. Listas con - o *
+  html = html.replace(/^[\-\*]\s+(.+)$/gm,'<li>$1</li>');
+  html = html.replace(/(<li>[\s\S]+?<\/li>)(?!\s*<li>)/g,'<ul>$1</ul>');
+  // 7. Saltos de línea
+  html = html.replace(/\n{2,}/g,'</p><p>');
+  html = html.replace(/\n/g,'<br>');
+  return '<p>' + html + '</p>';
+}
+
 function addChatMessage(text, type, delay=0){
   const body = document.getElementById('chatBody');
   setTimeout(()=>{
     const msg = document.createElement('div');
     msg.className = 'chat-msg chat-msg-' + type;
-    msg.textContent = text;
+    msg.innerHTML = chatFormatMessage(text);
     body.appendChild(msg);
     body.scrollTop = body.scrollHeight;
   }, delay);
