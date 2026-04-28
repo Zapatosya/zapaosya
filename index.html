@@ -635,6 +635,20 @@ label{font-size:.82rem;color:var(--gray);font-weight:600;display:block;margin-bo
 .pe-preview-empty{display:flex;align-items:center;justify-content:center;color:var(--gray);font-size:.7rem;text-align:center}
 @media(max-width:640px){.pe-row{grid-template-columns:1fr}.pe-box{max-height:96vh}}
 
+/* STOCK MATRIX */
+.stock-section{background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:4px}
+.stock-section h4{font-family:var(--fh);font-weight:700;font-size:.88rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.stock-section h4 span{font-size:.72rem;font-weight:400;color:var(--gray)}
+.stock-matrix{width:100%;border-collapse:collapse;font-size:.8rem}
+.stock-matrix th{background:var(--wht);font-family:var(--fh);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);padding:8px 6px;border:1px solid var(--border);text-align:center;position:sticky;top:0}
+.stock-matrix td{padding:4px;border:1px solid var(--border);text-align:center}
+.stock-matrix td.sm-label{background:var(--wht);font-weight:600;font-size:.78rem;padding:8px 10px;text-align:left;white-space:nowrap}
+.stock-matrix td .sm-swatch{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15)}
+.stock-matrix input[type="number"]{width:54px;padding:6px 4px;text-align:center;border:1px solid var(--border);border-radius:6px;font-size:.82rem;font-family:var(--fb)}
+.stock-matrix input[type="number"]:focus{border-color:var(--red);box-shadow:0 0 0 2px rgba(230,57,70,.12)}
+.stock-empty{text-align:center;padding:18px;color:var(--gray);font-size:.84rem}
+.stock-scroll{max-height:260px;overflow:auto;border-radius:8px}
+
 /* CHAT WIDGET */
 .chat-fab{position:fixed;bottom:22px;right:22px;width:60px;height:60px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(230,57,70,.4);z-index:200;border:none;cursor:pointer;transition:var(--tr)}
 .chat-fab:hover{transform:scale(1.08);box-shadow:0 12px 32px rgba(230,57,70,.55)}
@@ -1685,14 +1699,8 @@ function openModal(id){
     updateModalColor();
   }));
   const so=document.getElementById("sopts");
-  const noSz=p.tallas_no_disponibles||[];
-  so.innerHTML=(p.tallas||[]).map(s=>{const na=noSz.includes(s);return`<button class="sopt${na?' na':''}" data-sz="${s}"${na?' disabled':''}>${s}</button>`}).join('');
+  renderSizesForColor(p, selC);
   document.getElementById("selS").textContent="—";
-  so.querySelectorAll(".sopt:not(.na)").forEach(b=>b.addEventListener("click",()=>{
-    so.querySelectorAll(".sopt").forEach(x=>x.classList.remove("sel"));
-    b.classList.add("sel"); selS=+b.dataset.sz;
-    document.getElementById("selS").textContent=selS;
-  }));
   document.getElementById("pModal").classList.add("open");
   document.body.style.overflow="hidden";
   
@@ -1909,6 +1917,39 @@ function changeImage(dir){
   updateModalColor();
 }
 
+function renderSizesForColor(p, colorIdx){
+  const so=document.getElementById("sopts");
+  const stock=p.stock && typeof p.stock==='object' ? p.stock : {};
+  const hasStock=Object.keys(stock).length>0;
+  const noSz=p.tallas_no_disponibles||[];
+  so.innerHTML=(p.tallas||[]).map(s=>{
+    let na=noSz.includes(s);
+    // Si hay datos de stock, usar esos en vez de tallas_no_disponibles
+    if(hasStock){
+      const key=`${colorIdx}-${s}`;
+      const qty=parseInt(stock[key])||0;
+      na=qty<=0;
+    }
+    return`<button class="sopt${na?' na':''}" data-sz="${s}"${na?' disabled':''}>${s}</button>`;
+  }).join('');
+  selS=null;
+  document.getElementById("selS").textContent="—";
+  so.querySelectorAll(".sopt:not(.na)").forEach(b=>b.addEventListener("click",()=>{
+    so.querySelectorAll(".sopt").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel"); selS=+b.dataset.sz;
+    document.getElementById("selS").textContent=selS;
+    // Mostrar stock bajo
+    if(hasStock){
+      const key=`${selC}-${selS}`;
+      const qty=parseInt(stock[key])||0;
+      const stockEl=document.getElementById("mStock");
+      if(qty>0 && qty<=5) stockEl.textContent=`¡Solo quedan ${qty} unidades!`;
+      else if(qty>5) stockEl.textContent=p.stock_mensaje||'';
+      else stockEl.textContent='';
+    }
+  }));
+}
+
 function updateModalColor(){
   if(!curP) return;
   const cn=curP.nombres_colores||[];
@@ -1943,6 +1984,9 @@ function updateModalColor(){
   if(newBg){
     document.getElementById("mImg").style.background=newBg;
   }
+  
+  // Re-renderizar tallas según stock del color seleccionado
+  renderSizesForColor(curP, selC);
 }
 
 // Swipe táctil genérico
@@ -2034,6 +2078,14 @@ document.addEventListener('DOMContentLoaded',()=>{
 function addToCart(){
   if(!selS){showToast("Elige una talla primero");return;}
   const p=curP, cn=p.nombres_colores||[], key=`${p.id}-${selS}-${selC}`;
+  // Validar stock si hay datos
+  const stock=p.stock && typeof p.stock==='object' ? p.stock : {};
+  if(Object.keys(stock).length){
+    const sk=`${selC}-${selS}`;
+    const available=parseInt(stock[sk])||0;
+    const inCart=cart.filter(i=>i.id===p.id&&i.size===selS&&i.key===key).reduce((s,i)=>s+i.qty,0);
+    if(inCart>=available){showToast("No hay más stock disponible para esta talla/color");return;}
+  }
   const ex=cart.find(i=>i.key===key);
   if(ex) ex.qty++;
   else cart.push({
@@ -3542,6 +3594,10 @@ function openProductEditor(p){
           <div id="peColors"></div>
           <button type="button" class="btn btn-out btn-sm" onclick="addColorRow()" style="margin-top:8px">+ Agregar color</button>
         </div>
+        <div class="stock-section">
+          <h4>📦 Inventario por color y talla <span>(se actualiza al cambiar colores/tallas)</span></h4>
+          <div id="stockMatrixWrap"><div class="stock-empty">Agrega colores y tallas para ver la matriz de stock</div></div>
+        </div>
       </div>
       <div class="pe-foot">
         <button class="btn btn-out" onclick="closeProductEditor()">Cancelar</button>
@@ -3550,6 +3606,10 @@ function openProductEditor(p){
     </div>`;
   m.classList.add('open');
   document.body.style.overflow='hidden';
+  // Cargar stock existente
+  _stockData = p?.stock && typeof p.stock === 'object' ? {...p.stock} : {};
+  // Convertir valores a números
+  Object.keys(_stockData).forEach(k=>{ _stockData[k]=parseInt(_stockData[k])||0; });
   // Cargar colores existentes o uno vacío
   const colorRows=document.getElementById('peColors');
   if(colores.length){
@@ -3568,7 +3628,7 @@ function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
       <input type="color" value="${hex}" class="peColorHex" title="Color del botón">
       <input type="text" placeholder="Nombre (ej: Negro)" value="${nombre}" class="peColorName">
       <input type="color" value="${fondo||hex}" class="peColorBg" title="Color de fondo">
-      <button type="button" class="pe-del" onclick="this.closest('.pe-color-row').remove()">✕</button>
+      <button type="button" class="pe-del" onclick="this.closest('.pe-color-row').remove();renderStockMatrix()">✕</button>
     </div>
     <div class="pe-color-img">
       ${imgUrl?`<img src="${imgUrl}" alt="Vista previa del producto" class="pe-preview">`:'<div class="pe-preview pe-preview-empty">Sin imagen</div>'}
@@ -3578,8 +3638,59 @@ function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
         <input type="file" accept="image/*" style="display:none" onchange="uploadColorImage(this)">
       </label>
     </div>`;
+  // Escuchar cambios de nombre para actualizar matriz
+  row.querySelector('.peColorName').addEventListener('input', renderStockMatrix);
+  row.querySelector('.peColorHex').addEventListener('input', renderStockMatrix);
   wrap.appendChild(row);
+  renderStockMatrix();
 }
+
+/* ─── STOCK MATRIX ─────────────────────────────────────────── */
+let _stockData = {}; // { "colorIdx-talla": cantidad }
+
+function renderStockMatrix(){
+  const wrap=document.getElementById('stockMatrixWrap');
+  if(!wrap) return;
+  const colorRows=document.querySelectorAll('.pe-color-row');
+  const sizeChecks=document.querySelectorAll('.peSize:checked');
+  const tallas=Array.from(sizeChecks).map(x=>parseInt(x.value)).sort((a,b)=>a-b);
+  
+  if(!colorRows.length || !tallas.length){
+    wrap.innerHTML='<div class="stock-empty">Agrega colores y tallas para ver la matriz de stock</div>';
+    return;
+  }
+  
+  // Leer valores actuales de los inputs antes de re-renderizar
+  wrap.querySelectorAll('input[data-sk]').forEach(inp=>{
+    _stockData[inp.dataset.sk]=parseInt(inp.value)||0;
+  });
+  
+  let html='<div class="stock-scroll"><table class="stock-matrix"><thead><tr><th>Color</th>';
+  tallas.forEach(t=>{ html+=`<th>${t}</th>`; });
+  html+='</tr></thead><tbody>';
+  
+  colorRows.forEach((row,ci)=>{
+    const hex=row.querySelector('.peColorHex').value;
+    const nombre=row.querySelector('.peColorName').value.trim()||`Color ${ci+1}`;
+    html+=`<tr><td class="sm-label"><span class="sm-swatch" style="background:${hex}"></span>${nombre}</td>`;
+    tallas.forEach(t=>{
+      const key=`${ci}-${t}`;
+      const val=_stockData[key]||0;
+      html+=`<td><input type="number" min="0" value="${val}" data-sk="${key}" onchange="_stockData[this.dataset.sk]=parseInt(this.value)||0"></td>`;
+    });
+    html+='</tr>';
+  });
+  
+  html+='</tbody></table></div>';
+  wrap.innerHTML=html;
+}
+
+// Observar cambios en tallas (delegación en pe-body)
+document.addEventListener('change',function(e){
+  if(e.target.classList.contains('peSize')){
+    renderStockMatrix();
+  }
+});
 
 async function uploadColorImage(input){
   const file=input.files[0]; if(!file) return;
@@ -3674,9 +3785,14 @@ async function saveProduct(){
     imagenes.push(r.querySelector('.peColorImg').value||'');
     fondos.push(r.querySelector('.peColorBg').value);
   });
+  // Leer stock de la matriz
+  document.querySelectorAll('#stockMatrixWrap input[data-sk]').forEach(inp=>{
+    _stockData[inp.dataset.sk]=parseInt(inp.value)||0;
+  });
+  const stock = {..._stockData};
   const payload={
     nombre,categoria,precio,precio_original,descripcion,stock_mensaje,envio_gratis,
-    colores,nombres_colores,imagenes,fondos,tallas,etiquetas,
+    colores,nombres_colores,imagenes,fondos,tallas,etiquetas,stock,
     color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
     fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
   };
