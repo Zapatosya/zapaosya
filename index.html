@@ -2940,7 +2940,33 @@ async function logout(){
 }
 
 function updateUserUI(){
+  // Verificar admin por hash del email (más privado que email directo)
+  const esAdminConocido = currentUser && hashEmail(currentUser.email) === '4f7d8b12a';
+  if(esAdminConocido) isAdmin = true;
+  
   document.getElementById("adminBtn").style.display=isAdmin?'flex':'none';
+}
+
+// Hash simple del email para verificar admin sin exponer email real
+function hashEmail(email) {
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    const char = email.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+// Versión síncrona más simple para este caso
+function hashEmailSync(email) {
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    const char = email.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convertir a 32bit integer
+  }
+  return Math.abs(hash).toString(16);
 }
 
 // ─── MENU USUARIO ─────────────────────────────────────────────
