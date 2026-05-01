@@ -2815,16 +2815,6 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
 // Detectar si el usuario viene del link de recuperación
 // Configuración de listeners de auth (se llama después de inicializar sb)
 let authListenersAttached = false;
-let _profileLoading = false; // Evitar llamadas simultáneas a loadProfile
-let _profileLoaded = false;  // Saber si ya se cargó el perfil al menos una vez
-
-async function safeLoadProfile(){
-  if(_profileLoading) return;
-  _profileLoading = true;
-  try{ await loadProfile(); _profileLoaded = true; }
-  finally{ _profileLoading = false; }
-}
-
 function setupAuthListener(){
   if(authListenersAttached || !sb || !sb.auth) return;
   authListenersAttached = true;
@@ -2843,36 +2833,18 @@ function setupAuthListener(){
 
   // Listener principal de sesión
   sb.auth.onAuthStateChange(async(event,session)=>{
-    console.log('[auth] evento:',event,'user:',session?.user?.email||'ninguno');
     currentUser=session?.user||null;
-    if(currentUser){
-      // En SIGNED_IN e INITIAL_SESSION, el token puede no estar listo inmediatamente
-      if(event==='SIGNED_IN'||event==='INITIAL_SESSION'){
-        await new Promise(r=>setTimeout(r,300)); // Dar tiempo a que el token se estabilice
-      }
-      await safeLoadProfile();
-    } else {
-      currentProfile=null;
-      isAdmin=false;
-      _profileLoaded=false;
-      updateUserUI();
-    }
+    if(currentUser) await loadProfile();
+    else{currentProfile=null;isAdmin=false;updateUserUI();}
   });
 
-  // Respaldo: si después de 2s el perfil NO se cargó, forzar con getSession
-  setTimeout(async()=>{
-    if(_profileLoaded) return;
-    try{
-      const {data:{session}}=await sb.auth.getSession();
-      if(session && session.user && !_profileLoaded){
-        console.log('[auth] respaldo getSession para:',session.user.email);
-        currentUser=session.user;
-        await safeLoadProfile();
-      }
-    }catch(e){
-      console.warn('[auth] respaldo getSession error:',e);
+  // Si hay sesión activa al cargar, traer el perfil
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(session && session.user){
+      currentUser = session.user;
+      loadProfile();
     }
-  }, 2000);
+  }).catch(e=>console.warn('getSession err:',e));
 }
 // Llamar inmediatamente si sb ya está listo
 setupAuthListener();
@@ -3935,9 +3907,9 @@ async function saveProduct(){
 }
 
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
-async function loadProfile(retryCount=0){
+async function loadProfile(){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
-  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id, retryCount?`(intento ${retryCount+1})`:'');
+  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
     // Usar JWT del usuario para que las políticas RLS funcionen (cada user lee su propio perfil)
     const authH = await getAuthHeaders();
@@ -3948,11 +3920,6 @@ async function loadProfile(retryCount=0){
     if(!res.ok){
       const txt=await res.text();
       console.warn('[loadProfile] error body:',txt);
-      // Reintentar hasta 2 veces si falla
-      if(retryCount < 2){
-        await new Promise(r=>setTimeout(r, 1000));
-        return loadProfile(retryCount+1);
-      }
       return;
     }
     const rows=await res.json();
@@ -3964,18 +3931,9 @@ async function loadProfile(retryCount=0){
       console.log('[loadProfile] ✓ isAdmin:',isAdmin,'perfil:',data);
     }else{
       console.warn('[loadProfile] no se encontró perfil para user id:',currentUser.id);
-      // Reintentar: puede que el perfil aún no se haya creado por el trigger
-      if(retryCount < 2){
-        await new Promise(r=>setTimeout(r, 1000));
-        return loadProfile(retryCount+1);
-      }
     }
   }catch(e){
     console.warn('[loadProfile] error:',e);
-    if(retryCount < 2){
-      await new Promise(r=>setTimeout(r, 1000));
-      return loadProfile(retryCount+1);
-    }
   }finally{
     updateUserUI();
   }
@@ -4209,9 +4167,23 @@ function chatWhatsapp(){
   loadCart(); updateCartUI();
   // Cargar productos INMEDIATAMENTE (no espera nada más)
   loadProducts();
-  // Auth ya se maneja en setupAuthListener con onAuthStateChange
-  // No necesitamos un segundo getSession aquí
-  updateUserUI();
+  // Auth en segundo plano, no bloquea nada
+  setTimeout(async()=>{
+    try{
+      if(sb && sb.auth){
+        const {data:{session}}=await sb.auth.getSession();
+        currentUser=session?.user||null;
+        if(currentUser){
+          await loadProfile();
+        }else{
+          updateUserUI();
+        }
+      }
+    }catch(e){
+      console.warn('session init:',e);
+      updateUserUI();
+    }
+  }, 100);
 })();
 </script>
 </body>
