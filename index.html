@@ -1394,46 +1394,71 @@ if(!initSupabase()){
 }
 
 // Helpers para fetch directo a Supabase REST API
-const SB_HEADERS = {
+// Siempre usan la anon key como apikey, pero cuando hay sesión, usan el JWT del usuario en Authorization
+// Eso permite que las políticas RLS con auth.uid() y is_admin() funcionen correctamente
+const SB_HEADERS_BASE = {
   'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
   'Content-Type': 'application/json'
 };
 
+async function getAuthHeaders(){
+  let token = SUPABASE_KEY; // Por defecto, modo anónimo
+  try {
+    if(sb && sb.auth){
+      const {data:{session}} = await sb.auth.getSession();
+      if(session && session.access_token){
+        token = session.access_token; // JWT del usuario logueado
+      }
+    }
+  } catch(e){
+    console.warn('getAuthHeaders fallback to anon:', e);
+  }
+  return { ...SB_HEADERS_BASE, 'Authorization': `Bearer ${token}` };
+}
+
 async function sbSelect(table, query=''){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query?'?'+query:''}`, { headers: SB_HEADERS });
+  const headers = await getAuthHeaders();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query?'?'+query:''}`, { headers });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return await r.json();
 }
 async function sbInsert(table, row){
+  const headers = await getAuthHeaders();
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
-    headers: {...SB_HEADERS, 'Prefer':'return=representation'},
+    headers: {...headers, 'Prefer':'return=representation'},
     body: JSON.stringify(row)
   });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return await r.json();
 }
 async function sbUpdate(table, id, data, idCol='id'){
+  const headers = await getAuthHeaders();
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${id}`, {
     method: 'PATCH',
-    headers: SB_HEADERS,
+    headers,
     body: JSON.stringify(data)
   });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
 }
 async function sbDelete(table, id, idCol='id'){
+  const headers = await getAuthHeaders();
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${id}`, {
     method: 'DELETE',
-    headers: SB_HEADERS
+    headers
   });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
 }
 
-// Token de sesión actual (se usa para peticiones autenticadas)
+// Headers anónimos puros (para casos donde sí queremos forzar sin sesión, ej: endpoints públicos)
+const SB_HEADERS = {
+  ...SB_HEADERS_BASE,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
+};
+
+// Compatibilidad con código viejo
 function authHeaders(){
-  const tok = localStorage.getItem('zy_session_token');
-  return tok ? {...SB_HEADERS, 'Authorization': `Bearer ${tok}`} : SB_HEADERS;
+  return SB_HEADERS;
 }
 
 // ─── SVG SHOES ───────────────────────────────────────────────
@@ -3281,12 +3306,10 @@ async function deletePedido(id){
   if(!confirmar) return;
   
   try{
+    const authH = await getAuthHeaders();
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
       method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
+      headers: authH
     });
     if(!res.ok){
       const txt = await res.text();
@@ -3496,12 +3519,10 @@ async function toggleResenaAprobada(id, aprobada){
 async function deleteResena(id){
   if(!confirm('¿Eliminar esta reseña permanentemente?')) return;
   try{
+    const authH = await getAuthHeaders();
     const res = await fetch(`${SUPABASE_URL}/rest/v1/resenas?id=eq.${id}`, {
       method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
+      headers: authH
     });
     if(!res.ok) throw new Error(await res.text());
     showToast('Reseña eliminada');
@@ -3811,11 +3832,12 @@ async function saveProduct(){
   };
   console.log('[saveProduct] payload:',payload);
   try{
+    const authH = await getAuthHeaders();
     if(id){
       // UPDATE
       const res=await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`,{
         method:'PATCH',
-        headers:{...SB_HEADERS,'Prefer':'return=representation'},
+        headers:{...authH,'Prefer':'return=representation'},
         body:JSON.stringify(payload)
       });
       if(!res.ok){const t=await res.text(); console.error('[saveProduct] Error update',res.status,t); throw new Error(`${res.status}: ${t}`);}
@@ -3824,7 +3846,7 @@ async function saveProduct(){
       // INSERT
       const res=await fetch(`${SUPABASE_URL}/rest/v1/productos`,{
         method:'POST',
-        headers:{...SB_HEADERS,'Prefer':'return=representation'},
+        headers:{...authH,'Prefer':'return=representation'},
         body:JSON.stringify(payload)
       });
       if(!res.ok){const t=await res.text(); console.error('[saveProduct] Error insert',res.status,t); throw new Error(`${res.status}: ${t}`);}
@@ -3844,9 +3866,10 @@ async function loadProfile(){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
   console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
-    // Usar fetch directo para no depender de sesión RLS de Supabase Auth
+    // Usar JWT del usuario para que las políticas RLS funcionen (cada user lee su propio perfil)
+    const authH = await getAuthHeaders();
     const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
-      headers:SB_HEADERS
+      headers: authH
     });
     console.log('[loadProfile] status:',res.status);
     if(!res.ok){
