@@ -1393,6 +1393,19 @@ if(!initSupabase()){
   }, 200);
 }
 
+// ─── SEGURIDAD: Escape HTML universal (anti-XSS) ─────────────────────────
+// CRÍTICO: usar SIEMPRE al insertar datos de usuario/BD en innerHTML
+function escHTML(str){
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+    .replace(/`/g,'&#96;');
+}
+
 // Helpers para fetch directo a Supabase REST API
 // Siempre usan la anon key como apikey, pero cuando hay sesión, usan el JWT del usuario en Authorization
 // Eso permite que las políticas RLS con auth.uid() y is_admin() funcionen correctamente
@@ -1422,22 +1435,39 @@ async function sbSelect(table, query=''){
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return await r.json();
 }
-async function sbInsert(table, row){
+// ─── SEGURIDAD: Campos prohibidos por tabla (no se pueden enviar desde frontend) ───
+const CAMPOS_PROHIBIDOS = {
+  resenas: ['aprobada'],           // Solo admin puede aprobar reseñas (desde panel)
+  profiles: ['es_admin','role'],   // Nadie puede auto-promoverse a admin desde frontend
+  productos: ['precio','precio_original','activo'] // Solo admin puede cambiar precios
+};
+
+function sanitizarDatos(table, data){
+  const prohibidos = CAMPOS_PROHIBIDOS[table];
+  if(!prohibidos) return data;
+  const limpio = {...data};
+  prohibidos.forEach(campo => { delete limpio[campo]; });
+  return limpio;
+}
+
+async function sbInsert(table, row, adminBypass=false){
   const headers = await getAuthHeaders();
+  const cleanRow = (adminBypass && isAdmin) ? row : sanitizarDatos(table, row);
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
     headers: {...headers, 'Prefer':'return=representation'},
-    body: JSON.stringify(row)
+    body: JSON.stringify(cleanRow)
   });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return await r.json();
 }
-async function sbUpdate(table, id, data, idCol='id'){
+async function sbUpdate(table, id, data, idCol='id', adminBypass=false){
   const headers = await getAuthHeaders();
+  const cleanData = (adminBypass && isAdmin) ? data : sanitizarDatos(table, data);
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${id}`, {
     method: 'PATCH',
     headers,
-    body: JSON.stringify(data)
+    body: JSON.stringify(cleanData)
   });
   if(!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
 }
@@ -1497,7 +1527,7 @@ const getProductVisual=(p,colorIdx=0)=>{
   const imgs=p.imagenes||[];
   if(imgs.length>0){
     const url=imgs[colorIdx]||imgs[0];
-    return `<img src="${url}" alt="${p.nombre}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    return `<img src="${url}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -1608,7 +1638,7 @@ function render(f="todos"){
       </div>
       <div class="pc-info">
         <div class="pc-cat">${p.categoria}</div>
-        <div class="pc-name">${p.nombre}</div>
+        <div class="pc-name">${escHTML(p.nombre)}</div>
         <div class="pc-rate" id="pcRate-${p.id}" style="display:none"></div>
         <div class="pc-pr">
           <span class="price">${fmt(p.precio)}</span>
@@ -1829,11 +1859,11 @@ function renderReviews(reviews){
   list.innerHTML = reviews.map(r=>{
     const fecha = new Date(r.creada_en).toLocaleDateString('es-CO',{year:'numeric',month:'short',day:'numeric'});
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5-r.rating);
-    const escapedText = (r.comentario||'').replace(/[<>]/g, c=>({'<':'&lt;','>':'&gt;'}[c]));
+    const escapedText = escHTML(r.comentario||'');
     return `<div class="review-item">
       <div class="review-item-hd">
         <div>
-          <div class="review-item-name">${r.nombre||'Anónimo'}</div>
+          <div class="review-item-name">${escHTML(r.nombre||'Anónimo')}</div>
           <div class="review-item-stars">${stars}</div>
         </div>
         <div class="review-item-date">${fecha}</div>
@@ -1925,7 +1955,7 @@ document.addEventListener('click', async e=>{
       __selectedRating = 0;
       // No recargar reseñas ya que la nueva no está aprobada todavía
     }catch(err){
-      msg.innerHTML = `<div class="auth-error">Error: ${err.message||'No se pudo publicar'}</div>`;
+      msg.innerHTML = `<div class="auth-error">Error: ${escHTML(err.message||'No se pudo publicar')}</div>`;
       btn.disabled = false;
       btn.textContent = 'Publicar reseña';
     }
@@ -2568,7 +2598,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   }catch(err){
     console.error('Checkout error:', err);
     btn.disabled=false; btn.textContent='Pagar con tarjeta / PSE / Nequi →';
-    msg.innerHTML='<div class="auth-error">Error: '+err.message+'</div>';
+    msg.innerHTML='<div class="auth-error">Error: '+escHTML(err.message)+'</div>';
   }
 });
 
@@ -2737,7 +2767,7 @@ document.getElementById('recoverForm').addEventListener('submit',async e=>{
     msg.innerHTML='<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:10px;border-radius:8px;font-size:.84rem;text-align:center">Te enviamos un correo con el link para restablecer tu contraseña. Revisa tu bandeja (y spam).</div>';
     btn.textContent='Correo enviado';
   }catch(err){
-    msg.innerHTML=`<div class="auth-error">Error: ${err.message}</div>`;
+    msg.innerHTML=`<div class="auth-error">Error: ${escHTML(err.message)}</div>`;
     btn.disabled=false; btn.textContent='Enviar link de recuperación';
   }
 });
@@ -2777,7 +2807,7 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
       document.getElementById('newPass2').value='';
     },2500);
   }catch(err){
-    msg.innerHTML=`<div class="auth-error">Error: ${err.message}</div>`;
+    msg.innerHTML=`<div class="auth-error">Error: ${escHTML(err.message)}</div>`;
     btn.disabled=false; btn.textContent='Guardar nueva contraseña';
   }
 });
@@ -2847,7 +2877,7 @@ document.getElementById("authForm").addEventListener("submit",async e=>{
       msg.innerHTML='<div class="auth-success">Cuenta creada. Revisa tu correo para confirmar.</div>';
     }
   }catch(err){
-    msg.innerHTML='<div class="auth-error">'+err.message+'</div>';
+    msg.innerHTML='<div class="auth-error">'+escHTML(err.message)+'</div>';
   }
   btn.disabled=false;
   btn.textContent=authMode==='login'?'Iniciar sesión':'Crear cuenta';
@@ -2977,10 +3007,10 @@ async function renderAccountTab(tab){
     c.innerHTML=`<div class="acc-hd">Mi perfil</div>
       <form id="profileForm" class="auth-form">
         <div><label for="pfName">Nombre</label>
-          <input type="text" id="pfName" name="pfName" autocomplete="name" value="${currentProfile?.nombre||''}"></div>
+          <input type="text" id="pfName" name="pfName" autocomplete="name" maxlength="100" value="${escHTML(currentProfile?.nombre||'')}"></div>
         <div><label for="pfPhone">Teléfono</label>
-          <input type="tel" id="pfPhone" name="pfPhone" autocomplete="tel" value="${currentProfile?.telefono||''}"></div>
-        <div><label>Email</label><input type="email" value="${currentUser.email}" disabled/></div>
+          <input type="tel" id="pfPhone" name="pfPhone" autocomplete="tel" maxlength="20" value="${escHTML(currentProfile?.telefono||'')}"></div>
+        <div><label>Email</label><input type="email" value="${escHTML(currentUser.email)}" disabled/></div>
         <button type="submit" class="btn btn-red btn-full">Guardar cambios</button>
       </form>`;
     document.getElementById("profileForm").addEventListener("submit",async e=>{
@@ -3094,7 +3124,7 @@ async function renderAdminTab(tab){
       <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>${PRODUCTS.map(p=>`
         <tr>
-          <td><strong>${p.nombre}</strong></td>
+          <td><strong>${escHTML(p.nombre)}</strong></td>
           <td>${p.categoria}</td>
           <td>${fmt(p.precio)}</td>
           <td><span class="estado-badge est-${p.activo?'entregado':'cancelado'}">${p.activo?'activo':'inactivo'}</span></td>
@@ -3119,12 +3149,12 @@ async function renderAdminTab(tab){
       const fecha = new Date(r.creada_en).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
       const stars = '★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
       const prodName = prodMap[r.producto_id] || 'Producto eliminado';
-      const escapedText = (r.comentario||'').replace(/[<>]/g, c=>({'<':'&lt;','>':'&gt;'}[c]));
+      const escapedText = escHTML(r.comentario||'');
       return `<div class="ped-card ${!r.aprobada?'ped-card-oculto':''}">
         <div class="ped-card-top">
           <div>
-            <div class="ped-card-id">${r.nombre||'Anónimo'} ${!r.aprobada?'<span class="ped-oculto-tag">OCULTA</span>':''}</div>
-            <div class="ped-card-date">${fecha} · Producto: <strong>${prodName}</strong></div>
+            <div class="ped-card-id">${escHTML(r.nombre||'Anónimo')} ${!r.aprobada?'<span class="ped-oculto-tag">OCULTA</span>':''}</div>
+            <div class="ped-card-date">${fecha} · Producto: <strong>${escHTML(prodName)}</strong></div>
           </div>
           <div style="color:#f59e0b;font-size:1.1rem;letter-spacing:2px">${stars}</div>
         </div>
@@ -3145,9 +3175,9 @@ async function renderAdminTab(tab){
       <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Registro</th><th>Tipo</th></tr></thead>
       <tbody>${data.map(u=>`
         <tr>
-          <td><strong>${u.nombre||'—'}</strong></td>
-          <td>${u.email||'—'}</td>
-          <td>${u.telefono||'—'}</td>
+          <td><strong>${escHTML(u.nombre||'—')}</strong></td>
+          <td>${escHTML(u.email||'—')}</td>
+          <td>${escHTML(u.telefono||'—')}</td>
           <td>${new Date(u.creado_en).toLocaleDateString('es-CO')}</td>
           <td>${u.es_admin?'<span class="estado-badge est-enviado">Admin</span>':'Cliente'}</td>
         </tr>`).join('')}</tbody></table></div>`;
@@ -3194,8 +3224,8 @@ function renderAdminPedidosList(filtro){
         </div>
       </div>
       <div class="ped-card-body">
-        <div><strong>${p.nombre_cliente||'Cliente'}</strong> · ${p.telefono||'-'} · ${p.email||''}</div>
-        <div style="color:var(--gray);font-size:.85rem;margin-top:4px">${p.direccion_completa||''}</div>
+        <div><strong>${escHTML(p.nombre_cliente||'Cliente')}</strong> · ${escHTML(p.telefono||'-')} · ${escHTML(p.email||'')}</div>
+        <div style="color:var(--gray);font-size:.85rem;margin-top:4px">${escHTML(p.direccion_completa||'')}</div>
         <div style="margin-top:8px;font-size:.86rem">${items}</div>
         <div style="margin-top:8px;display:flex;gap:14px;font-size:.88rem;flex-wrap:wrap">
           <span>Subtotal: <strong>${fmt(p.subtotal||0)}</strong></span>
@@ -3203,7 +3233,7 @@ function renderAdminPedidosList(filtro){
           <span>Total: <strong style="color:var(--red)">${fmt(p.total||0)}</strong></span>
           <span>Método: <strong>${metodo}</strong></span>
         </div>
-        ${p.notas?`<div style="margin-top:6px;font-size:.82rem;background:#fff7ed;border-left:3px solid #f59e0b;padding:6px 10px;border-radius:4px"><strong>Notas:</strong> ${p.notas}</div>`:''}
+        ${p.notas?`<div style="margin-top:6px;font-size:.82rem;background:#fff7ed;border-left:3px solid #f59e0b;padding:6px 10px;border-radius:4px"><strong>Notas:</strong> ${escHTML(p.notas)}</div>`:''}
       </div>
       <div class="ped-card-actions">
         <label style="font-size:.82rem;color:var(--gray)">Estado del pedido:</label>
@@ -3521,7 +3551,7 @@ async function reintentarPago(pedidoId){
 // Reseñas: aprobar/ocultar
 async function toggleResenaAprobada(id, aprobada){
   try{
-    await sbUpdate('resenas', id, {aprobada});
+    await sbUpdate('resenas', id, {aprobada}, 'id', true);
     showToast(aprobada?'Reseña visible':'Reseña oculta');
     renderAdminTab('resenas');
   }catch(e){
@@ -3550,7 +3580,7 @@ async function deleteResena(id){
 
 async function toggleProd(id,activo){
   try{
-    await sbUpdate('productos', id, {activo});
+    await sbUpdate('productos', id, {activo}, 'id', true);
     await loadProducts();
     renderAdminTab('productos');
     showToast(activo?'Producto activado':'Producto desactivado');
