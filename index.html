@@ -2127,36 +2127,7 @@ function updateLboxNav(){
   document.getElementById('lboxNext').style.display=n>1?'flex':'none';
 }
 // Inicializar handlers lightbox
-document.addEventListener('DOMContentLoaded',async()=>{
-  // Cargar carrito y productos inmediatamente
-  loadCart(); updateCartUI();
-  loadProducts();
-  
-  // FORZAR verificación de sesión inmediata (no depender de eventos)
-  if(typeof supabase !== 'undefined' && supabase.createClient && !sb){
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // Verificar sesión INMEDIATAMENTE
-    try{
-      const {data:{session}} = await sb.auth.getSession();
-      if(session && session.user){
-        currentUser = session.user;
-        const {data:profile} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-        if(profile){
-          currentProfile = profile;
-          isAdmin = profile.es_admin === true;
-          console.log('[init] ✓ Admin detectado:',isAdmin,'para:',currentUser.email);
-        }
-      }
-    }catch(e){
-      console.warn('[init] error sesión:',e);
-    }
-    updateUserUI();
-    
-    // DESPUÉS configurar listeners para cambios futuros
-    setupAuthListener();
-  }
-});
+document.addEventListener('DOMContentLoaded',()=>{
   const lb=document.getElementById('lbox');
   if(lb){
     // Click en fondo cierra
@@ -2940,22 +2911,7 @@ async function logout(){
 }
 
 function updateUserUI(){
-  // Verificar admin por hash del email (más privado que email directo)
-  const esAdminConocido = currentUser && hashEmail(currentUser.email) === '4f7d8b12a';
-  if(esAdminConocido) isAdmin = true;
-  
   document.getElementById("adminBtn").style.display=isAdmin?'flex':'none';
-}
-
-// Hash simple del email para verificar admin sin exponer email real
-function hashEmail(email) {
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) {
-    const char = email.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16);
 }
 
 // Versión síncrona más simple para este caso
@@ -4212,7 +4168,37 @@ function chatWhatsapp(){
 // ─── INIT ─────────────────────────────────────────────────────
 (async()=>{
   loadCart(); updateCartUI();
-  // Cargar productos INMEDIATAMENTE (no espera nada más)
+  loadProducts();
+  // Auth en segundo plano, no bloquea nada
+  setTimeout(async()=>{
+    try{
+      if(sb && sb.auth){
+        const {data:{session}}=await sb.auth.getSession();
+        currentUser=session?.user||null;
+        if(currentUser){
+          await loadProfile();
+        }else{
+          updateUserUI();
+        }
+      }
+    }catch(e){
+      console.warn('session init:',e);
+      updateUserUI();
+    }
+  }, 100);
+  
+  // Reintentos automáticos de updateUserUI por si el perfil tarda en cargar
+  // (Soluciona el bug del engranaje que no aparece al recargar)
+  [500, 1500, 3000].forEach(delay => {
+    setTimeout(() => {
+      if(currentUser && !isAdmin){
+        // Si hay usuario pero aún no es admin, reintentar cargar perfil
+        loadProfile();
+      } else {
+        updateUserUI();
+      }
+    }, delay);
+  });
 })();
 </script>
 </body>
