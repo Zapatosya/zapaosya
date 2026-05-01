@@ -1878,7 +1878,8 @@ document.addEventListener('input', e=>{
   }
 });
 
-// Submit reseña
+// Submit reseña — con moderación previa y cooldown anti-spam
+let __lastReviewSubmit = 0;
 document.addEventListener('click', async e=>{
   if(e.target.id === 'submitReview'){
     if(!currentUser){ openAuth('login'); return; }
@@ -1887,7 +1888,18 @@ document.addEventListener('click', async e=>{
       document.getElementById('reviewMsg').innerHTML = '<div class="auth-error">Selecciona una calificación</div>';
       return;
     }
+    // Cooldown: 1 reseña por minuto
+    const now = Date.now();
+    if(now - __lastReviewSubmit < 60000){
+      const wait = Math.ceil((60000 - (now - __lastReviewSubmit)) / 1000);
+      document.getElementById('reviewMsg').innerHTML = `<div class="auth-error">Espera ${wait} segundos antes de enviar otra reseña.</div>`;
+      return;
+    }
     const txt = document.getElementById('reviewText').value.trim();
+    if(txt.length > 1000){
+      document.getElementById('reviewMsg').innerHTML = '<div class="auth-error">Tu reseña es muy larga. Máximo 1000 caracteres.</div>';
+      return;
+    }
     const btn = e.target;
     const msg = document.getElementById('reviewMsg');
     if(typeof tieneInsultos==='function' && tieneInsultos(txt)){
@@ -1904,11 +1916,14 @@ document.addEventListener('click', async e=>{
         nombre: nombre,
         rating: __selectedRating,
         comentario: txt,
-        aprobada: true
+        aprobada: false  // Las reseñas pasan por moderación admin antes de aparecer
       });
-      msg.innerHTML = '<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:8px;border-radius:6px;font-size:.84rem">Reseña publicada. Gracias por tu opinión.</div>';
-      // Recargar
-      setTimeout(()=>loadReviews(__currentReviewProductId), 800);
+      __lastReviewSubmit = now;
+      msg.innerHTML = '<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:8px;border-radius:6px;font-size:.84rem">¡Gracias por tu reseña! La estamos revisando y aparecerá pronto.</div>';
+      // Limpiar formulario
+      document.getElementById('reviewText').value = '';
+      __selectedRating = 0;
+      // No recargar reseñas ya que la nueva no está aprobada todavía
     }catch(err){
       msg.innerHTML = `<div class="auth-error">Error: ${err.message||'No se pudo publicar'}</div>`;
       btn.disabled = false;
@@ -4048,11 +4063,18 @@ async function chatSendMessage(){
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if(!text) return;
+  // Validar longitud máxima cliente-side (el server también valida)
+  if(text.length > 1500){
+    addChatMessage('Tu mensaje es muy largo. Acórtalo o escríbenos por WhatsApp.', 'bot');
+    return;
+  }
   input.value = '';
   addChatMessage(text, 'user');
   chatHistory.push({ role: 'user', content: text });
   chatSending = true;
-  document.getElementById('chatSend').disabled = true;
+  const sendBtn = document.getElementById('chatSend');
+  sendBtn.disabled = true;
+  input.disabled = true;
   showTyping();
   try {
     const res = await fetch(CHAT_FN_URL, {
@@ -4061,6 +4083,18 @@ async function chatSendMessage(){
       body: JSON.stringify({ messages: chatHistory })
     });
     hideTyping();
+    // Manejo de rate limit (429)
+    if(res.status === 429){
+      let msg = 'Has enviado muchos mensajes. Espera un momento o escríbenos al WhatsApp +57 321 297 0591.';
+      try {
+        const data = await res.json();
+        if(data.reply) msg = data.reply;
+      } catch(_){}
+      addChatMessage(msg, 'bot');
+      // Quitar el último user del historial para que pueda reintentar después
+      chatHistory.pop();
+      return;
+    }
     if(!res.ok){
       console.error('[chat-ai] Error:', res.status);
       addChatMessage('Lo siento, tuve un problema. Puedes escribirme por WhatsApp al +57 321 297 0591 para ayuda inmediata.', 'bot');
@@ -4077,8 +4111,12 @@ async function chatSendMessage(){
     addChatMessage('No me pude conectar. Revisa tu conexión o escríbenos por WhatsApp.', 'bot');
   } finally {
     chatSending = false;
-    document.getElementById('chatSend').disabled = false;
-    document.getElementById('chatInput').focus();
+    // Cooldown de 2 segundos para evitar spam de clicks rápidos
+    setTimeout(()=>{
+      sendBtn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }, 2000);
   }
 }
 
