@@ -3911,20 +3911,12 @@ async function loadProfile(){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
   console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
-    // Usar JWT del usuario para que las políticas RLS funcionen (cada user lee su propio perfil)
-    const authH = await getAuthHeaders();
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
-      headers: authH
-    });
-    console.log('[loadProfile] status:',res.status);
-    if(!res.ok){
-      const txt=await res.text();
-      console.warn('[loadProfile] error body:',txt);
+    // Usar SDK de Supabase directamente (maneja sesión/token internamente)
+    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    if(error){
+      console.warn('[loadProfile] error:',error.message);
       return;
     }
-    const rows=await res.json();
-    console.log('[loadProfile] rows:',rows);
-    const data=rows[0];
     if(data){
       currentProfile=data;
       isAdmin=data.es_admin===true;
