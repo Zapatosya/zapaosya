@@ -2846,6 +2846,10 @@ function setupAuthListener(){
     console.log('[auth] evento:',event,'user:',session?.user?.email||'ninguno');
     currentUser=session?.user||null;
     if(currentUser){
+      // En SIGNED_IN e INITIAL_SESSION, el token puede no estar listo inmediatamente
+      if(event==='SIGNED_IN'||event==='INITIAL_SESSION'){
+        await new Promise(r=>setTimeout(r,300)); // Dar tiempo a que el token se estabilice
+      }
       await safeLoadProfile();
     } else {
       currentProfile=null;
@@ -2855,9 +2859,9 @@ function setupAuthListener(){
     }
   });
 
-  // Respaldo: si después de 1.5s el perfil NO se cargó, forzar con getSession
+  // Respaldo: si después de 2s el perfil NO se cargó, forzar con getSession
   setTimeout(async()=>{
-    if(_profileLoaded) return; // Ya se cargó, no hacer nada
+    if(_profileLoaded) return;
     try{
       const {data:{session}}=await sb.auth.getSession();
       if(session && session.user && !_profileLoaded){
@@ -2868,7 +2872,7 @@ function setupAuthListener(){
     }catch(e){
       console.warn('[auth] respaldo getSession error:',e);
     }
-  }, 1500);
+  }, 2000);
 }
 // Llamar inmediatamente si sb ya está listo
 setupAuthListener();
@@ -3931,9 +3935,9 @@ async function saveProduct(){
 }
 
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
-async function loadProfile(){
+async function loadProfile(retryCount=0){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
-  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
+  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id, retryCount?`(intento ${retryCount+1})`:'');
   try{
     // Usar JWT del usuario para que las políticas RLS funcionen (cada user lee su propio perfil)
     const authH = await getAuthHeaders();
@@ -3944,6 +3948,11 @@ async function loadProfile(){
     if(!res.ok){
       const txt=await res.text();
       console.warn('[loadProfile] error body:',txt);
+      // Reintentar hasta 2 veces si falla
+      if(retryCount < 2){
+        await new Promise(r=>setTimeout(r, 1000));
+        return loadProfile(retryCount+1);
+      }
       return;
     }
     const rows=await res.json();
@@ -3955,9 +3964,18 @@ async function loadProfile(){
       console.log('[loadProfile] ✓ isAdmin:',isAdmin,'perfil:',data);
     }else{
       console.warn('[loadProfile] no se encontró perfil para user id:',currentUser.id);
+      // Reintentar: puede que el perfil aún no se haya creado por el trigger
+      if(retryCount < 2){
+        await new Promise(r=>setTimeout(r, 1000));
+        return loadProfile(retryCount+1);
+      }
     }
   }catch(e){
     console.warn('[loadProfile] error:',e);
+    if(retryCount < 2){
+      await new Promise(r=>setTimeout(r, 1000));
+      return loadProfile(retryCount+1);
+    }
   }finally{
     updateUserUI();
   }
