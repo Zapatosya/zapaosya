@@ -2815,6 +2815,8 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
 // Detectar si el usuario viene del link de recuperación
 // Configuración de listeners de auth (se llama después de inicializar sb)
 let authListenersAttached = false;
+let _profileLoading = false; // Evitar llamadas simultáneas a loadProfile
+
 function setupAuthListener(){
   if(authListenersAttached || !sb || !sb.auth) return;
   authListenersAttached = true;
@@ -2831,20 +2833,23 @@ function setupAuthListener(){
     }
   });
 
-  // Listener principal de sesión
+  // Listener ÚNICO de sesión (maneja tanto el inicio como cambios)
   sb.auth.onAuthStateChange(async(event,session)=>{
+    console.log('[auth] evento:',event,'user:',session?.user?.email||'ninguno');
     currentUser=session?.user||null;
-    if(currentUser) await loadProfile();
-    else{currentProfile=null;isAdmin=false;updateUserUI();}
-  });
-
-  // Si hay sesión activa al cargar, traer el perfil
-  sb.auth.getSession().then(({data:{session}})=>{
-    if(session && session.user){
-      currentUser = session.user;
-      loadProfile();
+    if(currentUser){
+      // Evitar llamadas simultáneas a loadProfile
+      if(!_profileLoading){
+        _profileLoading = true;
+        try{ await loadProfile(); }
+        finally{ _profileLoading = false; }
+      }
+    } else {
+      currentProfile=null;
+      isAdmin=false;
+      updateUserUI();
     }
-  }).catch(e=>console.warn('getSession err:',e));
+  });
 }
 // Llamar inmediatamente si sb ya está listo
 setupAuthListener();
@@ -4167,24 +4172,9 @@ function chatWhatsapp(){
   loadCart(); updateCartUI();
   // Cargar productos INMEDIATAMENTE (no espera nada más)
   loadProducts();
-  // Auth en segundo plano, no bloquea nada
-  setTimeout(async()=>{
-    try{
-      if(sb && sb.auth){
-        const {data:{session}}=await sb.auth.getSession();
-        currentUser=session?.user||null;
-        console.log('[init] session user:',currentUser?.email||'ninguno');
-        if(currentUser){
-          await loadProfile(); // esto ya llama updateUserUI al final
-        }else{
-          updateUserUI(); // por si acaso
-        }
-      }
-    }catch(e){
-      console.warn('session init:',e);
-      updateUserUI(); // garantizar que la UI se renderice aunque haya error
-    }
-  }, 100);
+  // Auth ya se maneja en setupAuthListener con onAuthStateChange
+  // No necesitamos un segundo getSession aquí
+  updateUserUI();
 })();
 </script>
 </body>
