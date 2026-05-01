@@ -2127,7 +2127,36 @@ function updateLboxNav(){
   document.getElementById('lboxNext').style.display=n>1?'flex':'none';
 }
 // Inicializar handlers lightbox
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
+  // Cargar carrito y productos inmediatamente
+  loadCart(); updateCartUI();
+  loadProducts();
+  
+  // FORZAR verificación de sesión inmediata (no depender de eventos)
+  if(typeof supabase !== 'undefined' && supabase.createClient && !sb){
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Verificar sesión INMEDIATAMENTE
+    try{
+      const {data:{session}} = await sb.auth.getSession();
+      if(session && session.user){
+        currentUser = session.user;
+        const {data:profile} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+        if(profile){
+          currentProfile = profile;
+          isAdmin = profile.es_admin === true;
+          console.log('[init] ✓ Admin detectado:',isAdmin,'para:',currentUser.email);
+        }
+      }
+    }catch(e){
+      console.warn('[init] error sesión:',e);
+    }
+    updateUserUI();
+    
+    // DESPUÉS configurar listeners para cambios futuros
+    setupAuthListener();
+  }
+});
   const lb=document.getElementById('lbox');
   if(lb){
     // Click en fondo cierra
@@ -4158,24 +4187,6 @@ function chatWhatsapp(){
 (async()=>{
   loadCart(); updateCartUI();
   // Cargar productos INMEDIATAMENTE (no espera nada más)
-  loadProducts();
-  // Auth en segundo plano, no bloquea nada
-  setTimeout(async()=>{
-    try{
-      if(sb && sb.auth){
-        const {data:{session}}=await sb.auth.getSession();
-        currentUser=session?.user||null;
-        if(currentUser){
-          await loadProfile();
-        }else{
-          updateUserUI();
-        }
-      }
-    }catch(e){
-      console.warn('session init:',e);
-      updateUserUI();
-    }
-  }, 100);
 })();
 </script>
 </body>
