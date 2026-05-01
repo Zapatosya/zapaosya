@@ -2816,6 +2816,14 @@ document.getElementById('newPassForm').addEventListener('submit',async e=>{
 // Configuración de listeners de auth (se llama después de inicializar sb)
 let authListenersAttached = false;
 let _profileLoading = false; // Evitar llamadas simultáneas a loadProfile
+let _profileLoaded = false;  // Saber si ya se cargó el perfil al menos una vez
+
+async function safeLoadProfile(){
+  if(_profileLoading) return;
+  _profileLoading = true;
+  try{ await loadProfile(); _profileLoaded = true; }
+  finally{ _profileLoading = false; }
+}
 
 function setupAuthListener(){
   if(authListenersAttached || !sb || !sb.auth) return;
@@ -2833,23 +2841,34 @@ function setupAuthListener(){
     }
   });
 
-  // Listener ÚNICO de sesión (maneja tanto el inicio como cambios)
+  // Listener principal de sesión
   sb.auth.onAuthStateChange(async(event,session)=>{
     console.log('[auth] evento:',event,'user:',session?.user?.email||'ninguno');
     currentUser=session?.user||null;
     if(currentUser){
-      // Evitar llamadas simultáneas a loadProfile
-      if(!_profileLoading){
-        _profileLoading = true;
-        try{ await loadProfile(); }
-        finally{ _profileLoading = false; }
-      }
+      await safeLoadProfile();
     } else {
       currentProfile=null;
       isAdmin=false;
+      _profileLoaded=false;
       updateUserUI();
     }
   });
+
+  // Respaldo: si después de 1.5s el perfil NO se cargó, forzar con getSession
+  setTimeout(async()=>{
+    if(_profileLoaded) return; // Ya se cargó, no hacer nada
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(session && session.user && !_profileLoaded){
+        console.log('[auth] respaldo getSession para:',session.user.email);
+        currentUser=session.user;
+        await safeLoadProfile();
+      }
+    }catch(e){
+      console.warn('[auth] respaldo getSession error:',e);
+    }
+  }, 1500);
 }
 // Llamar inmediatamente si sb ya está listo
 setupAuthListener();
