@@ -2,10 +2,69 @@
 // Cloudflare Pages Function: webhook-pago
 // Path: /functions/webhook-pago.js
 // Endpoint: https://zapatosya.com/webhook-pago
+//
+// 🔒 SEGURIDAD: Valida la firma HMAC SHA-256 del header x-signature
+// que envía Mercado Pago, comparando contra MP_WEBHOOK_SECRET.
 // ═══════════════════════════════════════════════════════════════
 
 function fmtCop(n){
   return '$' + (Number(n)||0).toLocaleString('es-CO');
+}
+
+// ─── Validar firma de Mercado Pago ─────────────────────────────
+async function validarFirmaMP(request, env, dataId) {
+  const xSignature = request.headers.get('x-signature') || '';
+  const xRequestId = request.headers.get('x-request-id') || '';
+  const secret = env.MP_WEBHOOK_SECRET;
+
+  if (!secret) {
+    console.warn('MP_WEBHOOK_SECRET no configurado — omitiendo validación');
+    return { valido: false, razon: 'Secret no configurado' };
+  }
+  if (!xSignature || !dataId) {
+    return { valido: false, razon: 'Headers o data.id faltantes' };
+  }
+
+  // Parsear el header x-signature: "ts=1234567890,v1=abc123..."
+  const parts = {};
+  xSignature.split(',').forEach(p => {
+    const [k, v] = p.trim().split('=');
+    if (k && v) parts[k] = v;
+  });
+  const ts = parts.ts;
+  const v1 = parts.v1;
+
+  if (!ts || !v1) {
+    return { valido: false, razon: 'Firma malformada' };
+  }
+
+  // Construir el manifest según la docs oficial de MP:
+  // id:[data.id];request-id:[x-request-id];ts:[ts];
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+  // Calcular HMAC SHA-256
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(manifest));
+    const sigHex = Array.from(new Uint8Array(sigBuf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    if (sigHex !== v1) {
+      return { valido: false, razon: 'Firma no coincide' };
+    }
+    return { valido: true };
+  } catch (e) {
+    console.error('Error calculando firma:', e.message);
+    return { valido: false, razon: 'Error interno calculando firma' };
+  }
 }
 
 // ─── Helper: Enviar notificación de PAGO a Telegram ────────────
@@ -108,8 +167,15 @@ export async function onRequestPost(context) {
   };
 
   try {
-    const body = await request.json().catch(() => ({}));
-    console.log('Webhook recibido:', JSON.stringify(body));
+    // Leer body PRIMERO porque necesitamos el data.id para validar firma
+    const bodyText = await request.text();
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      return new Response(JSON.stringify({ error: 'JSON inválido' }), { status: 400, headers });
+    }
+    console.log('Webhook recibido:', bodyText.slice(0, 200));
 
     if (body.type !== 'payment') {
       return new Response(JSON.stringify({ ignored: true }), { status: 200, headers });
@@ -119,6 +185,19 @@ export async function onRequestPost(context) {
     if (!paymentId) {
       return new Response(JSON.stringify({ error: 'Sin payment id' }), { status: 400, headers });
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔒 VALIDAR FIRMA DE MERCADO PAGO
+    // ═══════════════════════════════════════════════════════════
+    const firma = await validarFirmaMP(request, env, paymentId);
+    if (!firma.valido) {
+      console.warn('Webhook MP rechazado — firma inválida:', firma.razon);
+      return new Response(JSON.stringify({ 
+        error: 'Firma inválida', 
+        detalle: firma.razon 
+      }), { status: 401, headers });
+    }
+    console.log('Webhook MP firma válida ✓');
 
     const MP_ACCESS_TOKEN = env.MP_ACCESS_TOKEN;
     const SUPABASE_URL = env.SUPABASE_URL;
