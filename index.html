@@ -1577,11 +1577,48 @@ async function loadProducts(){
     console.log('Productos cargados:', PRODUCTS.length);
     updateProductsSchema(PRODUCTS);
     render();
+    
+    // Si la URL tiene #producto/<id>, abrir ese producto automáticamente
+    abrirProductoDesdeURL();
   }catch(e){
     console.error('Error cargando productos:', e);
     document.getElementById("pg").innerHTML='<div class="loading">No se pudieron cargar los productos. Recarga la página.</div>';
   }
 }
+
+// Abrir producto si la URL tiene #producto/<id>
+function abrirProductoDesdeURL(){
+  try {
+    const hash = location.hash || '';
+    const m = hash.match(/^#producto\/(.+)$/);
+    if (m) {
+      const id = decodeURIComponent(m[1]);
+      const existe = PRODUCTS.find(p => p.id === id);
+      if (existe) {
+        // Pequeño delay para que el render termine
+        setTimeout(() => openModal(id), 100);
+      } else {
+        console.warn('Producto del hash no encontrado:', id);
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+  } catch(e) { console.warn('Error abriendo producto desde URL:', e); }
+}
+
+// Soportar navegación con botones atrás/adelante del navegador
+window.addEventListener('popstate', () => {
+  const hash = location.hash || '';
+  if (hash.match(/^#producto\//)) {
+    abrirProductoDesdeURL();
+  } else {
+    // Si quitan el hash, cerrar el modal
+    const modal = document.getElementById("pModal");
+    if (modal && modal.classList.contains('open')) {
+      modal.classList.remove("open");
+      document.body.style.overflow="";
+    }
+  }
+});
 
 // Genera Schema.org Product para cada item del catálogo (SEO + Rich Results)
 function updateProductsSchema(products){
@@ -1754,6 +1791,15 @@ function openModal(id){
   curP=PRODUCTS.find(p=>p.id===id); if(!curP) return;
   selC=0; selS=null;
   const p=curP;
+  
+  // Actualizar URL para que sea compartible (deep linking)
+  try {
+    const newHash = '#producto/' + encodeURIComponent(id);
+    if (location.hash !== newHash) {
+      history.pushState({producto: id}, '', newHash);
+    }
+  } catch(e) { console.warn('No se pudo actualizar URL:', e); }
+  
   const mi=document.getElementById("mImg");
   
   // Precargar todas las imágenes para evitar flash al cambiar de color
@@ -1812,7 +1858,14 @@ function openModal(id){
   // Cargar reseñas del producto
   loadReviews(id);
 }
-function closeModal(){document.getElementById("pModal").classList.remove("open");document.body.style.overflow="";}
+function closeModal(){
+  document.getElementById("pModal").classList.remove("open");
+  document.body.style.overflow="";
+  // Quitar hash de la URL al cerrar
+  if (location.hash.startsWith('#producto/')) {
+    history.pushState(null, '', location.pathname + location.search);
+  }
+}
 
 // ─── RESEÑAS ─────────────────────────────────────────────────
 let __currentReviewProductId = null;
