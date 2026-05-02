@@ -1213,17 +1213,8 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
           <div><label>Notas (opcional)</label><textarea id="coNotes" rows="2" placeholder="Instrucciones especiales..."></textarea></div>
         </div>
         
-        <!-- Selector de método de pago -->
-        <div class="pay-methods">
-          <div class="pay-methods-title">Método de pago</div>
-          <label class="pay-opt pay-opt-selected">
-            <input type="radio" name="payMethod" value="completo" checked onchange="actualizarResumenPago()">
-            <div class="pay-opt-body">
-              <div class="pay-opt-title">Pago anticipado</div>
-              <div class="pay-opt-desc">Paga <strong>producto + envío</strong> ahora por Mercado Pago (tarjeta, PSE, Nequi, Daviplata, Bancolombia, Efecty)</div>
-            </div>
-          </label>
-        </div>
+        <!-- Solo hay un método de pago: anticipado por Mercado Pago -->
+        <input type="hidden" name="payMethod" value="completo">
         
         <div class="checkout-summary" style="margin-top:18px">
           <div id="coPromoShip" class="co-promo-ship" style="display:none"></div>
@@ -2218,9 +2209,14 @@ function renderCart(){
   body.querySelectorAll(".qb").forEach(b=>b.addEventListener("click",()=>chQty(b.dataset.key,+b.dataset.d)));
   body.querySelectorAll(".ci-rm").forEach(b=>b.addEventListener("click",()=>rm(b.dataset.key)));
   const tot=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const todosGratisProd = cart.length > 0 && cart.every(i=>i.envio_gratis);
+  const envioGratis = todosGratisProd || tot >= 280000;
+  const shipMsg = envioGratis
+    ? '<span>Envío GRATIS incluido</span>'
+    : 'Envío calculado al finalizar la compra';
   foot.innerHTML=`
     <div class="ctot"><span class="ctot-lbl">Total</span><span class="ctot-amt">${fmt(tot)}</span></div>
-    <p class="cship"><span>Envío incluido</span></p>
+    <p class="cship">${shipMsg}</p>
     <button class="btn btn-red btn-full" onclick="openCheckout()">Finalizar compra →</button>`;
 }
 
