@@ -4167,10 +4167,28 @@ async function loadProfile(){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
   console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
-    // Usar JWT del usuario para que las políticas RLS funcionen (cada user lee su propio perfil)
-    const authH = await getAuthHeaders();
+    // Leer el JWT directamente desde localStorage (más rápido y no se cuelga)
+    // El SDK de Supabase guarda la sesión bajo una clave que empieza con "sb-"
+    let jwt = null;
+    try {
+      for (const k of Object.keys(localStorage)) {
+        if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          const v = JSON.parse(localStorage.getItem(k));
+          jwt = v?.access_token || null;
+          if (jwt) break;
+        }
+      }
+    } catch(e) { console.warn('[loadProfile] error leyendo localStorage:', e); }
+    
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json'
+    };
+    if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
+    else headers['Authorization'] = 'Bearer ' + SUPABASE_KEY;
+    
     const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
-      headers: authH
+      headers: headers
     });
     console.log('[loadProfile] status:',res.status);
     if(!res.ok){
