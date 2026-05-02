@@ -1429,21 +1429,18 @@ const SB_HEADERS_BASE = {
 };
 
 async function getAuthHeaders(){
-  // Con las publishable keys nuevas (sb_publishable_...) NO se puede mandar
-  // la key como Bearer token — PostgREST espera un JWT real ahí.
-  // Solo mandamos Authorization cuando hay sesión de usuario logueado.
-  const headers = { ...SB_HEADERS_BASE };
+  let token = SUPABASE_KEY; // Por defecto, modo anónimo
   try {
     if(sb && sb.auth){
       const {data:{session}} = await sb.auth.getSession();
       if(session && session.access_token){
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+        token = session.access_token; // JWT del usuario logueado
       }
     }
   } catch(e){
-    console.warn('getAuthHeaders sin sesión:', e);
+    console.warn('getAuthHeaders fallback to anon:', e);
   }
-  return headers;
+  return { ...SB_HEADERS_BASE, 'Authorization': `Bearer ${token}` };
 }
 
 async function sbSelect(table, query=''){
@@ -1498,9 +1495,9 @@ async function sbDelete(table, id, idCol='id'){
 }
 
 // Headers anónimos puros (para casos donde sí queremos forzar sin sesión, ej: endpoints públicos)
-// Con publishable keys nuevas, NO se manda Authorization sin JWT válido
 const SB_HEADERS = {
-  ...SB_HEADERS_BASE
+  ...SB_HEADERS_BASE,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
 };
 
 // Compatibilidad con código viejo
@@ -2062,16 +2059,14 @@ async function subirFotoResena(blob){
   const fileName = `resena-${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
   const uploadUrl = `${SUPABASE_URL}/storage/v1/object/resenas-fotos/${fileName}`;
   const authH = await getAuthHeaders();
-  const headers = {
-    'apikey': SUPABASE_KEY,
-    'Content-Type': 'image/jpeg',
-    'x-upsert': 'false'
-  };
-  // Solo agregamos Authorization si hay sesión (JWT válido)
-  if(authH.Authorization) headers['Authorization'] = authH.Authorization;
   const res = await fetch(uploadUrl, {
     method: 'POST',
-    headers,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': authH.Authorization || `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'image/jpeg',
+      'x-upsert': 'false'
+    },
     body: blob
   });
   if(!res.ok){
@@ -4030,18 +4025,17 @@ async function uploadColorImage(input){
     console.log('[upload] Subiendo:', fileName, 'tamaño:', file.size);
     
     // Subir usando fetch directo al endpoint de Storage
-    // Usa el JWT del admin logueado (las RLS del bucket validan permisos)
+    // Usamos el anon key (las políticas del bucket permiten INSERT a authenticated,
+    // pero si el bucket es público, también permite con anon key)
     const uploadUrl=`${SUPABASE_URL}/storage/v1/object/productos/${fileName}`;
-    const authH = await getAuthHeaders();
-    const upHeaders = {
-      'apikey':SUPABASE_KEY,
-      'Content-Type':file.type||'image/jpeg',
-      'x-upsert':'false'
-    };
-    if(authH.Authorization) upHeaders['Authorization'] = authH.Authorization;
     const res=await fetch(uploadUrl,{
       method:'POST',
-      headers:upHeaders,
+      headers:{
+        'apikey':SUPABASE_KEY,
+        'Authorization':`Bearer ${SUPABASE_KEY}`,
+        'Content-Type':file.type||'image/jpeg',
+        'x-upsert':'false'
+      },
       body:file
     });
     
@@ -4346,7 +4340,7 @@ async function chatSendMessage(){
   try {
     const res = await fetch(CHAT_FN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
       body: JSON.stringify({ messages: chatHistory })
     });
     hideTyping();
