@@ -1975,7 +1975,7 @@ document.addEventListener('click', async e=>{
       }
       const fotosUrls = __reviewPhotos.map(p=>p.url).filter(Boolean);
       const nombre = (currentUser.user_metadata?.full_name) || (currentUser.email?.split('@')[0]) || 'Cliente';
-      await sbInsert('resenas', {
+      const inserted = await sbInsert('resenas', {
         producto_id: __currentReviewProductId,
         user_id: currentUser.id,
         nombre: nombre,
@@ -1985,6 +1985,25 @@ document.addEventListener('click', async e=>{
         aprobada: false  // Las reseñas pasan por moderación admin antes de aparecer
       });
       __lastReviewSubmit = now;
+      
+      // Notificar a Telegram (en background, sin bloquear)
+      const resenaCreada = Array.isArray(inserted) ? inserted[0] : inserted;
+      const productoActual = PRODUCTS.find(p=>p.id===__currentReviewProductId);
+      fetch('/notif-resena', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          resena_id: resenaCreada?.id,
+          producto_nombre: productoActual?.nombre || 'Producto',
+          producto_id: __currentReviewProductId,
+          nombre_cliente: nombre,
+          email: currentUser.email,
+          rating: __selectedRating,
+          comentario: txt,
+          fotos: fotosUrls,
+          fecha: new Date().toISOString()
+        })
+      }).catch(e=>console.warn('No se pudo notificar a Telegram:', e.message));
       msg.innerHTML = '<div class="auth-success" style="background:#16a34a15;color:#14532d;padding:8px;border-radius:6px;font-size:.84rem">¡Gracias por tu reseña! La estamos revisando y aparecerá pronto.</div>';
       // Limpiar formulario
       document.getElementById('reviewText').value = '';
