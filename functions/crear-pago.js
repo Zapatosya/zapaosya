@@ -3,6 +3,9 @@
 // Path: /functions/crear-pago.js
 // Endpoint: https://zapatosya.com/crear-pago
 // Soporta: Pago completo y Contraentrega (solo cobra envío)
+//
+// 🔒 SEGURIDAD: Los precios SE RECALCULAN desde Supabase para evitar
+// que el cliente manipule el carrito en su navegador (cart[0].price=1)
 // ═══════════════════════════════════════════════════════════════
 
 function fmtCop(n){
@@ -92,7 +95,6 @@ export async function onRequestPost(context) {
     const { 
       pedido_id, 
       items, 
-      total, 
       email, 
       nombre, 
       telefono, 
@@ -101,28 +103,149 @@ export async function onRequestPost(context) {
       saldo_pendiente
     } = body;
     
-    console.log('crear-pago:', pedido_id, 'total:', total, 'método:', metodo_pago);
+    // ⚠️ NOTA: ya NO usamos el "total" del cliente, lo recalculamos abajo
 
-    if (!pedido_id || !items || !total) {
+    if (!pedido_id || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'Datos incompletos' }), { status: 400, headers });
     }
 
     const MP_ACCESS_TOKEN = env.MP_ACCESS_TOKEN;
+    const SUPABASE_URL = env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY;
+
     if (!MP_ACCESS_TOKEN) {
       return new Response(JSON.stringify({ error: 'MP_ACCESS_TOKEN no configurado' }), { status: 500, headers });
     }
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return new Response(JSON.stringify({ error: 'SUPABASE no configurado' }), { status: 500, headers });
+    }
 
-    const mpItems = items.map(it => {
-      let title = it.name || 'Producto';
-      if (it.size) title += ` - Talla ${it.size}`;
-      if (it.color) title += ` - ${it.color}`;
-      return {
-        title: title,
-        quantity: it.qty || 1,
-        unit_price: it.price || 0,
+    // ═══════════════════════════════════════════════════════════
+    // 🔒 RECÁLCULO DE PRECIOS DESDE LA BD (anti-manipulación)
+    // ═══════════════════════════════════════════════════════════
+    const mpItems = [];
+    let subtotalReal = 0;
+    let envioReal = 0;
+    const itemsValidados = [];
+
+    for (const it of items) {
+      // ─── Item de envío: viene como { name: "Envío X días", price: N }
+      // No tiene "id" porque no es un producto. Lo dejamos pasar pero
+      // limitamos el monto a un rango razonable (0 a 100.000 COP).
+      if (it.name && String(it.name).startsWith('Envío')) {
+        const envio = Math.max(0, Math.min(100000, Math.floor(Number(it.price) || 0)));
+        envioReal += envio;
+        if (envio > 0) {
+          mpItems.push({
+            title: String(it.name).slice(0, 100),
+            quantity: 1,
+            unit_price: envio,
+            currency_id: 'COP'
+          });
+        }
+        itemsValidados.push({ ...it, price: envio });
+        continue;
+      }
+
+      // ─── Producto real: validar contra la tabla productos
+      if (!it.id) {
+        return new Response(JSON.stringify({ 
+          error: `Item sin id: ${it.name || 'desconocido'}` 
+        }), { status: 400, headers });
+      }
+
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/productos?id=eq.${encodeURIComponent(it.id)}&select=id,nombre,precio,activo`,
+        {
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+          }
+        }
+      );
+
+      if (!r.ok) {
+        console.error('Error consultando producto:', it.id, r.status);
+        return new Response(JSON.stringify({ 
+          error: 'Error validando productos' 
+        }), { status: 500, headers });
+      }
+
+      const rows = await r.json();
+      const prodReal = rows[0];
+
+      if (!prodReal) {
+        return new Response(JSON.stringify({ 
+          error: `Producto no encontrado: ${it.id}` 
+        }), { status: 400, headers });
+      }
+      if (!prodReal.activo) {
+        return new Response(JSON.stringify({ 
+          error: `Producto no disponible: ${prodReal.nombre}` 
+        }), { status: 400, headers });
+      }
+
+      // Limitar cantidad a un rango sensato (1-20 por línea)
+      const qty = Math.max(1, Math.min(20, parseInt(it.qty) || 1));
+      const precioReal = Math.max(0, Math.floor(Number(prodReal.precio) || 0));
+
+      if (precioReal <= 0) {
+        return new Response(JSON.stringify({ 
+          error: `Precio inválido para: ${prodReal.nombre}` 
+        }), { status: 400, headers });
+      }
+
+      subtotalReal += precioReal * qty;
+
+      // Construir título descriptivo (lo que ve el cliente en MP)
+      let title = prodReal.nombre;
+      if (it.size) title += ` - Talla ${String(it.size).slice(0, 10)}`;
+      if (it.color) title += ` - ${String(it.color).slice(0, 30)}`;
+
+      mpItems.push({
+        title: title.slice(0, 200),
+        quantity: qty,
+        unit_price: precioReal,
         currency_id: 'COP'
-      };
-    });
+      });
+
+      // Guardar item validado para Telegram y para actualizar el pedido
+      itemsValidados.push({
+        ...it,
+        id: prodReal.id,
+        name: prodReal.nombre,
+        price: precioReal,
+        qty: qty
+      });
+    }
+
+    const totalReal = subtotalReal + envioReal;
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔒 ACTUALIZAR EL PEDIDO EN LA BD CON LOS TOTALES REALES
+    // (importante porque el cliente lo creó con valores manipulables)
+    // ═══════════════════════════════════════════════════════════
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${encodeURIComponent(pedido_id)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          subtotal: subtotalReal,
+          envio: envioReal,
+          total: totalReal,
+          items: itemsValidados
+        })
+      });
+    } catch (e) {
+      console.warn('No se pudo actualizar totales del pedido:', e.message);
+    }
+
+    console.log('crear-pago:', pedido_id, 'total real:', totalReal, 'método:', metodo_pago);
 
     const SITE_URL = env.SITE_URL || 'https://zapatosya.com';
 
@@ -172,38 +295,13 @@ export async function onRequestPost(context) {
 
     console.log('Pago creado OK:', data.id);
 
-    // Obtener datos completos del pedido de Supabase (para Telegram)
-    let pedidoCompleto = null;
-    try {
-      const SUPABASE_URL = env.SUPABASE_URL;
-      const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY;
-      if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${pedido_id}&select=*`, {
-          headers: {
-            'apikey': SUPABASE_SERVICE_KEY,
-            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          pedidoCompleto = rows[0] || null;
-        }
-      }
-    } catch(e) {
-      console.warn('No se pudo obtener pedido completo:', e.message);
-    }
-
-    const totalProductos = pedidoCompleto?.subtotal || 0;
-    const totalEnvio = pedidoCompleto?.envio || 0;
-    const totalGeneral = pedidoCompleto?.total || total;
-    const itemsOriginales = pedidoCompleto?.items || items;
-    
+    // ─── Notificar a Telegram con datos REALES ───
     context.waitUntil(notificarTelegram(env, {
       pedido_id,
-      items_originales: itemsOriginales,
-      total_productos: totalProductos,
-      total_envio: totalEnvio,
-      total_general: totalGeneral,
+      items_originales: itemsValidados,
+      total_productos: subtotalReal,
+      total_envio: envioReal,
+      total_general: totalReal,
       email,
       nombre,
       telefono,
