@@ -1420,6 +1420,26 @@ function escHTML(str){
     .replace(/`/g,'&#96;');
 }
 
+// Escape para valores CSS (colores, gradientes). Whitelist estricta de caracteres seguros.
+// Si el valor tiene algo raro, devuelve un fallback seguro.
+function escCSS(value){
+  if(value === null || value === undefined || value === '') return '#F5F5F5';
+  const v = String(value).trim();
+  // Solo permite: letras, dígitos, #, paréntesis, comas, puntos, espacios, %, guiones
+  // Esto cubre: #fff, #FFFFFF, rgb(...), rgba(...), hsl(...), nombres de color, gradientes simples
+  if(v.length < 200 && /^[#a-zA-Z0-9(),.\s%\-]+$/.test(v)) return v;
+  return '#F5F5F5';
+}
+
+// Escape para URLs. Solo permite http://, https:// y rutas relativas (que empiezan con /).
+// Bloquea javascript:, data:, etc.
+function escURL(url){
+  if(!url) return '';
+  const s = String(url).trim();
+  if(/^(https?:\/\/|\/)/i.test(s)) return escHTML(s);
+  return '';
+}
+
 // Helpers para fetch directo a Supabase REST API
 // Siempre usan la anon key como apikey, pero cuando hay sesión, usan el JWT del usuario en Authorization
 // Eso permite que las políticas RLS con auth.uid() y is_admin() funcionen correctamente
@@ -1541,7 +1561,7 @@ const getProductVisual=(p,colorIdx=0)=>{
   const imgs=p.imagenes||[];
   if(imgs.length>0){
     const url=imgs[colorIdx]||imgs[0];
-    return `<img src="${url}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    return `<img src="${escURL(url)}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -1644,21 +1664,21 @@ function render(f="todos"){
   const data=f==="todos"?PRODUCTS:PRODUCTS.filter(p=>p.categoria.toLowerCase()===f);
   if(!data.length){document.getElementById("pg").innerHTML='<div class="loading">No hay productos en esta categoría</div>';return;}
   document.getElementById("pg").innerHTML=data.map((p,i)=>`
-    <article class="pc" data-id="${p.id}" style="animation-delay:${i*.07}s" tabindex="0">
-      <div class="pc-img" style="background:${p.fondo}">
+    <article class="pc" data-id="${escHTML(p.id)}" style="animation-delay:${i*.07}s" tabindex="0">
+      <div class="pc-img" style="background:${escCSS(p.fondo)}">
         ${getProductVisual(p,0)}
         <div class="pc-labels">${lblHTML(p.etiquetas)}${p.envio_gratis?'<span class="lbl lbl-eg">Envío gratis</span>':''}</div>
         <div class="pc-ov"><button class="btn btn-red">Ver más →</button></div>
       </div>
       <div class="pc-info">
-        <div class="pc-cat">${p.categoria}</div>
+        <div class="pc-cat">${escHTML(p.categoria)}</div>
         <div class="pc-name">${escHTML(p.nombre)}</div>
-        <div class="pc-rate" id="pcRate-${p.id}" style="display:none"></div>
+        <div class="pc-rate" id="pcRate-${escHTML(p.id)}" style="display:none"></div>
         <div class="pc-pr">
           <span class="price">${fmt(p.precio)}</span>
           ${p.precio_original?`<span class="orig">${fmt(p.precio_original)}</span><span class="disc">-${disc(p.precio_original,p.precio)}%</span>`:''}
         </div>
-        <div class="pc-dots">${(p.colores||[]).slice(0,4).map(c=>`<span class="dot" style="background:${c}"></span>`).join('')}</div>
+        <div class="pc-dots">${(p.colores||[]).slice(0,4).map(c=>`<span class="dot" style="background:${escCSS(c)}"></span>`).join('')}</div>
       </div>
     </article>`).join('');
   document.querySelectorAll(".pc").forEach(el=>{
@@ -1774,7 +1794,7 @@ function openModal(id){
   document.getElementById("mStock").textContent=p.stock_mensaje||'';
   const co=document.getElementById("copts");
   const cs=p.colores||[],cn=p.nombres_colores||[];
-  co.innerHTML=cs.map((c,i)=>`<button class="copt${i===0?' sel':''}" style="background:${c}" data-ci="${i}" title="${cn[i]||''}"></button>`).join('');
+  co.innerHTML=cs.map((c,i)=>`<button class="copt${i===0?' sel':''}" style="background:${escCSS(c)}" data-ci="${i}" title="${escHTML(cn[i]||'')}"></button>`).join('');
   document.getElementById("selC").textContent=cn[0]||'—';
   co.querySelectorAll(".copt").forEach(b=>b.addEventListener("click",()=>{
     selC=+b.dataset.ci;
@@ -1883,7 +1903,7 @@ function renderReviews(reviews){
     const fotos = Array.isArray(r.fotos) ? r.fotos.filter(Boolean) : [];
     const fotosHTML = fotos.length ? `
       <div class="review-item-photos">
-        ${fotos.map((f,i)=>`<div class="review-item-photo" onclick='openRvLightbox(${JSON.stringify(fotos).replace(/'/g,"&#39;")}, ${i})'><img src="${escHTML(f)}" alt="Foto reseña" loading="lazy"></div>`).join('')}
+        ${fotos.map((f,i)=>`<div class="review-item-photo" onclick='openRvLightbox(${JSON.stringify(fotos).replace(/'/g,"&#39;")}, ${i})'><img src="${escURL(f)}" alt="Foto reseña" loading="lazy"></div>`).join('')}
       </div>` : '';
     return `<div class="review-item">
       <div class="review-item-hd">
@@ -2162,7 +2182,8 @@ function openRvLightbox(fotos, idx=0){
   const lb = document.getElementById('rvLightbox');
   const img = document.getElementById('rvLightboxImg');
   if(!lb || !img) return;
-  img.src = fotos[idx];
+  const url = String(fotos[idx]||'');
+  img.src = /^(https?:\/\/|\/)/i.test(url) ? url : '';
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -2178,7 +2199,10 @@ function rvLightboxNav(dir){
   if(!__rvLightboxFotos.length) return;
   __rvLightboxIdx = (__rvLightboxIdx + dir + __rvLightboxFotos.length) % __rvLightboxFotos.length;
   const img = document.getElementById('rvLightboxImg');
-  if(img) img.src = __rvLightboxFotos[__rvLightboxIdx];
+  if(img) {
+    const url = String(__rvLightboxFotos[__rvLightboxIdx]||'');
+    img.src = /^(https?:\/\/|\/)/i.test(url) ? url : '';
+  }
 }
 
 // Cerrar lightbox con ESC y navegar con flechas
@@ -3135,8 +3159,8 @@ function toggleUserMenu(force){
   if(currentUser){
     m.innerHTML=`
       <div class="user-menu-hd">
-        <div>${currentProfile?.nombre||'Usuario'}</div>
-        <div>${currentUser.email}</div>
+        <div>${escHTML(currentProfile?.nombre||'Usuario')}</div>
+        <div>${escHTML(currentUser.email||'')}</div>
       </div>
       <button class="user-menu-item" data-act="account">Mi cuenta</button>
       <button class="user-menu-item" data-act="pedidos">Mis pedidos</button>
