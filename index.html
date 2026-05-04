@@ -919,34 +919,36 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
 @media (max-width:760px){
   .hero{margin-top:72px!important}
 
-  /* Carrusel móvil: 2 filas (slides + bottom). Las 3 imágenes ocupan
-     la misma celda del grid superpuestas, y el JS alterna .active */
+  /* En móvil, layout SIMPLE en columna sin grid raro */
   .hero-trip{
     grid-template-columns:none!important;
-    display:grid!important;
-    grid-template-rows:auto auto!important;
-    grid-template-areas:"slides" "bottom"!important;
+    display:flex!important;
+    flex-direction:column!important;
     height:auto!important;
     min-height:0!important;
+    max-height:none!important;
     background:#000!important;
     overflow:visible!important;
+    position:relative;
   }
-  /* Las imgs se apilan en la misma área "slides" */
+
+  /* Wrapper de las imágenes — usa el primer img y los demás se ponen
+     encima con un truco de position. Mejor approach: cada img mantiene
+     position:relative pero solo se muestra una a la vez con display */
   .hero-trip > .hero-trip-img{
-    grid-area:slides!important;
     width:100%!important;
     aspect-ratio:1.05/1!important;
-    opacity:0;
-    transition:opacity .6s ease-in-out;
-    pointer-events:none;
-    position:relative!important;
+    flex:none!important;
     border-left:none!important;
     border-top:none!important;
+    transition:opacity .5s ease-in-out;
+  }
+  /* Por defecto solo se ve la primera imagen */
+  .hero-trip > .hero-trip-img:not(.active){
+    display:none!important;
   }
   .hero-trip > .hero-trip-img.active{
-    opacity:1;
-    pointer-events:auto;
-    z-index:1;
+    display:block!important;
   }
 
   .hero-trip-word{
@@ -957,14 +959,14 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
     text-align:center!important;
   }
 
-  /* Card y CTA en la fila "bottom" */
+  /* Bottom: en flujo normal, después de la imagen activa */
   .hero-trip-bottom{
-    grid-area:bottom!important;
     position:static!important;
     flex-direction:column!important;
     width:100%!important;
     max-width:100%!important;
     display:flex!important;
+    flex:none!important;
   }
   .hero-trip-card{
     position:static!important;
@@ -983,7 +985,7 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
     align-self:auto!important;
   }
 
-  /* Indicadores de carrusel (puntitos) */
+  /* Indicadores del carrusel */
   .hero-trip-dots{
     display:flex!important;
     justify-content:center;
@@ -1010,8 +1012,13 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
   .fb{margin:0 14px 0 0!important}
 }
 
-/* Desktop: dots ocultos, todas las imgs visibles */
+/* Desktop: dots ocultos, todas las imágenes visibles */
 .hero-trip-dots{display:none}
+@media (min-width:761px){
+  /* Asegurar que en desktop las 3 imágenes se vean siempre,
+     ignorando la clase .active del JS móvil */
+  .hero-trip > .hero-trip-img{display:block!important}
+}
 
 /* ── Footer: monocromático ── */
 footer{background:#000!important;color:#fff!important}
