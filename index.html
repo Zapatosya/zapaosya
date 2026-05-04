@@ -917,106 +917,156 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
   .hero-trip-cta{align-self:auto;justify-content:center}
 }
 @media (max-width:760px){
-  .hero{margin-top:72px!important}
-
-  /* En móvil, layout SIMPLE en columna sin grid raro */
-  .hero-trip{
-    grid-template-columns:none!important;
+  /* ═══════════════════════════════════════════════════════════
+     MÓVIL: REINICIO TOTAL DEL HERO
+     Sobrescribe absolutamente todo el CSS desktop
+     ═══════════════════════════════════════════════════════════ */
+  section.hero{
+    margin-top:72px!important;
+    background:#fff!important;
+    padding:0!important;
+    display:block!important;
+    width:100%!important;
+  }
+  section.hero .hero-trip{
     display:flex!important;
     flex-direction:column!important;
+    grid-template-columns:none!important;
+    grid-template-rows:none!important;
+    grid-template-areas:none!important;
+    width:100%!important;
     height:auto!important;
     min-height:0!important;
     max-height:none!important;
-    background:#000!important;
+    background:#fff!important;
     overflow:visible!important;
-    position:relative;
+    position:static!important;
+    aspect-ratio:auto!important;
   }
 
-  /* Wrapper de las imágenes — usa el primer img y los demás se ponen
-     encima con un truco de position. Mejor approach: cada img mantiene
-     position:relative pero solo se muestra una a la vez con display */
-  .hero-trip > .hero-trip-img{
+  /* Imágenes: solo se ve la .active, en orden 1 */
+  section.hero .hero-trip > .hero-trip-img{
+    position:relative!important;
     width:100%!important;
+    height:auto!important;
     aspect-ratio:1.05/1!important;
     flex:none!important;
-    border-left:none!important;
-    border-top:none!important;
-    transition:opacity .5s ease-in-out;
+    border:none!important;
+    margin:0!important;
+    padding:0!important;
+    grid-area:auto!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    order:1!important;
   }
-  /* Por defecto solo se ve la primera imagen */
-  .hero-trip > .hero-trip-img:not(.active){
+  section.hero .hero-trip > .hero-trip-img:not(.active){
     display:none!important;
   }
-  .hero-trip > .hero-trip-img.active{
+  section.hero .hero-trip > .hero-trip-img.active{
     display:block!important;
   }
 
-  .hero-trip-word{
+  /* Palabra grande */
+  section.hero .hero-trip-word{
+    position:absolute!important;
     display:block!important;
-    font-size:clamp(1.8rem,8.5vw,2.8rem)!important;
     top:auto!important;
     bottom:8%!important;
+    left:0!important;
+    right:0!important;
     text-align:center!important;
+    font-size:clamp(1.8rem,8.5vw,2.8rem)!important;
+    color:#fff!important;
+    text-shadow:0 2px 8px rgba(0,0,0,.4)!important;
+    z-index:1!important;
   }
 
-  /* Bottom: en flujo normal, después de la imagen activa */
-  .hero-trip-bottom{
+  /* Bottom (caja blanca + botón): SIEMPRE en orden 2 (después de imagen) */
+  section.hero .hero-trip-bottom{
     position:static!important;
+    display:flex!important;
     flex-direction:column!important;
     width:100%!important;
     max-width:100%!important;
-    display:flex!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    top:auto!important;
+    z-index:auto!important;
     flex:none!important;
+    order:2!important;
+    margin:0!important;
+    padding:0!important;
+    grid-area:auto!important;
   }
-  .hero-trip-card{
+  section.hero .hero-trip-card{
     position:static!important;
+    display:block!important;
+    width:100%!important;
     max-width:100%!important;
-    padding:24px 22px 8px!important;
+    padding:24px 22px 20px!important;
     background:#fff!important;
+    box-sizing:border-box!important;
+    flex:none!important;
+    margin:0!important;
   }
-  .hero-trip-cta{
+  section.hero .hero-trip-cta{
     position:static!important;
     display:flex!important;
     width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
     justify-content:center!important;
-    padding:20px 22px!important;
-    margin:0!important;
-    box-sizing:border-box;
+    align-items:center!important;
     align-self:auto!important;
+    padding:22px 22px!important;
+    margin:0!important;
+    background:#000!important;
+    color:#fff!important;
+    flex:none!important;
   }
 
-  /* Indicadores del carrusel */
-  .hero-trip-dots{
+  section.hero .hero-trip-eyebrow{margin-bottom:10px!important;font-size:.68rem!important}
+  section.hero .hero-trip-title{font-size:1.25rem!important;margin-bottom:10px!important}
+  section.hero .hero-trip-desc{font-size:.84rem!important}
+
+  /* Indicadores del carrusel (puntitos) — siempre visibles en móvil,
+     siempre debajo del hero, en bloque centrado */
+  section.hero .hero-trip-dots{
     display:flex!important;
-    justify-content:center;
-    gap:8px;
-    padding:14px 0;
-    background:#000;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:16px 0!important;
+    background:#000!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    position:static!important;
   }
-  .hero-trip-dot{
-    width:24px;
-    height:2px;
-    background:rgba(255,255,255,.3);
-    transition:all .3s ease;
-    cursor:pointer;
-    border:none;
-    padding:0;
+  section.hero .hero-trip-dot{
+    width:24px!important;
+    height:2px!important;
+    background:rgba(255,255,255,.3)!important;
+    transition:all .3s ease!important;
+    cursor:pointer!important;
+    border:none!important;
+    padding:0!important;
+    border-radius:0!important;
+    flex:none!important;
   }
-  .hero-trip-dot.active{background:#fff;width:36px}
-
-  .hero-trip-eyebrow{margin-bottom:10px!important}
-  .hero-trip-title{font-size:1.25rem!important;margin-bottom:10px!important}
-  .hero-trip-desc{font-size:.84rem!important}
+  section.hero .hero-trip-dot.active{
+    background:#fff!important;
+    width:36px!important;
+  }
 
   .filters{flex-wrap:wrap;justify-content:flex-start!important;overflow-x:auto;gap:0!important}
   .fb{margin:0 14px 0 0!important}
 }
 
-/* Desktop: dots ocultos, todas las imágenes visibles */
+/* Desktop: dots ocultos */
 .hero-trip-dots{display:none}
 @media (min-width:761px){
-  /* Asegurar que en desktop las 3 imágenes se vean siempre,
-     ignorando la clase .active del JS móvil */
   .hero-trip > .hero-trip-img{display:block!important}
 }
 
@@ -1357,49 +1407,7 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
   .urg-in span{padding:0!important;margin:0!important}
 }
 
-/* ── 11. Hero móvil: separar caja blanca del CTA ── */
-@media (max-width:760px){
-  .hero-trip{
-    display:flex!important;
-    flex-direction:column!important;
-    height:auto!important;
-    min-height:auto!important;
-    background:#fff!important;
-  }
-  .hero-trip-img{
-    aspect-ratio:1.4/1!important;
-    width:100%!important;
-    order:1;
-  }
-  .hero-trip-img+.hero-trip-img{border-left:none!important;border-top:1px solid rgba(255,255,255,.1)!important}
-  .hero-trip-word{
-    display:block!important;
-    font-size:clamp(1.8rem,8vw,2.6rem)!important;
-    top:auto!important;
-    bottom:10%!important;
-    text-align:center!important;
-  }
-  .hero-trip-card{
-    position:static!important;
-    max-width:100%!important;
-    padding:24px 22px 8px!important;
-    background:#fff!important;
-    order:2;
-  }
-  .hero-trip-cta{
-    position:static!important;
-    display:flex!important;
-    width:100%!important;
-    justify-content:center!important;
-    padding:20px 22px!important;
-    margin:0!important;
-    order:3;
-    box-sizing:border-box;
-  }
-  .hero-trip-eyebrow{margin-bottom:10px!important}
-  .hero-trip-title{font-size:1.25rem!important;margin-bottom:10px!important}
-  .hero-trip-desc{font-size:.84rem!important}
-}
+/* ── 11. Hero móvil: gestionado en bloque principal de móvil arriba ── */
 
 /* ── 12. Footer: hacer visible el "ZapatosYa" en negro sobre negro ── */footer{padding:48px 24px 32px!important}
 .footer-trust{
@@ -1478,13 +1486,8 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 }
 .flinks a:hover{color:#fff!important}
 
-/* ── 14. Móvil: separar botón "COMPRAR AHORA" de banda urg ──
-   En la captura se veía todo negro pegado sin separación */
+/* ── 14. Móvil: separación visual entre CTA y banda urg ── */
 @media (max-width:760px){
-  .hero-trip-cta{
-    border-bottom:1px solid #fff!important;
-    box-shadow:inset 0 -1px 0 rgba(255,255,255,.5)!important;
-  }
   /* Margen blanco de respiro entre el CTA negro y la urg negra */
   .urg{
     margin-top:0!important;
