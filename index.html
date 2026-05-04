@@ -957,10 +957,14 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
   border-radius:0!important;
   margin:0 2px;
   position:relative;
-  display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
 }
+.user-btn,.cart-ic{display:inline-flex!important}
+/* El admin-btn NO lleva display:inline-flex aquí porque su HTML tiene
+   style="display:none" inline y el JS lo cambia a 'flex' cuando el
+   usuario es admin. Si forzamos display aquí, se vería siempre. */
+.admin-btn{display:inline-flex}
 .user-btn:hover,.cart-ic:hover,.admin-btn:hover{
   background:transparent!important;
 }
@@ -1292,8 +1296,7 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
   .hero-trip-desc{font-size:.84rem!important}
 }
 
-/* ── 12. Footer: hacer visible el "ZapatosYa" en negro sobre negro ── */
-footer{padding:48px 24px 32px!important}
+/* ── 12. Footer: hacer visible el "ZapatosYa" en negro sobre negro ── */footer{padding:48px 24px 32px!important}
 .footer-trust{
   border-bottom:1px solid rgba(255,255,255,.12)!important;
   padding:0 0 24px!important;
@@ -1369,6 +1372,25 @@ footer{padding:48px 24px 32px!important}
   font-weight:500!important;
 }
 .flinks a:hover{color:#fff!important}
+
+/* ── 14. Móvil: separar botón "COMPRAR AHORA" de banda urg ──
+   En la captura se veía todo negro pegado sin separación */
+@media (max-width:760px){
+  .hero-trip-cta{
+    border-bottom:1px solid #fff!important;
+    box-shadow:inset 0 -1px 0 rgba(255,255,255,.5)!important;
+  }
+  /* Margen blanco de respiro entre el CTA negro y la urg negra */
+  .urg{
+    margin-top:0!important;
+    border-top:2px solid #fff!important;
+  }
+  /* Que la urg en móvil tenga más padding interno */
+  .urg-in{padding:6px 8px!important}
+}
+
+/* En desktop también, por si acaso */
+.urg{border-top:1px solid rgba(255,255,255,.08)}
 
 /* FIN ZY-ICONS */
 
