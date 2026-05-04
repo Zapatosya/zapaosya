@@ -162,3 +162,296 @@ img{max-width:100%;display:block}
 @media(max-width:420px){
   .lh-promise{grid-template-columns:1fr}
 }
+
+/* ============================================================
+   ZY-SKIN para páginas legales
+   Alinea las páginas legales con el estilo del home:
+   blanco/negro, sin rojo, sin serif itálica, todo cuadrado.
+   Para revertir: borra desde aquí hasta el FIN.
+   ============================================================ */
+
+/* 1. Variables sobrescritas */
+:root{
+  --red:#000!important;
+  --red2:#000!important;
+  --red-soft:#fafafa!important;
+  --bg:#fff!important;
+}
+
+body{background:#fff!important;color:#000!important}
+
+/* 2. Header limpio */
+.lh-hdr{
+  background:#fff!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  border-bottom:1px solid #000!important;
+  padding:14px 0!important;
+}
+.lh-back{
+  font-weight:500!important;
+  font-size:.72rem!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  color:#000!important;
+}
+.lh-back:hover{color:#000!important;opacity:.6;transform:none!important}
+
+/* Nav central */
+.lh-nav a{
+  font-weight:500!important;
+  font-size:.72rem!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  color:#666!important;
+}
+.lh-nav a:hover,.lh-nav a.active{color:#000!important}
+.lh-nav a::after{background:#000!important}
+
+/* Hamburguesa */
+.lh-mb span{background:#000!important;height:1px!important}
+
+/* 3. Drawer móvil */
+.lh-drawer{background:#000!important}
+.lh-drawer-link{
+  font-weight:500!important;
+  font-size:.95rem!important;
+  letter-spacing:.16em!important;
+  text-transform:uppercase!important;
+}
+.lh-drawer-link:hover,.lh-drawer-link.active{
+  background:rgba(255,255,255,.08)!important;
+  padding-left:36px!important;
+}
+.lh-drawer-link.active .lh-drawer-link-text,
+.lh-drawer-link:hover .lh-drawer-link-text{color:#fff!important}
+.lh-drawer-close{border-radius:0!important}
+.lh-drawer-close:hover{background:#fff!important;color:#000!important;border-color:#fff!important}
+
+/* WhatsApp del drawer: cuadrado y blanco/negro */
+.lh-drawer-wa{
+  background:#fff!important;
+  color:#000!important;
+  border-radius:0!important;
+  font-weight:500!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  font-size:.72rem!important;
+  padding:16px 18px!important;
+}
+.lh-drawer-wa:hover{
+  background:#000!important;
+  color:#fff!important;
+  border:1px solid #fff!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+
+/* 4. HERO editorial — sin gradientes ni adornos */
+.lh-hero{
+  background:#000!important;
+  padding:100px 32px 80px!important;
+  border-bottom:none!important;
+}
+.lh-hero::before,.lh-hero::after{display:none!important}
+.lh-eyebrow{
+  color:#fff!important;
+  font-weight:500!important;
+  font-size:.7rem!important;
+  letter-spacing:.22em!important;
+}
+.lh-eyebrow::before{background:#fff!important;width:30px!important}
+
+.lh-title{
+  font-family:'Poppins',sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:-.02em!important;
+  font-size:clamp(2.4rem,6vw,4.5rem)!important;
+  text-transform:uppercase!important;
+  line-height:1.05!important;
+}
+.lh-title em{
+  font-style:normal!important;
+  color:#fff!important;
+  font-weight:500!important;
+  text-transform:uppercase!important;
+  border-bottom:2px solid #fff;
+  display:inline-block;
+  line-height:.95;
+}
+.lh-lead{
+  font-family:'Poppins',sans-serif!important;
+  font-size:1rem!important;
+  font-weight:400!important;
+  color:rgba(255,255,255,.7)!important;
+  max-width:580px!important;
+}
+.lh-meta{
+  font-size:.7rem!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  color:rgba(255,255,255,.4)!important;
+}
+.lh-meta-dot{background:#fff!important;border-radius:0!important;width:6px!important;height:1px!important}
+
+/* 5. Cuerpo de contenido */
+.lh-body{padding:80px 32px 100px!important}
+
+.lh-num{
+  font-family:'Poppins',sans-serif!important;
+  font-style:normal!important;
+  font-weight:500!important;
+  font-size:.7rem!important;
+  letter-spacing:.22em!important;
+  color:#000!important;
+}
+.lh-num::after{background:#000!important;width:32px!important}
+
+.lh-h2{
+  font-family:'Poppins',sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:-.015em!important;
+  text-transform:uppercase!important;
+  font-size:clamp(1.4rem,2.4vw,1.9rem)!important;
+  color:#000!important;
+}
+
+.lh-h3{
+  font-family:'Poppins',sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:.02em!important;
+  text-transform:uppercase!important;
+  font-size:.85rem!important;
+  color:#000!important;
+}
+
+.lh-p{
+  font-size:.95rem!important;
+  color:#444!important;
+  line-height:1.75!important;
+}
+.lh-p strong{color:#000!important;font-weight:500!important}
+.lh-p a{
+  color:#000!important;
+  font-weight:500!important;
+  border-bottom:1px solid #000!important;
+}
+.lh-p a:hover{color:#000!important;opacity:.6}
+
+/* 6. Listas */
+.lh-list li{
+  font-size:.92rem!important;
+  border-bottom:1px solid #e5e5e5!important;
+}
+.lh-list li::before{background:#000!important;width:14px!important}
+.lh-list li strong{color:#000!important;font-weight:500!important}
+
+.lh-ol li{font-size:.92rem!important;border-bottom:1px solid #e5e5e5!important}
+.lh-ol li::before{
+  font-family:'Poppins',sans-serif!important;
+  font-style:normal!important;
+  font-weight:500!important;
+  color:#000!important;
+  font-size:.7rem!important;
+  letter-spacing:.1em!important;
+}
+
+/* 7. Cards "promesa" cuadradas */
+.lh-promise{
+  border:1px solid #e5e5e5!important;
+  border-radius:0!important;
+  background:#e5e5e5!important;
+}
+.lh-promise-item{
+  background:#fff!important;
+  border-radius:0!important;
+}
+.lh-promise-item:hover{background:#fafafa!important}
+.lh-promise-ico{color:#000!important;width:28px!important;height:28px!important;stroke-width:1.4!important}
+.lh-promise-h{
+  font-weight:500!important;
+  letter-spacing:.05em!important;
+  text-transform:uppercase!important;
+  font-size:.85rem!important;
+  color:#000!important;
+}
+.lh-promise-p{font-size:.82rem!important;color:#666!important}
+
+/* 8. Callout (info importante) cuadrado y monocromático */
+.lh-callout{
+  background:#fafafa!important;
+  border:1px solid #e5e5e5!important;
+  border-left:3px solid #000!important;
+  border-radius:0!important;
+}
+.lh-callout-ico{color:#000!important;stroke-width:1.4!important}
+.lh-callout-h{
+  font-weight:500!important;
+  letter-spacing:.05em!important;
+  text-transform:uppercase!important;
+  font-size:.78rem!important;
+  color:#000!important;
+}
+.lh-callout-p{color:#444!important;font-size:.85rem!important}
+
+/* 9. Contacto card final */
+.lh-contact{
+  background:#000!important;
+  border-radius:0!important;
+  padding:64px 36px!important;
+}
+.lh-contact::before{display:none!important}
+.lh-contact-h{
+  font-family:'Poppins',sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:-.015em!important;
+  text-transform:uppercase!important;
+  font-size:1.6rem!important;
+}
+.lh-contact-h em{
+  font-style:normal!important;
+  color:#fff!important;
+  font-weight:500!important;
+  border-bottom:2px solid #fff;
+  display:inline-block;
+  line-height:.95;
+}
+.lh-contact-p{color:rgba(255,255,255,.7)!important;font-size:.92rem!important}
+.lh-contact-cta{
+  background:#fff!important;
+  color:#000!important;
+  border-radius:0!important;
+  font-weight:500!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  font-size:.72rem!important;
+  padding:18px 32px!important;
+}
+.lh-contact-cta:hover{
+  background:transparent!important;
+  color:#fff!important;
+  outline:1px solid #fff;
+  transform:none!important;
+}
+
+/* 10. Footer monocromático */
+.lh-foot{
+  background:#000!important;
+  padding:32px 24px!important;
+  border-top:none!important;
+}
+.lh-foot-links a{
+  font-weight:500!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  font-size:.7rem!important;
+  color:rgba(255,255,255,.6)!important;
+}
+.lh-foot-links a:hover,.lh-foot-links a.active{color:#fff!important}
+.lh-foot-copy{
+  font-size:.7rem!important;
+  letter-spacing:.06em!important;
+  color:rgba(255,255,255,.35)!important;
+}
+
+/* FIN ZY-SKIN páginas legales */
