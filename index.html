@@ -1213,17 +1213,17 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 /* Limpiar el filter del logo viejo (ya no aplica porque ya no hay <img>) */
 .hdr .logo-img{display:none}
 
-/* Logo del cart drawer: ajustes */
+/* Logo del cart drawer: ahora solo el título "TU CARRITO" */
 .cdh-logo{display:flex;align-items:center;gap:14px}
 .cdh-logo h2{
   color:#fff;
   font-size:1rem!important;
   font-weight:500!important;
-  letter-spacing:.12em!important;
+  letter-spacing:.18em!important;
   text-transform:uppercase!important;
   margin:0!important;
+  font-family:'Poppins',sans-serif;
 }
-.cdh-logo .zy-wordmark{padding-right:14px;border-right:1px solid rgba(255,255,255,.25)}
 
 /* Avatar del chat: iniciales ZY en lugar de cara sonriente */
 .zy-chat-mono{
@@ -1239,6 +1239,136 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
   background:#fff!important;
   width:38px!important;height:38px!important;
 }
+
+/* ── 10. Banda "urg" móvil: arreglar amontonado ──
+   En móvil deja de ser grilla 2x2 y se vuelve una columna sobria, o mejor
+   aún se oculta porque la información ya es redundante con el hero */
+@media (max-width:760px){
+  .urg{padding:10px 16px!important}
+  .urg-in{
+    flex-wrap:wrap!important;
+    gap:10px 18px!important;
+    justify-content:center!important;
+    font-size:.6rem!important;
+    letter-spacing:.14em!important;
+  }
+  .urg-sep{display:none!important}
+  .urg-in span{padding:0!important;margin:0!important}
+}
+
+/* ── 11. Hero móvil: separar caja blanca del CTA ── */
+@media (max-width:760px){
+  .hero-trip{
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:auto!important;
+    background:#fff!important;
+  }
+  .hero-trip-img{
+    aspect-ratio:1.05/1!important;
+    width:100%!important;
+    order:1;
+  }
+  .hero-trip-card{
+    position:static!important;
+    max-width:100%!important;
+    padding:24px 22px 8px!important;
+    background:#fff!important;
+    order:2;
+  }
+  .hero-trip-cta{
+    position:static!important;
+    display:flex!important;
+    width:100%!important;
+    justify-content:center!important;
+    padding:20px 22px!important;
+    margin:0!important;
+    order:3;
+    box-sizing:border-box;
+  }
+  .hero-trip-eyebrow{margin-bottom:10px!important}
+  .hero-trip-title{font-size:1.25rem!important;margin-bottom:10px!important}
+  .hero-trip-desc{font-size:.84rem!important}
+}
+
+/* ── 12. Footer: hacer visible el "ZapatosYa" en negro sobre negro ── */
+footer{padding:48px 24px 32px!important}
+.footer-trust{
+  border-bottom:1px solid rgba(255,255,255,.12)!important;
+  padding:0 0 24px!important;
+  margin-bottom:24px!important;
+  gap:14px 28px!important;
+  font-size:.7rem!important;
+  letter-spacing:.16em!important;
+  text-transform:uppercase!important;
+  color:rgba(255,255,255,.55)!important;
+}
+.footer-payments{
+  border-bottom:1px solid rgba(255,255,255,.12)!important;
+  padding:0 0 22px!important;
+  margin-bottom:22px!important;
+}
+.footer-payments-title{
+  font-size:.66rem!important;
+  letter-spacing:.22em!important;
+  color:rgba(255,255,255,.5)!important;
+  margin-bottom:14px!important;
+}
+.footer-payment-icons{gap:8px!important}
+.pay-tag{
+  background:transparent!important;
+  border:1px solid rgba(255,255,255,.25)!important;
+  color:rgba(255,255,255,.85)!important;
+  font-size:.7rem!important;
+  letter-spacing:.06em!important;
+  font-weight:500!important;
+  text-transform:none!important;
+  padding:7px 14px!important;
+  border-radius:0!important;
+}
+.pay-tag-mp{
+  background:#fff!important;
+  color:#000!important;
+  border-color:#fff!important;
+}
+.footer-bottom{padding-top:8px!important;text-align:center!important}
+.footer-logo-line{
+  font-family:'Poppins',sans-serif!important;
+  font-size:.78rem!important;
+  letter-spacing:.16em!important;
+  text-transform:uppercase!important;
+  color:rgba(255,255,255,.7)!important;
+  font-weight:400!important;
+}
+/* CRITICAL: el <strong> dentro del footer-logo-line era rojo (#E63946) */
+/* Como yo forcé --red:#000, quedó negro sobre negro = invisible. Lo hago blanco. */
+.footer-logo-line strong{
+  color:#fff!important;
+  font-weight:500!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+  font-size:1.1rem!important;
+  display:inline-block;
+  margin-right:6px;
+}
+.flinks{
+  display:flex!important;
+  justify-content:center!important;
+  flex-wrap:wrap!important;
+  gap:18px 28px!important;
+  margin-top:22px!important;
+  padding-top:22px!important;
+  border-top:1px solid rgba(255,255,255,.12)!important;
+}
+.flinks a{
+  color:rgba(255,255,255,.6)!important;
+  font-size:.7rem!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  font-weight:500!important;
+}
+.flinks a:hover{color:#fff!important}
 
 /* FIN ZY-ICONS */
 
@@ -1790,9 +1920,6 @@ FIN HERO_BACKUP -->
 <aside class="cdw" id="cDw">
   <div class="cdh">
     <div class="cdh-logo">
-      <span class="zy-wordmark zy-wm-onblack">
-        <span class="zy-wm-name">ZapatosYa</span>
-      </span>
       <h2>Tu carrito</h2>
     </div>
     <button class="cdc" id="cClose">✕</button>
