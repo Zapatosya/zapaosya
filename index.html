@@ -913,10 +913,10 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
 }
 @media (max-width:760px){
   .hero{margin-top:72px!important}
-  .hero-trip{grid-template-columns:1fr;height:auto;min-height:520px}
-  .hero-trip-img{aspect-ratio:1.1/1}
-  .hero-trip-img:nth-child(2),.hero-trip-img:nth-child(3){display:none}
-  .hero-trip-word{display:none}
+  .hero-trip{grid-template-columns:1fr;height:auto;min-height:auto}
+  .hero-trip-img{aspect-ratio:1.4/1}
+  .hero-trip-img+.hero-trip-img{border-left:none!important;border-top:1px solid rgba(255,255,255,.08)}
+  .hero-trip-word{font-size:clamp(1.6rem,9vw,2.6rem);top:auto;bottom:8%;text-align:center}
   .hero-trip-card{position:static;max-width:100%;padding:28px 22px}
   .hero-trip-cta{position:static;display:flex;width:100%;justify-content:center;padding:20px}
   .filters{flex-wrap:wrap;justify-content:flex-start!important;overflow-x:auto;gap:0!important}
@@ -1270,9 +1270,17 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
     background:#fff!important;
   }
   .hero-trip-img{
-    aspect-ratio:1.05/1!important;
+    aspect-ratio:1.4/1!important;
     width:100%!important;
     order:1;
+  }
+  .hero-trip-img+.hero-trip-img{border-left:none!important;border-top:1px solid rgba(255,255,255,.1)!important}
+  .hero-trip-word{
+    display:block!important;
+    font-size:clamp(1.8rem,8vw,2.6rem)!important;
+    top:auto!important;
+    bottom:10%!important;
+    text-align:center!important;
   }
   .hero-trip-card{
     position:static!important;
@@ -5191,13 +5199,28 @@ function applyHeroBanner(b){
     const el = document.getElementById(id);
     if(el && url) el.style.backgroundImage = `url('${url}')`;
   };
+  // Set text + auto-hide si está vacío
   const setText = (id, text) => {
     const el = document.getElementById(id);
-    if(el && text != null) el.textContent = text;
+    if(!el) return;
+    if(text){
+      el.textContent = text;
+      el.style.display = '';
+    }else{
+      el.textContent = '';
+      el.style.display = 'none';
+    }
   };
   const setHTML = (id, html) => {
     const el = document.getElementById(id);
-    if(el && html != null) el.innerHTML = html;
+    if(!el) return;
+    if(html){
+      el.innerHTML = html;
+      el.style.display = '';
+    }else{
+      el.innerHTML = '';
+      el.style.display = 'none';
+    }
   };
   setImg('heroImg1', b.imagen_1);
   setImg('heroImg2', b.imagen_2);
@@ -5206,16 +5229,33 @@ function applyHeroBanner(b){
   setText('heroWord2', b.palabra_2);
   setText('heroWord3', b.palabra_3);
   setText('heroEyebrow', b.eyebrow);
-  // El título permite <br> para salto de línea (escapado en otro lado)
+  // El título permite saltos de línea con \n
   if(b.titulo){
     const safe = escHTML(b.titulo).replace(/\n/g, '<br>');
     setHTML('heroTitle', safe);
+  }else{
+    setHTML('heroTitle', '');
   }
   setText('heroDesc', b.descripcion);
-  setText('heroCtaText', b.cta_texto);
-  if(b.cta_link){
-    const cta = document.getElementById('heroCta');
-    if(cta) cta.setAttribute('href', b.cta_link);
+
+  // Si TODOS los textos de la card están vacíos, ocultar la card entera
+  const card = document.querySelector('.hero-trip-card');
+  if(card){
+    const hasAnyText = b.eyebrow || b.titulo || b.descripcion;
+    card.style.display = hasAnyText ? '' : 'none';
+  }
+
+  // Botón: si no hay texto del CTA, ocultar el botón completo
+  const cta = document.getElementById('heroCta');
+  if(cta){
+    if(b.cta_texto){
+      cta.style.display = '';
+      const ctaText = document.getElementById('heroCtaText');
+      if(ctaText) ctaText.textContent = b.cta_texto;
+      if(b.cta_link) cta.setAttribute('href', b.cta_link);
+    }else{
+      cta.style.display = 'none';
+    }
   }
 }
 
@@ -5260,7 +5300,7 @@ async function renderAdminBanner(){
           <td>${estado}</td>
           <td>
             <div style="font-size:.72rem;color:#888;text-transform:uppercase;letter-spacing:1px">${escHTML(b.eyebrow||'')}</div>
-            <strong>${escHTML(b.titulo||'(sin título)')}</strong>
+            <strong>${escHTML(b.titulo || b.eyebrow || '(banner solo de imágenes)')}</strong>
           </td>
           <td style="font-size:.82rem;color:var(--gray)">${escHTML(fechas)}</td>
           <td>${b.prioridad||0}</td>
@@ -5451,8 +5491,12 @@ window.saveBanner = async function(){
     activo: document.getElementById('bnActive').value === 'true'
   };
 
-  // Validación básica
-  if(!payload.titulo){ showToast('El título es obligatorio'); return; }
+  // Validación básica: al menos algo (imagen o texto) debe haber
+  const hasAnyImage = payload.imagen_1 || payload.imagen_2 || payload.imagen_3;
+  const hasAnyText = payload.titulo || payload.eyebrow || payload.descripcion || payload.cta_texto;
+  if(!hasAnyImage && !hasAnyText){
+    showToast('Sube al menos una imagen o escribe algún texto'); return;
+  }
   if(payload.fecha_inicio && payload.fecha_fin && payload.fecha_inicio > payload.fecha_fin){
     showToast('La fecha de inicio no puede ser posterior a la de fin'); return;
   }
