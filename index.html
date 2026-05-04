@@ -901,27 +901,117 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
 .hero-trip-img{position:relative;background-size:cover;background-position:center;background-color:#1a1a1a;overflow:hidden}
 .hero-trip-img+.hero-trip-img{border-left:1px solid rgba(255,255,255,.08)}
 .hero-trip-word{position:absolute;top:6%;left:0;right:0;text-align:center;color:#fff;font-family:'Poppins',sans-serif;font-weight:500;letter-spacing:.08em;font-size:clamp(2rem,5vw,3.8rem);line-height:1;z-index:2}
-.hero-trip-card{position:absolute;left:0;bottom:0;background:#fff;padding:28px 36px 32px;max-width:420px;z-index:3}
+
+/* Contenedor flex que mantiene SIEMPRE pegados card + CTA */
+.hero-trip-bottom{position:absolute;left:0;bottom:0;display:flex;align-items:stretch;z-index:3;max-width:100%}
+.hero-trip-card{background:#fff;padding:28px 36px 32px;max-width:420px;flex-shrink:0}
 .hero-trip-eyebrow{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:#000;margin-bottom:14px;font-weight:500}
 .hero-trip-title{font-family:'Poppins',sans-serif;font-weight:500;font-size:1.5rem;letter-spacing:-.015em;color:#000;margin-bottom:14px;line-height:1.15;text-transform:uppercase}
 .hero-trip-desc{font-size:.85rem;color:#444;line-height:1.6;margin-bottom:0;font-weight:400}
-.hero-trip-cta{position:absolute;bottom:0;left:420px;background:#000;color:#fff;padding:22px 38px;font-weight:500;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;display:inline-flex;align-items:center;gap:16px;z-index:3;text-decoration:none;transition:background .2s ease;border:none}
+.hero-trip-cta{background:#000;color:#fff;padding:22px 38px;font-weight:500;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;display:inline-flex;align-items:center;gap:16px;text-decoration:none;transition:background .2s ease;border:none;flex-shrink:0;align-self:flex-end}
 .hero-trip-cta:hover{background:#fff;color:#000;outline:1px solid #000}
 .hero-trip-cta svg{width:16px;height:16px}
 @media (max-width:900px){
-  .hero-trip-cta{left:auto;right:0;bottom:auto;top:0;padding:18px 28px}
+  .hero-trip-bottom{flex-direction:column;left:0;right:0}
+  .hero-trip-card{max-width:100%}
+  .hero-trip-cta{align-self:auto;justify-content:center}
 }
 @media (max-width:760px){
   .hero{margin-top:72px!important}
-  .hero-trip{grid-template-columns:1fr;height:auto;min-height:auto}
-  .hero-trip-img{aspect-ratio:1.4/1}
-  .hero-trip-img+.hero-trip-img{border-left:none!important;border-top:1px solid rgba(255,255,255,.08)}
-  .hero-trip-word{font-size:clamp(1.6rem,9vw,2.6rem);top:auto;bottom:8%;text-align:center}
-  .hero-trip-card{position:static;max-width:100%;padding:28px 22px}
-  .hero-trip-cta{position:static;display:flex;width:100%;justify-content:center;padding:20px}
+
+  /* Carrusel móvil: 2 filas (slides + bottom). Las 3 imágenes ocupan
+     la misma celda del grid superpuestas, y el JS alterna .active */
+  .hero-trip{
+    grid-template-columns:none!important;
+    display:grid!important;
+    grid-template-rows:auto auto!important;
+    grid-template-areas:"slides" "bottom"!important;
+    height:auto!important;
+    min-height:0!important;
+    background:#000!important;
+    overflow:visible!important;
+  }
+  /* Las imgs se apilan en la misma área "slides" */
+  .hero-trip > .hero-trip-img{
+    grid-area:slides!important;
+    width:100%!important;
+    aspect-ratio:1.05/1!important;
+    opacity:0;
+    transition:opacity .6s ease-in-out;
+    pointer-events:none;
+    position:relative!important;
+    border-left:none!important;
+    border-top:none!important;
+  }
+  .hero-trip > .hero-trip-img.active{
+    opacity:1;
+    pointer-events:auto;
+    z-index:1;
+  }
+
+  .hero-trip-word{
+    display:block!important;
+    font-size:clamp(1.8rem,8.5vw,2.8rem)!important;
+    top:auto!important;
+    bottom:8%!important;
+    text-align:center!important;
+  }
+
+  /* Card y CTA en la fila "bottom" */
+  .hero-trip-bottom{
+    grid-area:bottom!important;
+    position:static!important;
+    flex-direction:column!important;
+    width:100%!important;
+    max-width:100%!important;
+    display:flex!important;
+  }
+  .hero-trip-card{
+    position:static!important;
+    max-width:100%!important;
+    padding:24px 22px 8px!important;
+    background:#fff!important;
+  }
+  .hero-trip-cta{
+    position:static!important;
+    display:flex!important;
+    width:100%!important;
+    justify-content:center!important;
+    padding:20px 22px!important;
+    margin:0!important;
+    box-sizing:border-box;
+    align-self:auto!important;
+  }
+
+  /* Indicadores de carrusel (puntitos) */
+  .hero-trip-dots{
+    display:flex!important;
+    justify-content:center;
+    gap:8px;
+    padding:14px 0;
+    background:#000;
+  }
+  .hero-trip-dot{
+    width:24px;
+    height:2px;
+    background:rgba(255,255,255,.3);
+    transition:all .3s ease;
+    cursor:pointer;
+    border:none;
+    padding:0;
+  }
+  .hero-trip-dot.active{background:#fff;width:36px}
+
+  .hero-trip-eyebrow{margin-bottom:10px!important}
+  .hero-trip-title{font-size:1.25rem!important;margin-bottom:10px!important}
+  .hero-trip-desc{font-size:.84rem!important}
+
   .filters{flex-wrap:wrap;justify-content:flex-start!important;overflow-x:auto;gap:0!important}
   .fb{margin:0 14px 0 0!important}
 }
+
+/* Desktop: dots ocultos, todas las imgs visibles */
+.hero-trip-dots{display:none}
 
 /* ── Footer: monocromático ── */
 footer{background:#000!important;color:#fff!important}
@@ -1475,9 +1565,9 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
      Para revertir al hero anterior: busca "HERO_BACKUP" más abajo.
      ============================================================ -->
 <section class="hero">
-  <div class="hero-trip">
+  <div class="hero-trip" id="heroTrip">
 
-    <div class="hero-trip-img" id="heroImg1" style="background-image:url('/img/hero/hero-1.webp');">
+    <div class="hero-trip-img active" id="heroImg1" style="background-image:url('/img/hero/hero-1.webp');">
       <div class="hero-trip-word" id="heroWord1">CAMINA</div>
     </div>
 
@@ -1489,17 +1579,26 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
       <div class="hero-trip-word" id="heroWord3">LLEGA</div>
     </div>
 
-    <div class="hero-trip-card">
-      <div class="hero-trip-eyebrow" id="heroEyebrow">Nueva colección 2026</div>
-      <div class="hero-trip-title" id="heroTitle">Tenis hechos<br>en Colombia.</div>
-      <p class="hero-trip-desc" id="heroDesc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
+    <div class="hero-trip-bottom">
+      <div class="hero-trip-card">
+        <div class="hero-trip-eyebrow" id="heroEyebrow">Nueva colección 2026</div>
+        <div class="hero-trip-title" id="heroTitle">Tenis hechos<br>en Colombia.</div>
+        <p class="hero-trip-desc" id="heroDesc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
+      </div>
+
+      <a href="#productos" id="heroCta" class="hero-trip-cta">
+        <span id="heroCtaText">Comprar ahora</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
 
-    <a href="#productos" id="heroCta" class="hero-trip-cta">
-      <span id="heroCtaText">Comprar ahora</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </a>
+  </div>
 
+  <!-- Indicadores del carrusel (solo visibles en móvil) -->
+  <div class="hero-trip-dots" id="heroDots">
+    <button class="hero-trip-dot active" data-slide="0" aria-label="Imagen 1"></button>
+    <button class="hero-trip-dot" data-slide="1" aria-label="Imagen 2"></button>
+    <button class="hero-trip-dot" data-slide="2" aria-label="Imagen 3"></button>
   </div>
 </section>
 
@@ -5257,6 +5356,9 @@ function applyHeroBanner(b){
       cta.style.display = 'none';
     }
   }
+
+  // Reiniciar el carrusel móvil porque las imágenes pueden haber cambiado
+  if(typeof initHeroCarousel === 'function') initHeroCarousel();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -5524,11 +5626,102 @@ window.saveBanner = async function(){
   }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// CARRUSEL DEL HERO EN MÓVIL — auto-play
+// ═══════════════════════════════════════════════════════════════
+function initHeroCarousel(){
+  const slides = document.querySelectorAll('.hero-trip > .hero-trip-img');
+  const dots = document.querySelectorAll('.hero-trip-dot');
+  if(slides.length === 0) return;
+
+  // Filtrar: solo slides visibles (con imagen). Si una imagen está vacía,
+  // el background-image queda con la URL placeholder, así que aún cuenta.
+  const visibleSlides = Array.from(slides).filter(s => {
+    const bg = s.style.backgroundImage;
+    // Considerar visible si tiene background-image definido
+    return bg && bg !== 'none' && bg !== '';
+  });
+
+  // Si solo hay 1 slide visible, no hay carrusel: ocultar dots
+  const heroDots = document.getElementById('heroDots');
+  if(visibleSlides.length <= 1){
+    if(heroDots) heroDots.style.display = 'none';
+    return;
+  }
+
+  let current = 0;
+  let intervalId = null;
+  let isHovering = false;
+
+  function goTo(idx){
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    if(slides[idx]) slides[idx].classList.add('active');
+    if(dots[idx]) dots[idx].classList.add('active');
+    current = idx;
+  }
+
+  function next(){
+    let nextIdx = (current + 1) % slides.length;
+    // Si la siguiente no tiene imagen, saltarla
+    let attempts = 0;
+    while(attempts < slides.length){
+      const bg = slides[nextIdx]?.style.backgroundImage;
+      if(bg && bg !== 'none' && bg !== '') break;
+      nextIdx = (nextIdx + 1) % slides.length;
+      attempts++;
+    }
+    goTo(nextIdx);
+  }
+
+  function startAutoplay(){
+    stopAutoplay();
+    intervalId = setInterval(()=>{
+      if(!isHovering && !document.hidden) next();
+    }, 4500);
+  }
+
+  function stopAutoplay(){
+    if(intervalId){ clearInterval(intervalId); intervalId = null; }
+  }
+
+  // Dots: clic para saltar
+  dots.forEach((d, i) => {
+    d.addEventListener('click', ()=>{
+      goTo(i);
+      // Reiniciar el timer para que no salte inmediato
+      startAutoplay();
+    });
+  });
+
+  // Pausar al hover/touch
+  const heroTrip = document.getElementById('heroTrip');
+  if(heroTrip){
+    heroTrip.addEventListener('mouseenter', ()=>{ isHovering = true; });
+    heroTrip.addEventListener('mouseleave', ()=>{ isHovering = false; });
+    // Touch: pausar mientras el dedo está en la imagen
+    heroTrip.addEventListener('touchstart', ()=>{ isHovering = true; }, {passive:true});
+    heroTrip.addEventListener('touchend', ()=>{
+      // Reanudar después de 1s
+      setTimeout(()=>{ isHovering = false; }, 1000);
+    }, {passive:true});
+  }
+
+  // Pausar cuando la pestaña no está activa (ahorra batería)
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden) stopAutoplay();
+    else startAutoplay();
+  });
+
+  startAutoplay();
+}
+
 // ─── INIT ─────────────────────────────────────────────────────
 (async()=>{
   loadCart(); updateCartUI();
   loadProducts();
   loadHeroBanner();  // Cargar banner del hero (si existe en BD)
+  initHeroCarousel(); // Carrusel auto-play en móvil
   // Auth en segundo plano, no bloquea nada
   setTimeout(async()=>{
     try{
