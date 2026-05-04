@@ -984,7 +984,6 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
   /* Bottom (caja blanca + botón): SIEMPRE en orden 2 (después de imagen) */
   section.hero .hero-trip-bottom{
     position:static!important;
-    display:flex!important;
     flex-direction:column!important;
     width:100%!important;
     max-width:100%!important;
@@ -999,9 +998,16 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
     padding:0!important;
     grid-area:auto!important;
   }
+  /* Respetar display:none del JS (cuando todo el bottom está vacío) */
+  section.hero .hero-trip-bottom[style*="display: none"],
+  section.hero .hero-trip-bottom[style*="display:none"]{
+    display:none!important;
+  }
+  section.hero .hero-trip-bottom:not([style*="display: none"]):not([style*="display:none"]){
+    display:flex!important;
+  }
   section.hero .hero-trip-card{
     position:static!important;
-    display:block!important;
     width:100%!important;
     max-width:100%!important;
     padding:24px 22px 20px!important;
@@ -1010,9 +1016,16 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
     flex:none!important;
     margin:0!important;
   }
+  /* Respetar display:none del JS (cuando no hay textos configurados) */
+  section.hero .hero-trip-card[style*="display: none"],
+  section.hero .hero-trip-card[style*="display:none"]{
+    display:none!important;
+  }
+  section.hero .hero-trip-card:not([style*="display: none"]):not([style*="display:none"]){
+    display:block!important;
+  }
   section.hero .hero-trip-cta{
     position:static!important;
-    display:flex!important;
     width:100%!important;
     max-width:100%!important;
     box-sizing:border-box!important;
@@ -1024,6 +1037,15 @@ body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
     background:#000!important;
     color:#fff!important;
     flex:none!important;
+  }
+  /* Si el JS oculta el botón con style="display:none", respetarlo */
+  section.hero .hero-trip-cta[style*="display: none"],
+  section.hero .hero-trip-cta[style*="display:none"]{
+    display:none!important;
+  }
+  /* Si el botón es visible, usar flex */
+  section.hero .hero-trip-cta:not([style*="display: none"]):not([style*="display:none"]){
+    display:flex!important;
   }
 
   section.hero .hero-trip-eyebrow{margin-bottom:10px!important;font-size:.68rem!important}
@@ -5349,8 +5371,8 @@ function applyHeroBanner(b){
 
   // Si TODOS los textos de la card están vacíos, ocultar la card entera
   const card = document.querySelector('.hero-trip-card');
+  const hasAnyText = b.eyebrow || b.titulo || b.descripcion;
   if(card){
-    const hasAnyText = b.eyebrow || b.titulo || b.descripcion;
     card.style.display = hasAnyText ? '' : 'none';
   }
 
@@ -5365,6 +5387,15 @@ function applyHeroBanner(b){
     }else{
       cta.style.display = 'none';
     }
+  }
+
+  // Si TODO el bottom está vacío (sin card y sin cta), ocultarlo entero
+  // para que no quede espacio blanco
+  const bottom = document.querySelector('.hero-trip-bottom');
+  if(bottom){
+    const cardVisible = hasAnyText;
+    const ctaVisible = !!b.cta_texto;
+    bottom.style.display = (cardVisible || ctaVisible) ? '' : 'none';
   }
 
   // Reiniciar el carrusel móvil porque las imágenes pueden haber cambiado
