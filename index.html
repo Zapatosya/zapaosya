@@ -1469,26 +1469,26 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 <section class="hero">
   <div class="hero-trip">
 
-    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-1.webp');">
-      <div class="hero-trip-word">CAMINA</div>
+    <div class="hero-trip-img" id="heroImg1" style="background-image:url('/img/hero/hero-1.webp');">
+      <div class="hero-trip-word" id="heroWord1">CAMINA</div>
     </div>
 
-    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-2.webp');">
-      <div class="hero-trip-word">RÁPIDO</div>
+    <div class="hero-trip-img" id="heroImg2" style="background-image:url('/img/hero/hero-2.webp');">
+      <div class="hero-trip-word" id="heroWord2">RÁPIDO</div>
     </div>
 
-    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-3.webp');">
-      <div class="hero-trip-word">LLEGA</div>
+    <div class="hero-trip-img" id="heroImg3" style="background-image:url('/img/hero/hero-3.webp');">
+      <div class="hero-trip-word" id="heroWord3">LLEGA</div>
     </div>
 
     <div class="hero-trip-card">
-      <div class="hero-trip-eyebrow">Nueva colección 2026</div>
-      <div class="hero-trip-title">Tenis hechos<br>en Colombia.</div>
-      <p class="hero-trip-desc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
+      <div class="hero-trip-eyebrow" id="heroEyebrow">Nueva colección 2026</div>
+      <div class="hero-trip-title" id="heroTitle">Tenis hechos<br>en Colombia.</div>
+      <p class="hero-trip-desc" id="heroDesc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
     </div>
 
-    <a href="#productos" class="hero-trip-cta">
-      Comprar ahora
+    <a href="#productos" id="heroCta" class="hero-trip-cta">
+      <span id="heroCtaText">Comprar ahora</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
 
@@ -1865,6 +1865,7 @@ FIN HERO_BACKUP -->
     </div>
     <div class="admin-tabs">
       <button class="acc-tab act" data-at="dashboard">Dashboard</button>
+      <button class="acc-tab" data-at="banner">Banner</button>
       <button class="acc-tab" data-at="pedidos">Pedidos</button>
       <button class="acc-tab" data-at="productos">Productos</button>
       <button class="acc-tab" data-at="resenas">Reseñas</button>
@@ -4031,6 +4032,9 @@ async function renderAdminTab(tab){
         <div class="stat"><div class="stat-l">Clientes</div><div class="stat-v">${(cli||[]).length}</div></div>
       </div>`;
   }
+  else if(tab==='banner'){
+    await renderAdminBanner();
+  }
   else if(tab==='pedidos'){
     c.innerHTML='<div class="loading">Cargando pedidos...</div>';
     
@@ -5152,10 +5156,335 @@ function chatWhatsapp(){
   window.open(`https://wa.me/573212970591?text=${msg}`, '_blank');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// BANNER DEL HERO — carga dinámica desde Supabase
+// ═══════════════════════════════════════════════════════════════
+async function loadHeroBanner(){
+  try{
+    // Buscar banner activo cuya ventana de fechas incluya hoy (o sin fechas)
+    const today = new Date().toISOString().slice(0,10);
+    const q = `activo=eq.true&order=prioridad.desc,creado_en.desc&limit=1` +
+              `&or=(fecha_inicio.is.null,fecha_inicio.lte.${today})` +
+              `&and=(or(fecha_fin.is.null,fecha_fin.gte.${today}))`;
+    // Nota: PostgREST no soporta and+or anidados así de fácil, por eso
+    // hacemos filtrado client-side. Traemos los activos y filtramos por fecha.
+    const data = await sbSelect('banners', 'activo=eq.true&order=prioridad.desc,creado_en.desc');
+    if(!data || !data.length) return; // No hay banner — usar los valores por defecto del HTML
+
+    const todayStr = new Date().toISOString().slice(0,10);
+    const banner = data.find(b => {
+      const okStart = !b.fecha_inicio || b.fecha_inicio <= todayStr;
+      const okEnd = !b.fecha_fin || b.fecha_fin >= todayStr;
+      return okStart && okEnd;
+    });
+    if(!banner) return;
+
+    applyHeroBanner(banner);
+  }catch(e){
+    console.warn('[banner] No se pudo cargar:', e.message);
+    // No es crítico — el hero queda con los valores por defecto del HTML
+  }
+}
+
+function applyHeroBanner(b){
+  const setImg = (id, url) => {
+    const el = document.getElementById(id);
+    if(el && url) el.style.backgroundImage = `url('${url}')`;
+  };
+  const setText = (id, text) => {
+    const el = document.getElementById(id);
+    if(el && text != null) el.textContent = text;
+  };
+  const setHTML = (id, html) => {
+    const el = document.getElementById(id);
+    if(el && html != null) el.innerHTML = html;
+  };
+  setImg('heroImg1', b.imagen_1);
+  setImg('heroImg2', b.imagen_2);
+  setImg('heroImg3', b.imagen_3);
+  setText('heroWord1', b.palabra_1);
+  setText('heroWord2', b.palabra_2);
+  setText('heroWord3', b.palabra_3);
+  setText('heroEyebrow', b.eyebrow);
+  // El título permite <br> para salto de línea (escapado en otro lado)
+  if(b.titulo){
+    const safe = escHTML(b.titulo).replace(/\n/g, '<br>');
+    setHTML('heroTitle', safe);
+  }
+  setText('heroDesc', b.descripcion);
+  setText('heroCtaText', b.cta_texto);
+  if(b.cta_link){
+    const cta = document.getElementById('heroCta');
+    if(cta) cta.setAttribute('href', b.cta_link);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PANEL ADMIN — pestaña Banner
+// ═══════════════════════════════════════════════════════════════
+async function renderAdminBanner(){
+  const c = document.getElementById('adminContent');
+  c.innerHTML = '<div class="loading">Cargando banners...</div>';
+
+  let banners = [];
+  try{
+    banners = await sbSelect('banners', 'order=prioridad.desc,creado_en.desc') || [];
+  }catch(e){
+    c.innerHTML = `<div class="acc-empty"><p>Error: ${escHTML(e.message)}</p>
+      <p style="margin-top:10px;font-size:.85rem">¿Ya creaste la tabla <code>banners</code> en Supabase? Mira las instrucciones SQL al final.</p></div>`;
+    return;
+  }
+
+  c.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap">
+      <div>
+        <h3 style="font-family:var(--fh);font-weight:700;font-size:1.05rem;margin-bottom:4px">Banners del home</h3>
+        <p style="font-size:.82rem;color:var(--gray)">Solo el banner activo de mayor prioridad cuya ventana de fechas incluya hoy se muestra.</p>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="addBanner()">+ Nuevo banner</button>
+    </div>
+    <div class="admin-wrap"><table class="admin-table">
+      <thead><tr>
+        <th>Estado</th><th>Eyebrow / Título</th><th>Vigencia</th><th>Prioridad</th><th>Acciones</th>
+      </tr></thead>
+      <tbody>${banners.map(b=>{
+        const today = new Date().toISOString().slice(0,10);
+        const okStart = !b.fecha_inicio || b.fecha_inicio <= today;
+        const okEnd = !b.fecha_fin || b.fecha_fin >= today;
+        const vigente = b.activo && okStart && okEnd;
+        const estado = vigente ? '<span style="color:#16a34a;font-weight:600">● Vigente</span>'
+                       : b.activo ? '<span style="color:#d97706">○ Fuera de fecha</span>'
+                       : '<span style="color:#999">○ Inactivo</span>';
+        const fechas = (b.fecha_inicio||'—') + ' → ' + (b.fecha_fin||'—');
+        return `<tr>
+          <td>${estado}</td>
+          <td>
+            <div style="font-size:.72rem;color:#888;text-transform:uppercase;letter-spacing:1px">${escHTML(b.eyebrow||'')}</div>
+            <strong>${escHTML(b.titulo||'(sin título)')}</strong>
+          </td>
+          <td style="font-size:.82rem;color:var(--gray)">${escHTML(fechas)}</td>
+          <td>${b.prioridad||0}</td>
+          <td>
+            <button class="btn btn-out btn-sm" onclick="editBanner('${escHTML(b.id)}')">Editar</button>
+            <button class="btn btn-out btn-sm" onclick="deleteBanner('${escHTML(b.id)}')" style="color:#dc2626;border-color:#dc2626">Eliminar</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>
+    ${banners.length===0 ? '<div class="acc-empty" style="margin-top:20px"><p>Aún no hay banners. Crea uno con el botón de arriba.</p></div>' : ''}
+  `;
+}
+
+window.addBanner = function(){ openBannerForm(null); };
+window.editBanner = async function(id){
+  try{
+    const data = await sbSelect('banners', `id=eq.${encodeURIComponent(id)}&limit=1`);
+    if(!data || !data.length){ showToast('Banner no encontrado'); return; }
+    openBannerForm(data[0]);
+  }catch(e){ showToast('Error al cargar: '+e.message); }
+};
+
+window.deleteBanner = async function(id){
+  if(!confirm('¿Eliminar este banner? Esta acción no se puede deshacer.')) return;
+  try{
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.${encodeURIComponent(id)}`, {
+      method:'DELETE', headers
+    });
+    if(!res.ok) throw new Error(await res.text());
+    showToast('Banner eliminado');
+    renderAdminBanner();
+  }catch(e){ showToast('Error: '+e.message); }
+};
+
+function openBannerForm(banner){
+  const isEdit = !!banner;
+  const b = banner || {
+    activo:true, prioridad:0,
+    eyebrow:'Nueva colección 2026',
+    titulo:'Tenis hechos\nen Colombia.',
+    descripcion:'Diseño, confort y actitud. Tu próximo par está a un clic de distancia.',
+    cta_texto:'Comprar ahora', cta_link:'#productos',
+    palabra_1:'CAMINA', palabra_2:'RÁPIDO', palabra_3:'LLEGA'
+  };
+  const c = document.getElementById('adminContent');
+  c.innerHTML = `
+    <div style="margin-bottom:14px">
+      <button class="btn btn-out btn-sm" onclick="renderAdminBanner()">← Volver</button>
+    </div>
+    <h3 style="font-family:var(--fh);font-weight:700;margin-bottom:14px">${isEdit?'Editar banner':'Nuevo banner'}</h3>
+
+    <input type="hidden" id="bnId" value="${escHTML(b.id||'')}">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px">
+      ${[1,2,3].map(n=>`
+        <div>
+          <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Imagen ${n}</label>
+          <div style="border:1px dashed #ccc;padding:10px;text-align:center;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+            <img id="bnPreview${n}" src="${escHTML(b['imagen_'+n]||'')}" style="max-width:100%;max-height:100px;${b['imagen_'+n]?'':'display:none'}" />
+            <input type="file" id="bnFile${n}" accept="image/*" onchange="uploadBannerImage(${n})" style="font-size:.75rem">
+            <input type="hidden" id="bnImg${n}" value="${escHTML(b['imagen_'+n]||'')}">
+            <div id="bnUp${n}" style="font-size:.72rem;color:#999"></div>
+          </div>
+          <input type="text" id="bnWord${n}" value="${escHTML(b['palabra_'+n]||'')}" placeholder="Palabra ${n}" maxlength="12" style="margin-top:8px;width:100%;padding:8px 10px;border:1px solid #e5e5e5;font-size:.85rem;text-transform:uppercase;letter-spacing:1px">
+          <div style="font-size:.7rem;color:#999;margin-top:4px">Máx 12 caracteres. Se muestra encima de la imagen.</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px">
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Eyebrow (texto pequeño)</label>
+        <input type="text" id="bnEyebrow" value="${escHTML(b.eyebrow||'')}" maxlength="80" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+      </div>
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Título principal (usa Enter para salto de línea)</label>
+        <textarea id="bnTitle" rows="2" maxlength="120" style="width:100%;padding:10px;border:1px solid #e5e5e5;font-family:inherit;resize:vertical">${escHTML(b.titulo||'')}</textarea>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Descripción</label>
+      <textarea id="bnDesc" rows="2" maxlength="240" style="width:100%;padding:10px;border:1px solid #e5e5e5;font-family:inherit;resize:vertical">${escHTML(b.descripcion||'')}</textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Texto del botón</label>
+        <input type="text" id="bnCtaText" value="${escHTML(b.cta_texto||'')}" maxlength="40" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+      </div>
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Link del botón (URL o ancla)</label>
+        <input type="text" id="bnCtaLink" value="${escHTML(b.cta_link||'')}" placeholder="#productos o /coleccion-mama" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:18px;background:#fafafa;padding:14px;border:1px solid #eee">
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Fecha inicio</label>
+        <input type="date" id="bnStart" value="${escHTML(b.fecha_inicio||'')}" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+        <div style="font-size:.7rem;color:#999;margin-top:4px">Vacío = sin restricción</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Fecha fin</label>
+        <input type="date" id="bnEnd" value="${escHTML(b.fecha_fin||'')}" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+        <div style="font-size:.7rem;color:#999;margin-top:4px">Vacío = sin restricción</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Prioridad</label>
+        <input type="number" id="bnPrio" value="${b.prioridad||0}" min="0" max="100" style="width:100%;padding:10px;border:1px solid #e5e5e5">
+        <div style="font-size:.7rem;color:#999;margin-top:4px">Mayor = se muestra primero</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.78rem;font-weight:600;margin-bottom:6px">Estado</label>
+        <select id="bnActive" style="width:100%;padding:10px;border:1px solid #e5e5e5;background:#fff">
+          <option value="true" ${b.activo?'selected':''}>Activo</option>
+          <option value="false" ${!b.activo?'selected':''}>Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-out btn-sm" onclick="renderAdminBanner()">Cancelar</button>
+      <button class="btn btn-red" onclick="saveBanner()">${isEdit?'Guardar cambios':'Crear banner'}</button>
+    </div>
+  `;
+}
+
+window.uploadBannerImage = async function(n){
+  const fileInput = document.getElementById('bnFile'+n);
+  const file = fileInput.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ showToast('Imagen demasiado grande (máx 5MB)'); fileInput.value=''; return; }
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)){ showToast('Solo JPG, PNG o WEBP'); fileInput.value=''; return; }
+
+  const upDiv = document.getElementById('bnUp'+n);
+  upDiv.textContent = 'Subiendo...';
+  try{
+    const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
+    const fileName = `banner-${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const authH = await getAuthHeaders();
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/banners/${fileName}`;
+    const res = await fetch(uploadUrl, {
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_KEY,
+        'Authorization':authH.Authorization,
+        'Content-Type':file.type||'image/jpeg',
+        'x-upsert':'false'
+      },
+      body:file
+    });
+    if(!res.ok){
+      const err = await res.text();
+      throw new Error(`HTTP ${res.status}: ${err}`);
+    }
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/banners/${fileName}`;
+    document.getElementById('bnImg'+n).value = publicUrl;
+    const preview = document.getElementById('bnPreview'+n);
+    preview.src = publicUrl;
+    preview.style.display = 'block';
+    upDiv.textContent = '✓ Subida';
+    setTimeout(()=>upDiv.textContent='', 2500);
+  }catch(e){
+    upDiv.textContent = 'Error: '+e.message;
+  }
+};
+
+window.saveBanner = async function(){
+  const id = document.getElementById('bnId').value;
+  const payload = {
+    imagen_1: document.getElementById('bnImg1').value || null,
+    imagen_2: document.getElementById('bnImg2').value || null,
+    imagen_3: document.getElementById('bnImg3').value || null,
+    palabra_1: document.getElementById('bnWord1').value.trim().toUpperCase() || null,
+    palabra_2: document.getElementById('bnWord2').value.trim().toUpperCase() || null,
+    palabra_3: document.getElementById('bnWord3').value.trim().toUpperCase() || null,
+    eyebrow: document.getElementById('bnEyebrow').value.trim() || null,
+    titulo: document.getElementById('bnTitle').value.trim() || null,
+    descripcion: document.getElementById('bnDesc').value.trim() || null,
+    cta_texto: document.getElementById('bnCtaText').value.trim() || null,
+    cta_link: document.getElementById('bnCtaLink').value.trim() || null,
+    fecha_inicio: document.getElementById('bnStart').value || null,
+    fecha_fin: document.getElementById('bnEnd').value || null,
+    prioridad: parseInt(document.getElementById('bnPrio').value) || 0,
+    activo: document.getElementById('bnActive').value === 'true'
+  };
+
+  // Validación básica
+  if(!payload.titulo){ showToast('El título es obligatorio'); return; }
+  if(payload.fecha_inicio && payload.fecha_fin && payload.fecha_inicio > payload.fecha_fin){
+    showToast('La fecha de inicio no puede ser posterior a la de fin'); return;
+  }
+
+  try{
+    const headers = {...(await getAuthHeaders()), 'Content-Type':'application/json', 'Prefer':'return=minimal'};
+    let res;
+    if(id){
+      res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.${encodeURIComponent(id)}`, {
+        method:'PATCH', headers, body: JSON.stringify(payload)
+      });
+    }else{
+      res = await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
+        method:'POST', headers, body: JSON.stringify(payload)
+      });
+    }
+    if(!res.ok){
+      const err = await res.text();
+      throw new Error(`HTTP ${res.status}: ${err}`);
+    }
+    showToast(id?'Banner actualizado':'Banner creado');
+    renderAdminBanner();
+  }catch(e){
+    showToast('Error: '+e.message);
+  }
+};
+
 // ─── INIT ─────────────────────────────────────────────────────
 (async()=>{
   loadCart(); updateCartUI();
   loadProducts();
+  loadHeroBanner();  // Cargar banner del hero (si existe en BD)
   // Auth en segundo plano, no bloquea nada
   setTimeout(async()=>{
     try{
