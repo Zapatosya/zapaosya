@@ -780,6 +780,400 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
   .b2{width:300px;height:300px;left:-50px;bottom:-80px}
   .ctr{padding:0 16px}
 }
+
+/* ============================================================
+   ZY-SKIN v2 — minimalismo radical blanco y negro (Adidas/Vélez)
+   Para revertir: borra desde aquí hasta "FIN ZY-SKIN"
+   ============================================================ */
+
+/* Variables: forzamos paleta blanco/negro */
+:root{
+  --red:#000!important;
+  --red2:#000!important;
+  --yel:#000!important;
+  --blk:#000!important;
+  --blk2:#000!important;
+  --wht:#fff!important;
+  --gray:#666!important;
+  --gray-light:#999!important;
+  --border:#e5e5e5!important;
+  --shd:none!important;
+}
+
+body{background:#fff!important;color:#000!important}
+
+/* ── Eliminar TODO adorno decorativo ── */
+.blob,.grid-bg,.fl,.fl1,.fl2,.fl3{display:none!important}
+.hero-bg{display:none!important}
+.hero-pill{display:none!important}
+.hero-trust{display:none!important}
+.hero-sub br,.hero-desc br{display:none}
+
+/* ── Tipografía global: Poppins consistente ── */
+body,input,select,textarea,button{font-family:'Poppins',sans-serif!important}
+
+/* ── Bordes: TODO cuadrado (excepto avatares circulares) ── */
+.btn,.btn-red,.btn-ghost,.btn-blk,.btn-out,.btn-full,.btn-sm,.fb,.hero-pill,
+.lbl,.disc,.mdisc,.estado-badge,.pay-tag,.pc,.pc-img,.acc-card,.ped-card,
+.mp-card,.mp-card-status,.user-menu,.user-menu-item,.modal,.social-btn,
+.auth-error,.auth-success,.sopt,.mp-item-ico,.mi,input,select,textarea,
+.fc,.urg,.fc-ico{border-radius:0!important}
+
+/* ── Header: blanco, limpio, casi invisible ── */
+.hdr{background:#fff!important;border-bottom:1px solid #000!important;box-shadow:none!important}
+.hdr.scrolled{background:#fff!important;backdrop-filter:none!important}
+.hdr-in{height:72px!important}
+.nav{gap:36px!important}
+.nav a{color:#000!important;font-weight:500!important;font-size:.72rem!important;letter-spacing:.18em!important;text-transform:uppercase!important}
+.nav a::after{background:#000!important}
+.nav a:hover{color:#000!important}
+.user-btn,.cart-ic,.admin-btn{color:#000!important;background:transparent!important}
+.user-btn svg,.cart-ic svg,.admin-btn svg{stroke:#000!important}
+.user-btn:hover,.cart-ic:hover,.admin-btn:hover{background:#f5f5f5!important}
+.cart-n{background:#000!important;color:#fff!important;font-weight:500!important}
+.mobile-menu-btn span{background:#000!important}
+.hdr .logo-img{filter:invert(1) brightness(0)!important}
+
+/* ── Botones: rectangulares, monocromáticos, mayúsculas espaciadas ── */
+.btn{font-weight:500!important;letter-spacing:.18em!important;text-transform:uppercase!important;font-size:.72rem!important;padding:18px 36px!important;box-shadow:none!important}
+.btn-red,.btn-blk{background:#000!important;color:#fff!important;border:1px solid #000!important}
+.btn-red:hover,.btn-blk:hover{background:#fff!important;color:#000!important;transform:none!important}
+.btn-out,.btn-ghost{background:transparent!important;color:#000!important;border:1px solid #000!important}
+.btn-out:hover,.btn-ghost:hover{background:#000!important;color:#fff!important}
+
+/* ── Filtros: minimalistas con underline activo ── */
+.fb{border:none!important;background:transparent!important;color:#666!important;font-weight:500!important;letter-spacing:.18em!important;text-transform:uppercase!important;font-size:.72rem!important;padding:8px 0!important;margin:0 18px!important;border-bottom:1px solid transparent!important;border-radius:0!important}
+.fb:hover{background:transparent!important;color:#000!important;border-bottom-color:#000!important}
+.fb.act{background:transparent!important;color:#000!important;border-bottom-color:#000!important}
+.filters{gap:0!important;border-bottom:1px solid #e5e5e5!important;margin-bottom:48px!important;padding-bottom:0!important}
+
+/* ── Sec headings: editoriales, sin adornos ── */
+.sec-hd{margin-bottom:48px!important}
+.sec-hd h2{font-weight:500!important;letter-spacing:-.02em!important;color:#000!important;font-size:clamp(1.8rem,3.5vw,2.4rem)!important}
+.sec-hd p{text-transform:uppercase!important;letter-spacing:.2em!important;font-size:.7rem!important;color:#999!important;margin-top:10px}
+
+/* ── Cards de producto: estilo lookbook puro ── */
+.pgrid{gap:32px 20px!important}
+.pc{background:transparent!important;border:none!important;overflow:visible!important}
+.pc:hover{transform:none!important;box-shadow:none!important;border-color:transparent!important}
+.pc-img{background:#f5f5f5!important;aspect-ratio:1!important;border:none!important}
+.pc:hover .pc-img img{transform:scale(1.04)!important}
+.pc:hover .pc-img svg{transform:scale(1.04) rotate(0)!important}
+.pc-ov{display:none!important}
+.pc-info{padding:16px 0 0!important}
+.pc-cat{text-transform:uppercase!important;letter-spacing:.15em!important;font-size:.65rem!important;color:#999!important;margin-bottom:6px!important;font-weight:500!important}
+.pc-name{font-weight:500!important;font-size:.92rem!important;letter-spacing:0!important;color:#000!important;margin-bottom:6px!important}
+.pc-pr{display:flex;align-items:baseline;gap:10px}
+.pc-pr .price{font-weight:500!important;color:#000!important;font-size:.92rem!important}
+.pc-pr .orig{color:#999!important;text-decoration:line-through;font-size:.82rem}
+.pc-dots{margin-top:8px!important;gap:6px!important}
+.dot{width:11px!important;height:11px!important;border:1px solid #e5e5e5!important;box-shadow:none!important}
+
+/* Etiquetas y descuentos en blanco/negro */
+.lbl,.lbl-eg{background:#000!important;color:#fff!important;font-weight:500!important;letter-spacing:.12em!important;text-transform:uppercase!important;font-size:.58rem!important;backdrop-filter:none!important;box-shadow:none!important;padding:5px 10px!important;border-radius:0!important}
+.disc,.mdisc{background:#000!important;color:#fff!important;font-weight:500!important;letter-spacing:.08em!important;border-radius:0!important;padding:3px 8px!important}
+
+/* ── Banda de confianza: minimalista ── */
+.urg{background:#000!important;color:#fff!important;letter-spacing:.18em!important;text-transform:uppercase!important;font-size:.68rem!important;padding:14px 20px!important;border-radius:0!important}
+.urg-in{font-weight:500!important;gap:32px!important}
+.urg-sep{opacity:.4!important}
+
+/* ── Sección "feat" (garantías): cuadrícula limpia ── */
+.feat{background:#fff!important;padding:80px 0!important;border-top:1px solid #e5e5e5}
+.feat-g{gap:0!important;border:1px solid #e5e5e5}
+.feat-g .fc{background:#fff!important;border:none!important;border-right:1px solid #e5e5e5!important;border-radius:0!important;padding:40px 28px!important;text-align:left!important}
+.feat-g .fc:last-child{border-right:none!important}
+.feat-g .fc-ico{margin-bottom:18px!important}
+.feat-g .fc-ico svg{stroke:#000!important;width:28px!important;height:28px!important}
+.feat-g .fc h3{font-weight:500!important;letter-spacing:-.01em!important;font-size:1rem!important;margin-bottom:8px!important;color:#000!important}
+.feat-g .fc p{color:#666!important;font-size:.85rem!important;line-height:1.6!important}
+
+/* ── FAQ: tipografía sobria ── */
+.faq-eyebrow{color:#000!important;text-transform:uppercase!important;letter-spacing:.2em!important;font-size:.7rem!important;font-weight:500!important}
+.faq-title{font-weight:500!important;letter-spacing:-.02em!important;color:#000!important}
+.faq-title em{font-style:normal!important;color:#000!important;font-weight:500!important;border-bottom:2px solid #000;display:inline-block;line-height:.95}
+.faq-ico{background:#000!important;color:#fff!important;border-radius:50%!important}
+
+/* ── HERO: tríptico Adidas blanco/negro ── */
+.hero{min-height:auto!important;padding:0!important;background:#fff!important;margin-top:72px!important}
+.hero:has(.hero-trip) .hero-bg,.hero:has(.hero-trip) .hero-inner{display:none!important}
+.hero-trip{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;width:100%;height:78vh;min-height:520px;max-height:760px;background:#000;overflow:hidden}
+.hero-trip-img{position:relative;background-size:cover;background-position:center;background-color:#1a1a1a;overflow:hidden}
+.hero-trip-img+.hero-trip-img{border-left:1px solid rgba(255,255,255,.08)}
+.hero-trip-word{position:absolute;top:6%;left:0;right:0;text-align:center;color:#fff;font-family:'Poppins',sans-serif;font-weight:500;letter-spacing:.08em;font-size:clamp(2rem,5vw,3.8rem);line-height:1;z-index:2}
+.hero-trip-card{position:absolute;left:0;bottom:0;background:#fff;padding:28px 36px 32px;max-width:420px;z-index:3}
+.hero-trip-eyebrow{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:#000;margin-bottom:14px;font-weight:500}
+.hero-trip-title{font-family:'Poppins',sans-serif;font-weight:500;font-size:1.5rem;letter-spacing:-.015em;color:#000;margin-bottom:14px;line-height:1.15;text-transform:uppercase}
+.hero-trip-desc{font-size:.85rem;color:#444;line-height:1.6;margin-bottom:0;font-weight:400}
+.hero-trip-cta{position:absolute;bottom:0;left:420px;background:#000;color:#fff;padding:22px 38px;font-weight:500;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;display:inline-flex;align-items:center;gap:16px;z-index:3;text-decoration:none;transition:background .2s ease;border:none}
+.hero-trip-cta:hover{background:#fff;color:#000;outline:1px solid #000}
+.hero-trip-cta svg{width:16px;height:16px}
+@media (max-width:900px){
+  .hero-trip-cta{left:auto;right:0;bottom:auto;top:0;padding:18px 28px}
+}
+@media (max-width:760px){
+  .hero{margin-top:72px!important}
+  .hero-trip{grid-template-columns:1fr;height:auto;min-height:520px}
+  .hero-trip-img{aspect-ratio:1.1/1}
+  .hero-trip-img:nth-child(2),.hero-trip-img:nth-child(3){display:none}
+  .hero-trip-word{display:none}
+  .hero-trip-card{position:static;max-width:100%;padding:28px 22px}
+  .hero-trip-cta{position:static;display:flex;width:100%;justify-content:center;padding:20px}
+  .filters{flex-wrap:wrap;justify-content:flex-start!important;overflow-x:auto;gap:0!important}
+  .fb{margin:0 14px 0 0!important}
+}
+
+/* ── Footer: monocromático ── */
+footer{background:#000!important;color:#fff!important}
+footer a{color:rgba(255,255,255,.7)!important}
+footer a:hover{color:#fff!important}
+
+/* ── Modales: bordes rectos pero conservan funcionalidad ── */
+.modal{border-radius:0!important}
+.mc{border-radius:50%!important}
+
+/* ── Inputs: minimalistas ── */
+input,select,textarea{border:1px solid #e5e5e5!important;border-radius:0!important;padding:14px 16px!important}
+input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none!important}
+
+/* ── Acentos rojos restantes ── */
+[style*="#E63946"],[style*="#e63946"]{color:#000!important}
+.tit-red{color:inherit!important}
+
+/* FIN ZY-SKIN */
+
+/* ============================================================
+   ZY-ICONS — afinado de iconos para look editorial
+   Estrategia: CSS-only. No cambia los SVG inline (eso rompería
+   cosas). Solo adelgaza el stroke y reescala con !important.
+   Para revertir: borra desde aquí hasta "FIN ZY-ICONS".
+   ============================================================ */
+
+/* ── 1. Iconos del header (perfil, carrito, admin) ──
+   Más finos (stroke 1.2), más espacio, sin fondo redondo en hover */
+.user-btn,.cart-ic,.admin-btn{
+  width:40px!important;height:40px!important;
+  padding:0!important;
+  border-radius:0!important;
+  margin:0 2px;
+  position:relative;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.user-btn:hover,.cart-ic:hover,.admin-btn:hover{
+  background:transparent!important;
+}
+.user-btn:hover svg,.cart-ic:hover svg,.admin-btn:hover svg{opacity:.55}
+.user-btn svg,.cart-ic svg,.admin-btn svg{
+  width:20px!important;height:20px!important;
+  stroke-width:1.2!important;
+  fill:none!important;
+  stroke:#000!important;
+  transition:opacity .2s ease;
+}
+
+/* Cart badge: rectangular pequeño, no círculo rojo */
+.cart-n{
+  position:absolute!important;
+  top:6px!important;right:0!important;
+  background:#000!important;color:#fff!important;
+  width:auto!important;height:auto!important;
+  min-width:16px!important;
+  border-radius:0!important;
+  padding:1px 4px!important;
+  font-size:.6rem!important;
+  font-weight:500!important;
+  letter-spacing:.05em!important;
+  box-shadow:none!important;
+}
+
+/* Mobile menu: 3 líneas más finas */
+.mobile-menu-btn{padding:0!important;width:40px!important;height:40px!important}
+.mobile-menu-btn span{width:20px!important;height:1px!important;background:#000!important}
+
+/* ── 2. Iconos de la sección "feat" (garantías) ──
+   Stroke 1 puro, sin color, alineados a la izquierda */
+.feat-g .fc-ico svg{
+  width:26px!important;height:26px!important;
+  stroke:#000!important;
+  stroke-width:1!important;
+  fill:none!important;
+}
+.feat-g .fc-ico{
+  width:auto!important;height:auto!important;
+  background:transparent!important;
+  margin-bottom:20px!important;
+  padding:0!important;
+  display:block!important;
+}
+
+/* ── 3. Botón flotante del chat ── */
+/* De círculo rojo gigante a cuadrado negro pequeño */
+.chat-fab{
+  width:52px!important;height:52px!important;
+  border-radius:0!important;
+  background:#000!important;
+  color:#fff!important;
+  bottom:24px!important;right:24px!important;
+  box-shadow:none!important;
+  border:1px solid #000!important;
+  transition:all .25s ease!important;
+}
+.chat-fab:hover{
+  transform:none!important;
+  background:#fff!important;
+  color:#000!important;
+  box-shadow:none!important;
+}
+.chat-fab.open{background:#fff!important;color:#000!important;border-color:#000!important}
+.chat-fab svg{
+  width:20px!important;height:20px!important;
+  stroke-width:1.4!important;
+}
+/* Badge de mensajes: rectangular en vez de píldora amarilla */
+.chat-fab-badge{
+  top:-7px!important;right:-7px!important;
+  background:#000!important;color:#fff!important;
+  border:1px solid #fff!important;
+  min-width:18px!important;height:18px!important;
+  border-radius:0!important;
+  font-weight:500!important;
+  font-size:.62rem!important;
+  letter-spacing:.04em!important;
+  box-shadow:none!important;
+  padding:0 4px!important;
+}
+
+/* Ventana del chat */
+.chat-window{
+  border-radius:0!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.18)!important;
+  border:1px solid #000!important;
+  bottom:90px!important;right:24px!important;
+}
+/* Header del chat: negro plano, no gradiente rojo */
+.chat-header{
+  background:#000!important;
+  color:#fff!important;
+  padding:18px 20px!important;
+}
+.chat-avatar{
+  width:36px!important;height:36px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+}
+.chat-avatar svg circle{fill:#fff!important}
+.chat-avatar svg path{stroke:#000!important}
+.chat-header-title{
+  font-weight:500!important;
+  font-size:.78rem!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+}
+.chat-header-status{
+  font-size:.66rem!important;
+  letter-spacing:.1em!important;
+  text-transform:uppercase!important;
+  opacity:.7!important;
+}
+.chat-dot{background:#4ade80!important}
+
+/* Input del chat: cuadrado, sin píldora */
+.chat-input-row input{
+  border-radius:0!important;
+  border:1px solid #e5e5e5!important;
+  padding:12px 14px!important;
+  font-size:.86rem!important;
+}
+.chat-input-row input:focus{
+  border-color:#000!important;
+  box-shadow:none!important;
+}
+#chatSend{
+  background:#000!important;color:#fff!important;
+  border:none!important;border-radius:0!important;
+  width:42px!important;height:42px!important;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:opacity .2s ease;
+}
+#chatSend:hover{opacity:.7}
+#chatSend svg{width:16px!important;height:16px!important;fill:#fff!important}
+
+/* Botón "WhatsApp" pequeño dentro del chat: estilo link sobrio */
+.chat-wa-btn-sm{
+  color:#000!important;
+  font-size:.66rem!important;
+  letter-spacing:.15em!important;
+  text-transform:uppercase!important;
+  font-weight:500!important;
+  padding:8px 0 0!important;
+  border-top:1px solid #e5e5e5!important;
+  margin-top:10px!important;
+  width:100%;
+}
+.chat-wa-btn-sm:hover{text-decoration:none!important;opacity:.6}
+.chat-wa-btn-sm svg{
+  width:12px!important;height:12px!important;
+  fill:#000!important;
+}
+
+/* ── 4. Iconos de modales (cerrar, navegar producto) ──
+   Más finos */
+.mc{
+  background:transparent!important;
+  border:1px solid #000!important;
+  border-radius:50%!important;
+  width:34px!important;height:34px!important;
+  font-size:.85rem!important;
+  backdrop-filter:none!important;
+}
+.mc:hover{background:#000!important;color:#fff!important}
+.mi-nav{
+  background:#fff!important;
+  border:1px solid #000!important;
+  box-shadow:none!important;
+  width:38px!important;height:38px!important;
+}
+.mi-nav:hover{background:#000!important}
+.mi-nav:hover svg{stroke:#fff!important}
+.mi-nav svg{stroke:#000!important;stroke-width:1.4!important;width:14px!important;height:14px!important}
+.mi-dot{background:rgba(0,0,0,.25)!important;border-radius:0!important;width:18px!important;height:2px!important}
+.mi-dot.act{background:#000!important;width:24px!important;border-radius:0!important}
+
+/* ── 5. SVG genéricos del header (svg sueltos en SVG inline del menú móvil drawer, etc) ── */
+.md-close svg{stroke-width:1.2!important}
+.md-close{background:transparent!important;border:1px solid rgba(255,255,255,.4)!important}
+
+/* ── 6. Iconos del FAQ ── */
+.faq-ico{
+  background:transparent!important;
+  color:#000!important;
+  border:1px solid #000!important;
+  font-weight:400!important;
+  width:28px!important;height:28px!important;
+  font-size:1rem!important;
+}
+.faq-q.open .faq-ico{background:#000!important;color:#fff!important}
+
+/* ── 7. Toast (notificaciones) más sobrio ── */
+.toast{
+  border-radius:0!important;
+  background:#000!important;
+  color:#fff!important;
+  font-weight:500!important;
+  letter-spacing:.08em!important;
+  font-size:.78rem!important;
+  text-transform:uppercase!important;
+}
+
+/* ── 8. Iconos sociales (auth modal) ── */
+.social-btn svg{stroke-width:1.4!important}
+.social-btn{font-weight:500!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-size:.74rem!important}
+
+/* FIN ZY-ICONS */
+
 </style>
 </head>
 <body>
@@ -840,6 +1234,45 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
 
 <main>
 
+<!-- ============================================================
+     HERO TRÍPTICO — minimalista blanco y negro
+     ============================================================
+     Para editar:
+     - Las 3 imágenes: cambia las URLs en background-image (líneas siguientes)
+     - Las 3 palabras grandes: cambia el texto dentro de hero-trip-word
+     - El título / descripción / CTA: edita el texto en hero-trip-card
+     Para revertir al hero anterior: busca "HERO_BACKUP" más abajo.
+     ============================================================ -->
+<section class="hero">
+  <div class="hero-trip">
+
+    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-1.webp');">
+      <div class="hero-trip-word">CAMINA</div>
+    </div>
+
+    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-2.webp');">
+      <div class="hero-trip-word">RÁPIDO</div>
+    </div>
+
+    <div class="hero-trip-img" style="background-image:url('/img/hero/hero-3.webp');">
+      <div class="hero-trip-word">LLEGA</div>
+    </div>
+
+    <div class="hero-trip-card">
+      <div class="hero-trip-eyebrow">Nueva colección 2026</div>
+      <div class="hero-trip-title">Tenis hechos<br>en Colombia.</div>
+      <p class="hero-trip-desc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
+    </div>
+
+    <a href="#productos" class="hero-trip-cta">
+      Comprar ahora
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+
+  </div>
+</section>
+
+<!-- HERO_BACKUP — hero original, comentado por si quieres revertir
 <section class="hero">
   <div class="hero-bg">
     <div class="blob b1"></div>
@@ -871,6 +1304,8 @@ footer{background:var(--blk);padding:36px 24px;color:rgba(255,255,255,.3);font-s
     </div>
   </div>
 </section>
+FIN HERO_BACKUP -->
+
 
 <div class="urg">
   <div class="urg-in">
