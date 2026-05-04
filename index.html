@@ -1172,6 +1172,74 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 .social-btn svg{stroke-width:1.4!important}
 .social-btn{font-weight:500!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-size:.74rem!important}
 
+/* ── 9. WORDMARK — logo en texto puro ──
+   Reemplaza las imágenes /img/logo-*.webp por texto consistente
+   en todos los puntos donde aparece el logo */
+.zy-wordmark{
+  display:inline-flex;
+  flex-direction:column;
+  line-height:1;
+  font-family:'Poppins',sans-serif;
+}
+.zy-wordmark .zy-wm-name{
+  font-size:1.55rem;
+  font-weight:700;
+  letter-spacing:-.025em;
+  color:#000;
+  line-height:1;
+}
+.zy-wordmark .zy-wm-tag{
+  font-size:.6rem;
+  font-weight:500;
+  letter-spacing:.32em;
+  text-transform:uppercase;
+  color:#000;
+  margin-top:5px;
+  opacity:.85;
+}
+/* Variante centrada (modal de auth) */
+.zy-wm-center{align-items:center;text-align:center;margin:0 auto 20px}
+.zy-wm-center .zy-wm-name{font-size:1.7rem}
+
+/* Variante sobre fondo negro (cart drawer, etc.) */
+.zy-wm-onblack .zy-wm-name,.zy-wm-onblack .zy-wm-tag{color:#fff}
+
+/* En mobile, achicar un poco */
+@media (max-width:640px){
+  .zy-wordmark .zy-wm-name{font-size:1.3rem}
+  .zy-wordmark .zy-wm-tag{font-size:.55rem;letter-spacing:.28em;margin-top:4px}
+}
+
+/* Limpiar el filter del logo viejo (ya no aplica porque ya no hay <img>) */
+.hdr .logo-img{display:none}
+
+/* Logo del cart drawer: ajustes */
+.cdh-logo{display:flex;align-items:center;gap:14px}
+.cdh-logo h2{
+  color:#fff;
+  font-size:1rem!important;
+  font-weight:500!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+  margin:0!important;
+}
+.cdh-logo .zy-wordmark{padding-right:14px;border-right:1px solid rgba(255,255,255,.25)}
+
+/* Avatar del chat: iniciales ZY en lugar de cara sonriente */
+.zy-chat-mono{
+  font-family:'Poppins',sans-serif;
+  font-weight:700;
+  font-size:.85rem;
+  letter-spacing:.04em;
+  color:#000;
+  line-height:1;
+}
+.chat-avatar{
+  border-radius:0!important;
+  background:#fff!important;
+  width:38px!important;height:38px!important;
+}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -1180,8 +1248,11 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 
 <header class="hdr" id="hdr">
   <div class="hdr-in">
-    <a href="/" class="logo-link">
-      <img src="/img/logo-header.webp" alt="ZapatosYa" class="logo-img" width="254" height="60" fetchpriority="high" decoding="async"/>
+    <a href="/" class="logo-link" aria-label="ZapatosYa - Inicio">
+      <span class="zy-wordmark">
+        <span class="zy-wm-name">ZapatosYa</span>
+        <span class="zy-wm-tag">Rápido y seguro</span>
+      </span>
     </a>
     <nav class="nav" aria-label="Menú principal">
       <a href="/sobre-nosotros">Sobre nosotros</a>
@@ -1525,7 +1596,10 @@ FIN HERO_BACKUP -->
     <button class="mc" onclick="closeAuth()">✕</button>
     <div class="auth-body">
       <div class="auth-hd">
-        <img src="/img/logo-small.webp" alt="ZapatosYa" width="200" height="200" loading="lazy" decoding="async"/>
+        <span class="zy-wordmark zy-wm-center">
+          <span class="zy-wm-name">ZapatosYa</span>
+          <span class="zy-wm-tag">Rápido y seguro</span>
+        </span>
         <h2 id="authTitle">Inicia sesión</h2>
         <p id="authSubtitle">Accede a tu cuenta para continuar</p>
       </div>
@@ -1716,7 +1790,9 @@ FIN HERO_BACKUP -->
 <aside class="cdw" id="cDw">
   <div class="cdh">
     <div class="cdh-logo">
-      <img src="/img/logo-small.webp" alt="ZapatosYa" width="200" height="200" loading="lazy" decoding="async"/>
+      <span class="zy-wordmark zy-wm-onblack">
+        <span class="zy-wm-name">ZapatosYa</span>
+      </span>
       <h2>Tu carrito</h2>
     </div>
     <button class="cdc" id="cClose">✕</button>
@@ -1749,7 +1825,7 @@ FIN HERO_BACKUP -->
 
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
-    <div class="chat-avatar"><svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="#E63946" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="chat-avatar"><span class="zy-chat-mono">ZY</span></div>
     <div class="chat-header-info">
       <div class="chat-header-title">Asistente ZapatosYa</div>
       <div class="chat-header-status"><span class="chat-dot"></span>En línea ahora</div>
