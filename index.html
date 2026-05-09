@@ -1523,19 +1523,19 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 .urg{border-top:1px solid rgba(255,255,255,.08)}
 
 /* ── 15. ANTI-FLASH del hero ──
-   El hero se oculta hasta que el JS termina de cargar el banner.
-   Si pasa más de 1.5s sin respuesta, se muestra igual con su contenido
-   por defecto (clase .hero-ready la agrega initHeroCarousel o el timeout).
-   También evita el "404 visible" cuando las URLs hardcodeadas no existen. */
+   El hero arranca completamente invisible Y con altura mínima.
+   Solo se muestra cuando el JS termina de cargar el banner (clase .hero-ready).
+   Si pasa más de 1.5s sin respuesta, se muestra igual con su contenido por defecto. */
 section.hero{
   opacity:0;
+  visibility:hidden;
   transition:opacity .35s ease-in-out;
 }
 section.hero.hero-ready{
   opacity:1;
+  visibility:visible;
 }
-/* Fondo placeholder neutro mientras cargan las imágenes (en lugar de
-   mostrar negro vacío con el texto "404") */
+/* Fondo placeholder neutro mientras cargan las imágenes */
 .hero-trip-img{
   background-color:#1a1a1a;
 }
@@ -1618,26 +1618,26 @@ section.hero.hero-ready{
   <div class="hero-trip" id="heroTrip">
 
     <div class="hero-trip-img active" id="heroImg1">
-      <div class="hero-trip-word" id="heroWord1">CAMINA</div>
+      <div class="hero-trip-word" id="heroWord1"></div>
     </div>
 
     <div class="hero-trip-img" id="heroImg2">
-      <div class="hero-trip-word" id="heroWord2">RÁPIDO</div>
+      <div class="hero-trip-word" id="heroWord2"></div>
     </div>
 
     <div class="hero-trip-img" id="heroImg3">
-      <div class="hero-trip-word" id="heroWord3">LLEGA</div>
+      <div class="hero-trip-word" id="heroWord3"></div>
     </div>
 
     <div class="hero-trip-bottom">
       <div class="hero-trip-card">
-        <div class="hero-trip-eyebrow" id="heroEyebrow">Nueva colección 2026</div>
-        <div class="hero-trip-title" id="heroTitle">Tenis hechos<br>en Colombia.</div>
-        <p class="hero-trip-desc" id="heroDesc">Diseño, confort y actitud. Tu próximo par está a un clic de distancia, entregado a tu puerta.</p>
+        <div class="hero-trip-eyebrow" id="heroEyebrow"></div>
+        <div class="hero-trip-title" id="heroTitle"></div>
+        <p class="hero-trip-desc" id="heroDesc"></p>
       </div>
 
       <a href="#productos" id="heroCta" class="hero-trip-cta">
-        <span id="heroCtaText">Comprar ahora</span>
+        <span id="heroCtaText"></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
