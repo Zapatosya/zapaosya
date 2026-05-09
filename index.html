@@ -1522,6 +1522,24 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 /* En desktop también, por si acaso */
 .urg{border-top:1px solid rgba(255,255,255,.08)}
 
+/* ── 15. ANTI-FLASH del hero ──
+   El hero se oculta hasta que el JS termina de cargar el banner.
+   Si pasa más de 1.5s sin respuesta, se muestra igual con su contenido
+   por defecto (clase .hero-ready la agrega initHeroCarousel o el timeout).
+   También evita el "404 visible" cuando las URLs hardcodeadas no existen. */
+section.hero{
+  opacity:0;
+  transition:opacity .35s ease-in-out;
+}
+section.hero.hero-ready{
+  opacity:1;
+}
+/* Fondo placeholder neutro mientras cargan las imágenes (en lugar de
+   mostrar negro vacío con el texto "404") */
+.hero-trip-img{
+  background-color:#1a1a1a;
+}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -1599,15 +1617,15 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 <section class="hero">
   <div class="hero-trip" id="heroTrip">
 
-    <div class="hero-trip-img active" id="heroImg1" style="background-image:url('/img/hero/hero-1.webp');">
+    <div class="hero-trip-img active" id="heroImg1">
       <div class="hero-trip-word" id="heroWord1">CAMINA</div>
     </div>
 
-    <div class="hero-trip-img" id="heroImg2" style="background-image:url('/img/hero/hero-2.webp');">
+    <div class="hero-trip-img" id="heroImg2">
       <div class="hero-trip-word" id="heroWord2">RÁPIDO</div>
     </div>
 
-    <div class="hero-trip-img" id="heroImg3" style="background-image:url('/img/hero/hero-3.webp');">
+    <div class="hero-trip-img" id="heroImg3">
       <div class="hero-trip-word" id="heroWord3">LLEGA</div>
     </div>
 
@@ -5299,16 +5317,21 @@ function chatWhatsapp(){
 // BANNER DEL HERO — carga dinámica desde Supabase
 // ═══════════════════════════════════════════════════════════════
 async function loadHeroBanner(){
+  const heroSection = document.querySelector('section.hero');
+
+  // Timeout de seguridad: si Supabase tarda más de 1.5s, mostrar el hero
+  // igual aunque sin banner (no bloqueamos la página por una promesa lenta)
+  const fallbackTimer = setTimeout(()=>{
+    if(heroSection) heroSection.classList.add('hero-ready');
+  }, 1500);
+
   try{
-    // Buscar banner activo cuya ventana de fechas incluya hoy (o sin fechas)
-    const today = new Date().toISOString().slice(0,10);
-    const q = `activo=eq.true&order=prioridad.desc,creado_en.desc&limit=1` +
-              `&or=(fecha_inicio.is.null,fecha_inicio.lte.${today})` +
-              `&and=(or(fecha_fin.is.null,fecha_fin.gte.${today}))`;
-    // Nota: PostgREST no soporta and+or anidados así de fácil, por eso
-    // hacemos filtrado client-side. Traemos los activos y filtramos por fecha.
     const data = await sbSelect('banners', 'activo=eq.true&order=prioridad.desc,creado_en.desc');
-    if(!data || !data.length) return; // No hay banner — usar los valores por defecto del HTML
+    if(!data || !data.length){
+      // No hay banner — mostramos el hero sin imágenes (placeholder negro)
+      if(heroSection) heroSection.classList.add('hero-ready');
+      return;
+    }
 
     const todayStr = new Date().toISOString().slice(0,10);
     const banner = data.find(b => {
@@ -5316,13 +5339,38 @@ async function loadHeroBanner(){
       const okEnd = !b.fecha_fin || b.fecha_fin >= todayStr;
       return okStart && okEnd;
     });
-    if(!banner) return;
+    if(!banner){
+      if(heroSection) heroSection.classList.add('hero-ready');
+      return;
+    }
+
+    // Precargar las imágenes ANTES de aplicarlas al DOM, para que cuando se
+    // muestre el hero ya estén descargadas y no haya un "flash" gris→imagen
+    const urls = [banner.imagen_1, banner.imagen_2, banner.imagen_3].filter(Boolean);
+    await Promise.race([
+      Promise.all(urls.map(preloadImage)),
+      new Promise(res => setTimeout(res, 1200)) // máximo 1.2s esperando imágenes
+    ]);
 
     applyHeroBanner(banner);
   }catch(e){
     console.warn('[banner] No se pudo cargar:', e.message);
-    // No es crítico — el hero queda con los valores por defecto del HTML
+  }finally{
+    clearTimeout(fallbackTimer);
+    if(heroSection) heroSection.classList.add('hero-ready');
   }
+}
+
+// Helper: precarga una imagen y resuelve cuando está lista (o falla)
+function preloadImage(url){
+  return new Promise(resolve => {
+    if(!url){ resolve(); return; }
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // no bloqueamos por errores
+    img.fetchPriority = 'high';
+    img.src = url;
+  });
 }
 
 function applyHeroBanner(b){
