@@ -2667,7 +2667,7 @@ function unlockScroll(){
   document.body.style.left = '';
   document.body.style.right = '';
   document.body.style.width = '';
-  unlockScroll();
+  document.body.style.overflow = '';
   window.scrollTo(0, __scrollLockY);
 }
 let currentUser=null, currentProfile=null, isAdmin=false;
@@ -3063,16 +3063,11 @@ function closeModal(){
   try {
     const path = location.pathname || '/';
     const hash = location.hash || '';
-    console.log('[closeModal] path antes:', path, 'hash:', hash);
-    // Solo limpiar si hay algo que limpiar (path de producto o hash viejo)
     if ((path !== '/' && path !== '/index.html' && !path.includes('.')) ||
         hash.startsWith('#producto/')) {
       history.pushState(null, '', '/');
-      console.log('[closeModal] URL limpiada → /');
-    } else {
-      console.log('[closeModal] No se limpió la URL (no había nada que limpiar)');
     }
-  } catch(e) { console.warn('[closeModal] error:', e); }
+  } catch(e) { /* navegador viejo, ignorar */ }
 }
 
 // ─── RESEÑAS ─────────────────────────────────────────────────
