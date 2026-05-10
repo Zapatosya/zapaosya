@@ -1349,7 +1349,8 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
    Hay dos versiones disponibles:
    - /img/logo-negro.png  → para fondos claros (header, modal de auth)
    - /img/logo-blanco.png → para fondos oscuros (cart drawer, footer)
-   Si la imagen no carga, el alt text se ve como fallback. */
+   Si la imagen no carga, el onerror inline reemplaza el <img> por un
+   <span class="zy-logo-fallback"> con el texto "ZapatosYa". */
 .zy-logo-img{
   display:block;
   height:42px;
@@ -1362,8 +1363,25 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
   margin:0 auto 18px;
   max-width:240px;
 }
+/* Fallback de texto si el logo PNG no existe en el servidor */
+.zy-logo-fallback{
+  display:inline-block;
+  font-family:'Poppins',sans-serif;
+  font-weight:700;
+  font-size:1.55rem;
+  letter-spacing:-.02em;
+  color:#000;
+  line-height:1;
+}
+.zy-logo-fallback.zy-logo-auth-fallback{
+  display:block;
+  text-align:center;
+  margin:0 auto 18px;
+  font-size:1.7rem;
+}
 @media (max-width:640px){
   .zy-logo-img{height:36px;max-width:180px}
+  .zy-logo-fallback{font-size:1.3rem}
 }
 
 /* Limpiar override del logo viejo (ya no hay <img class="logo-img">) */
@@ -1579,7 +1597,7 @@ section.hero.hero-ready{
 <header class="hdr" id="hdr">
   <div class="hdr-in">
     <a href="/" class="logo-link" aria-label="ZapatosYa - Inicio">
-      <img src="/img/logo-negro.png" alt="ZapatosYa - Rápido y seguro" class="zy-logo-img" width="220" height="56" fetchpriority="high" decoding="async"/>
+      <img src="/img/logo-negro.png" alt="ZapatosYa" class="zy-logo-img" width="220" height="56" fetchpriority="high" decoding="async" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'),{className:'zy-logo-fallback',textContent:'ZapatosYa'}));"/>
     </a>
     <nav class="nav" aria-label="Menú principal">
       <a href="/sobre-nosotros">Sobre nosotros</a>
@@ -1932,7 +1950,7 @@ FIN HERO_BACKUP -->
     <button class="mc" onclick="closeAuth()">✕</button>
     <div class="auth-body">
       <div class="auth-hd">
-        <img src="/img/logo-negro.png" alt="ZapatosYa" class="zy-logo-img zy-logo-auth" width="220" height="56" loading="lazy" decoding="async"/>
+        <img src="/img/logo-negro.png" alt="ZapatosYa" class="zy-logo-img zy-logo-auth" width="220" height="56" loading="lazy" decoding="async" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'),{className:'zy-logo-fallback zy-logo-auth-fallback',textContent:'ZapatosYa'}));"/>
         <h2 id="authTitle">Inicia sesión</h2>
         <p id="authSubtitle">Accede a tu cuenta para continuar</p>
       </div>
