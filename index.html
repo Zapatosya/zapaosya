@@ -3059,8 +3059,16 @@ function openModal(id){
 function closeModal(){
   document.getElementById("pModal").classList.remove("open");
   unlockScroll();
-  // La URL queda igual con el slug del producto (el usuario puede volver a abrir
-  // el modal recargando o usando el botón atrás del navegador)
+  // Limpiar URL al cerrar — vuelve a zapatosya.com
+  try {
+    const path = location.pathname || '/';
+    const hash = location.hash || '';
+    // Solo limpiar si hay algo que limpiar (path de producto o hash viejo)
+    if ((path !== '/' && path !== '/index.html' && !path.includes('.')) ||
+        hash.startsWith('#producto/')) {
+      history.pushState(null, '', '/');
+    }
+  } catch(e) { /* navegador viejo, ignorar */ }
 }
 
 // ─── RESEÑAS ─────────────────────────────────────────────────
