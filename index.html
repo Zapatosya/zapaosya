@@ -2489,6 +2489,30 @@ if(!initSupabase()){
   }, 200);
 }
 
+// ─── URLs amigables por nombre de producto ──────────────────────
+// Convierte "Diesel - Azul Marino" → "diesel-azul-marino"
+function slugify(str){
+  if(!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // quitar tildes
+    .replace(/ñ/g, 'n')
+    .replace(/[^a-z0-9]+/g, '-')   // todo lo no alfanumérico → guion
+    .replace(/^-+|-+$/g, '')        // sin guiones al inicio/final
+    .slice(0, 80);                  // máx 80 chars
+}
+
+// Buscar producto por slug o por ID (compat con URLs viejas)
+function resolveProductByIdentifier(ident){
+  if(!ident) return null;
+  // Primero intento por ID exacto (UUID o lo que sea — formato viejo)
+  let p = PRODUCTS.find(x => x.id === ident);
+  if(p) return p;
+  // Luego por slug del nombre
+  p = PRODUCTS.find(x => slugify(x.nombre) === ident);
+  return p || null;
+}
+
 // ─── SEGURIDAD: Escape HTML universal (anti-XSS) ─────────────────────────
 // CRÍTICO: usar SIEMPRE al insertar datos de usuario/BD en innerHTML
 function escHTML(str){
@@ -2719,20 +2743,42 @@ async function loadProducts(){
   }
 }
 
-// Abrir producto si la URL tiene #producto/<id>
+// Abrir producto si la URL tiene /<slug> o #producto/<id> (compat con URLs viejas)
 function abrirProductoDesdeURL(){
   try {
-    const hash = location.hash || '';
-    const m = hash.match(/^#producto\/(.+)$/);
-    if (m) {
-      const id = decodeURIComponent(m[1]);
-      const existe = PRODUCTS.find(p => p.id === id);
-      if (existe) {
-        // Pequeño delay para que el render termine
-        setTimeout(() => openModal(id), 100);
-      } else {
-        console.warn('Producto del hash no encontrado:', id);
-        history.replaceState(null, '', location.pathname + location.search);
+    let ident = null;
+
+    // 1) Formato nuevo: /nombre-del-producto en el pathname
+    const path = location.pathname || '/';
+    if (path && path !== '/' && path !== '/index.html') {
+      // Limpiar barras y extraer el primer segmento
+      const seg = path.replace(/^\/+/, '').replace(/\/+$/, '').split('/')[0];
+      // Excluir rutas conocidas que NO son de producto
+      const noProductRoutes = ['sobre-nosotros','devoluciones','terminos','privacidad','admin','login'];
+      if (seg && !noProductRoutes.includes(seg) && !seg.includes('.')) {
+        ident = decodeURIComponent(seg);
+      }
+    }
+
+    // 2) Formato viejo (compat hacia atrás): #producto/<id>
+    if (!ident) {
+      const hash = location.hash || '';
+      const m = hash.match(/^#producto\/(.+)$/);
+      if (m) ident = decodeURIComponent(m[1]);
+    }
+
+    if (!ident) return;
+
+    const producto = resolveProductByIdentifier(ident);
+    if (producto) {
+      // Pequeño delay para que el render termine
+      setTimeout(() => openModal(producto.id), 100);
+    } else {
+      console.warn('Producto no encontrado para identificador:', ident);
+      // Si la URL apuntaba a un producto inexistente, llevarlo a la home
+      // pero solo si era pathname (no si era hash viejo, que es inofensivo)
+      if (location.pathname !== '/' && location.pathname !== '/index.html') {
+        history.replaceState(null, '', '/');
       }
     }
   } catch(e) { console.warn('Error abriendo producto desde URL:', e); }
@@ -2740,11 +2786,16 @@ function abrirProductoDesdeURL(){
 
 // Soportar navegación con botones atrás/adelante del navegador
 window.addEventListener('popstate', () => {
+  const path = location.pathname || '/';
   const hash = location.hash || '';
-  if (hash.match(/^#producto\//)) {
+  const hasProductInURL =
+    (path && path !== '/' && path !== '/index.html' && !path.includes('.')) ||
+    hash.match(/^#producto\//);
+
+  if (hasProductInURL) {
     abrirProductoDesdeURL();
   } else {
-    // Si quitan el hash, cerrar el modal
+    // Si quitan el path/hash, cerrar el modal
     const modal = document.getElementById("pModal");
     if (modal && modal.classList.contains('open')) {
       modal.classList.remove("open");
@@ -2758,20 +2809,21 @@ function updateProductsSchema(products){
   try{
     const items = products.map((p,i)=>{
       const img = getColorMainImage(p, 0) || 'https://zapatosya.com/img/icon-512.png';
-      const slug = String(p.nombre||'producto').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const slug = slugify(p.nombre) || p.id;
+      const productUrl = `https://zapatosya.com/${slug}`;
       const price = String(p.precio||0);
       const product = {
         "@type": "Product",
-        "@id": `https://zapatosya.com/#producto-${p.id}`,
+        "@id": productUrl,
         "name": p.nombre,
         "image": img,
         "description": `${p.nombre} — ${p.categoria||'Calzado'} disponible en ZapatosYa con envío a todo Colombia.`,
         "brand": { "@type": "Brand", "name": p.nombre },
         "category": p.categoria || "Calzado",
-        "url": `https://zapatosya.com/#producto-${slug}`,
+        "url": productUrl,
         "offers": {
           "@type": "Offer",
-          "url": `https://zapatosya.com/`,
+          "url": productUrl,
           "priceCurrency": "COP",
           "price": price,
           "availability": "https://schema.org/InStock",
@@ -2925,11 +2977,12 @@ function openModal(id){
   selC=0; selS=null; selI=0;
   const p=curP;
   
-  // Actualizar URL para que sea compartible (deep linking)
+  // Actualizar URL para que sea compartible (deep linking) — formato: /nombre-del-producto
   try {
-    const newHash = '#producto/' + encodeURIComponent(id);
-    if (location.hash !== newHash) {
-      history.pushState({producto: id}, '', newHash);
+    const slug = slugify(p.nombre) || id;
+    const newPath = '/' + slug;
+    if (location.pathname !== newPath) {
+      history.pushState({producto: id}, '', newPath);
     }
   } catch(e) { console.warn('No se pudo actualizar URL:', e); }
   
@@ -3006,10 +3059,8 @@ function openModal(id){
 function closeModal(){
   document.getElementById("pModal").classList.remove("open");
   unlockScroll();
-  // Quitar hash de la URL al cerrar
-  if (location.hash.startsWith('#producto/')) {
-    history.pushState(null, '', location.pathname + location.search);
-  }
+  // La URL queda igual con el slug del producto (el usuario puede volver a abrir
+  // el modal recargando o usando el botón atrás del navegador)
 }
 
 // ─── RESEÑAS ─────────────────────────────────────────────────

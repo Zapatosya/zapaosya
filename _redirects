@@ -1,2 +1,14 @@
-# Redirección 301 de www a versión sin www
-https://www.zapatosya.com/* https://zapatosya.com/:splat 301!
+# Cloudflare Pages — SPA fallback
+# Cualquier URL que no sea un archivo real (CSS, JS, imagen, etc.)
+# sirve index.html con código 200.
+# Eso permite que URLs como /diesel-azul carguen el index.html
+# y el JS detecte el slug en location.pathname para abrir el producto.
+
+# Páginas legales: se sirven tal cual (tienen archivo .html propio)
+/sobre-nosotros  /sobre-nosotros.html  200
+/devoluciones    /devoluciones.html    200
+/terminos        /terminos.html        200
+/privacidad      /privacidad.html      200
+
+# Todo lo demás → index.html (el JS se encarga de abrir el producto correcto)
+/*  /index.html  200
