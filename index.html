@@ -1345,45 +1345,28 @@ input:focus,select:focus,textarea:focus{border-color:#000!important;outline:none
 .social-btn svg{stroke-width:1.4!important}
 .social-btn{font-weight:500!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-size:.74rem!important}
 
-/* ── 9. WORDMARK — logo en texto puro ──
-   Reemplaza las imágenes /img/logo-*.webp por texto consistente
-   en todos los puntos donde aparece el logo */
-.zy-wordmark{
-  display:inline-flex;
-  flex-direction:column;
-  line-height:1;
-  font-family:'Poppins',sans-serif;
+/* ── 9. LOGO — imagen real ──
+   Hay dos versiones disponibles:
+   - /img/logo-negro.png  → para fondos claros (header, modal de auth)
+   - /img/logo-blanco.png → para fondos oscuros (cart drawer, footer)
+   Si la imagen no carga, el alt text se ve como fallback. */
+.zy-logo-img{
+  display:block;
+  height:42px;
+  width:auto;
+  max-width:220px;
+  object-fit:contain;
 }
-.zy-wordmark .zy-wm-name{
-  font-size:1.55rem;
-  font-weight:700;
-  letter-spacing:-.025em;
-  color:#000;
-  line-height:1;
+.zy-logo-img.zy-logo-auth{
+  height:48px;
+  margin:0 auto 18px;
+  max-width:240px;
 }
-.zy-wordmark .zy-wm-tag{
-  font-size:.6rem;
-  font-weight:500;
-  letter-spacing:.32em;
-  text-transform:uppercase;
-  color:#000;
-  margin-top:5px;
-  opacity:.85;
-}
-/* Variante centrada (modal de auth) */
-.zy-wm-center{align-items:center;text-align:center;margin:0 auto 20px}
-.zy-wm-center .zy-wm-name{font-size:1.7rem}
-
-/* Variante sobre fondo negro (cart drawer, etc.) */
-.zy-wm-onblack .zy-wm-name,.zy-wm-onblack .zy-wm-tag{color:#fff}
-
-/* En mobile, achicar un poco */
 @media (max-width:640px){
-  .zy-wordmark .zy-wm-name{font-size:1.3rem}
-  .zy-wordmark .zy-wm-tag{font-size:.55rem;letter-spacing:.28em;margin-top:4px}
+  .zy-logo-img{height:36px;max-width:180px}
 }
 
-/* Limpiar el filter del logo viejo (ya no aplica porque ya no hay <img>) */
+/* Limpiar override del logo viejo (ya no hay <img class="logo-img">) */
 .hdr .logo-img{display:none}
 
 /* Logo del cart drawer: ahora solo el título "TU CARRITO" */
@@ -1596,10 +1579,7 @@ section.hero.hero-ready{
 <header class="hdr" id="hdr">
   <div class="hdr-in">
     <a href="/" class="logo-link" aria-label="ZapatosYa - Inicio">
-      <span class="zy-wordmark">
-        <span class="zy-wm-name">ZapatosYa</span>
-        <span class="zy-wm-tag">Rápido y seguro</span>
-      </span>
+      <img src="/img/logo-negro.png" alt="ZapatosYa - Rápido y seguro" class="zy-logo-img" width="220" height="56" fetchpriority="high" decoding="async"/>
     </a>
     <nav class="nav" aria-label="Menú principal">
       <a href="/sobre-nosotros">Sobre nosotros</a>
@@ -1952,10 +1932,7 @@ FIN HERO_BACKUP -->
     <button class="mc" onclick="closeAuth()">✕</button>
     <div class="auth-body">
       <div class="auth-hd">
-        <span class="zy-wordmark zy-wm-center">
-          <span class="zy-wm-name">ZapatosYa</span>
-          <span class="zy-wm-tag">Rápido y seguro</span>
-        </span>
+        <img src="/img/logo-negro.png" alt="ZapatosYa" class="zy-logo-img zy-logo-auth" width="220" height="56" loading="lazy" decoding="async"/>
         <h2 id="authTitle">Inicia sesión</h2>
         <p id="authSubtitle">Accede a tu cuenta para continuar</p>
       </div>
