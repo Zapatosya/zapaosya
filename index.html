@@ -1746,11 +1746,12 @@ section.hero.hero-ready{
 .guia-table input{
   width:100%;
   border:none;
-  padding:8px 10px;
+  padding:8px 28px 8px 10px;  /* espacio a la derecha para que no choque con la X */
   font-size:.85rem;
   background:transparent;
   font-family:inherit;
   outline:none;
+  box-sizing:border-box;
 }
 .guia-table input.guia-col{
   font-weight:500;
@@ -1762,19 +1763,31 @@ section.hero.hero-ready{
   border:none;
   color:#dc2626;
   cursor:pointer;
-  padding:2px 6px;
-  font-size:.85rem;
+  padding:4px 8px;
+  font-size:1rem;
   font-weight:600;
   line-height:1;
+  z-index:5;
+  position:relative;
 }
 .guia-x:hover{background:#fee2e2}
+/* Botón X de cabecera de columna: superpuesto al input */
 .guia-table th .guia-x{
   position:absolute;
-  top:2px;right:2px;
-  padding:0 4px;
-  font-size:.7rem;
+  top:50%;
+  right:4px;
+  transform:translateY(-50%);
+  padding:2px 6px;
+  font-size:.85rem;
+  z-index:10;
 }
-.guia-add{background:#fafafa;width:1%;white-space:nowrap;padding:4px}
+/* Botón X de fila: en celda dedicada al final */
+.guia-table td.guia-add .guia-x{
+  display:block;
+  margin:0 auto;
+}
+.guia-add{background:#fafafa;width:36px;white-space:nowrap;padding:4px;text-align:center}
+.guia-add .btn{padding:6px 12px;font-size:.7rem}
 
 /* FIN ZY-ICONS */
 
@@ -5321,8 +5334,10 @@ let _guiaTallasData = { columnas: ['Talla','CM','Pulgadas'], filas: [] };
 function renderGuiaTallasEditor(){
   const wrap = document.getElementById('guiaTallasWrap');
   if(!wrap) return;
-  // Leer valores actuales antes de re-renderizar (para no perder edits en curso)
-  syncGuiaTallasFromInputs();
+  // NO sincronizar aquí — los handlers que modifican datos ya sincronizaron
+  // antes de cambiar el estado. Si sincronizamos aquí, podemos sobrescribir
+  // los cambios recién hechos (ej: al eliminar columna, el sync re-lee los
+  // inputs viejos del DOM y deshace el splice).
 
   const cols = _guiaTallasData.columnas || [];
   const rows = _guiaTallasData.filas || [];
