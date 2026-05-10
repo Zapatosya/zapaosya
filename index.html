@@ -1588,6 +1588,194 @@ section.hero.hero-ready{
 }
 .pe-thumb-del:hover{background:#000}
 
+/* ── 16. GUÍA DE TALLAS ──
+   Botón en modal de producto + modal con la tabla + editor admin */
+
+/* Botón "Guía de tallas" debajo del selector de tallas */
+.guia-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding:6px 0;
+  background:transparent;
+  border:none;
+  color:#000;
+  font-family:'Poppins',sans-serif;
+  font-size:.7rem;
+  font-weight:500;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-bottom:1px solid #000;
+  align-self:flex-start;
+}
+.guia-link:hover{opacity:.6}
+.guia-link svg{flex-shrink:0;stroke:#000}
+
+/* Modal de guía de tallas (vista pública) */
+.guia-modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  box-sizing:border-box;
+}
+.guia-modal.open{display:flex}
+.guia-box{
+  background:#fff;
+  width:100%;
+  max-width:560px;
+  max-height:85vh;
+  display:flex;
+  flex-direction:column;
+  border-radius:0;
+  border:1px solid #000;
+}
+.guia-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 22px;
+  border-bottom:1px solid #e5e5e5;
+}
+.guia-head h3{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  font-weight:500;
+  font-size:.95rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#000;
+}
+.guia-head .mc{
+  border:1px solid #000;
+  background:transparent;
+  width:32px;height:32px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:.85rem;
+}
+.guia-head .mc:hover{background:#000;color:#fff}
+.guia-body{
+  padding:18px 22px;
+  overflow-y:auto;
+  flex:1;
+}
+.guia-foot{
+  padding:14px 22px 18px;
+  border-top:1px solid #e5e5e5;
+}
+.guia-note{
+  margin:0;
+  font-size:.78rem;
+  color:#666;
+  line-height:1.5;
+}
+.guia-table-wrap{overflow-x:auto}
+.guia-public-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.85rem;
+}
+.guia-public-table th,
+.guia-public-table td{
+  border:1px solid #e5e5e5;
+  padding:10px 12px;
+  text-align:left;
+}
+.guia-public-table th{
+  background:#fafafa;
+  font-weight:500;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  font-size:.68rem;
+  color:#000;
+}
+.guia-public-table td{color:#444}
+
+/* Editor admin */
+.guia-section{
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid #e5e5e5;
+}
+.guia-section h4{
+  margin:0 0 10px;
+  font-size:.95rem;
+  font-weight:600;
+  color:#000;
+}
+.guia-section h4 span{
+  font-size:.78rem;
+  color:#888;
+  font-weight:400;
+}
+.guia-empty{
+  padding:14px 16px;
+  background:#fafafa;
+  border:1px dashed #ccc;
+  font-size:.85rem;
+  color:#666;
+}
+.btn-link{
+  background:none;
+  border:none;
+  color:#000;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:pointer;
+  padding:0;
+  font:inherit;
+}
+.guia-scroll{overflow-x:auto;max-width:100%}
+.guia-table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:400px;
+}
+.guia-table th,
+.guia-table td{
+  border:1px solid #e5e5e5;
+  padding:0;
+  position:relative;
+}
+.guia-table input{
+  width:100%;
+  border:none;
+  padding:8px 10px;
+  font-size:.85rem;
+  background:transparent;
+  font-family:inherit;
+  outline:none;
+}
+.guia-table input.guia-col{
+  font-weight:500;
+  background:#fafafa;
+}
+.guia-table input:focus{background:#fffbe7}
+.guia-x{
+  background:transparent;
+  border:none;
+  color:#dc2626;
+  cursor:pointer;
+  padding:2px 6px;
+  font-size:.85rem;
+  font-weight:600;
+  line-height:1;
+}
+.guia-x:hover{background:#fee2e2}
+.guia-table th .guia-x{
+  position:absolute;
+  top:2px;right:2px;
+  padding:0 4px;
+  font-size:.7rem;
+}
+.guia-add{background:#fafafa;width:1%;white-space:nowrap;padding:4px}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -1873,6 +2061,10 @@ FIN HERO_BACKUP -->
         <div class="msel">
           <label>Talla: <strong id="selS">—</strong></label>
           <div class="sopts" id="sopts"></div>
+          <button type="button" class="guia-link" id="mGuiaBtn" style="display:none" onclick="openGuiaTallas()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" width="14" height="14"><rect x="3" y="6" width="18" height="12" rx="0"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="11" y1="6" x2="11" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+            <span>Guía de tallas</span>
+          </button>
         </div>
         <div class="mstock" id="mStock"></div>
         <button class="btn btn-red btn-full" id="addBtn">Agregar al carrito</button>
@@ -2165,6 +2357,20 @@ FIN HERO_BACKUP -->
 <!-- ==================== PRODUCT EDITOR MODAL ==================== -->
 <div class="pe" id="prodEditor"></div>
 
+<!-- ==================== MODAL DE GUÍA DE TALLAS ==================== -->
+<div class="ov guia-modal" id="guiaModal">
+  <div class="guia-box">
+    <div class="guia-head">
+      <h3>Guía de tallas</h3>
+      <button class="mc" onclick="closeGuiaTallas()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="guia-body" id="guiaModalBody"></div>
+    <div class="guia-foot">
+      <p class="guia-note">Las medidas son referenciales. Si tienes dudas, escríbenos por WhatsApp y te asesoramos.</p>
+    </div>
+  </div>
+</div>
+
 <!-- Chat widget -->
 <button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Abrir chat de ayuda">
   <svg id="chatFabOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -2400,6 +2606,33 @@ const SVGS={
 
 // ─── STATE ───────────────────────────────────────────────────
 let PRODUCTS=[], cart=[], curP=null, selC=0, selS=null, selI=0;
+
+// ─── Lock/Unlock del scroll del fondo cuando hay modales abiertos ───
+// Robusto en iOS Safari: usa position:fixed para bloquear todo movimiento
+let __scrollLockY = 0;
+let __scrollLocks = 0; // contador para soportar modales anidados
+function lockScroll(){
+  __scrollLocks++;
+  if(__scrollLocks > 1) return; // ya bloqueado
+  __scrollLockY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top = '-' + __scrollLockY + 'px';
+  document.body.style.left = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
+}
+function unlockScroll(){
+  __scrollLocks = Math.max(0, __scrollLocks - 1);
+  if(__scrollLocks > 0) return; // todavía hay otro modal abierto
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.left = '';
+  document.body.style.right = '';
+  document.body.style.width = '';
+  unlockScroll();
+  window.scrollTo(0, __scrollLockY);
+}
 let currentUser=null, currentProfile=null, isAdmin=false;
 let authMode='login';
 const fmt=p=>"$"+(p||0).toLocaleString("es-CO");
@@ -2502,7 +2735,7 @@ window.addEventListener('popstate', () => {
     const modal = document.getElementById("pModal");
     if (modal && modal.classList.contains('open')) {
       modal.classList.remove("open");
-      document.body.style.overflow="";
+      unlockScroll();
     }
   }
 });
@@ -2741,15 +2974,25 @@ function openModal(id){
   const so=document.getElementById("sopts");
   renderSizesForColor(p, selC);
   document.getElementById("selS").textContent="—";
+
+  // Mostrar/ocultar el botón de guía de tallas según si el producto tiene guía
+  const guiaBtn = document.getElementById("mGuiaBtn");
+  if(guiaBtn){
+    const hasGuia = p.guia_tallas
+      && Array.isArray(p.guia_tallas.columnas) && p.guia_tallas.columnas.length > 0
+      && Array.isArray(p.guia_tallas.filas) && p.guia_tallas.filas.length > 0;
+    guiaBtn.style.display = hasGuia ? '' : 'none';
+  }
+
   document.getElementById("pModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
   
   // Cargar reseñas del producto
   loadReviews(id);
 }
 function closeModal(){
   document.getElementById("pModal").classList.remove("open");
-  document.body.style.overflow="";
+  unlockScroll();
   // Quitar hash de la URL al cerrar
   if (location.hash.startsWith('#producto/')) {
     history.pushState(null, '', location.pathname + location.search);
@@ -3130,14 +3373,14 @@ function openRvLightbox(fotos, idx=0){
   const url = String(fotos[idx]||'');
   img.src = /^(https?:\/\/|\/)/i.test(url) ? url : '';
   lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockScroll();
 }
 
 function closeRvLightbox(){
   const lb = document.getElementById('rvLightbox');
   if(!lb) return;
   lb.classList.remove('open');
-  document.body.style.overflow = '';
+  unlockScroll();
 }
 
 function rvLightboxNav(dir){
@@ -3160,6 +3403,46 @@ document.addEventListener('keydown', e=>{
 });
 
 // ─── NAV IMÁGENES EN MODAL ──────────────────────────────────
+// ─── Guía de tallas (vista pública) ─────────────────────────
+window.openGuiaTallas = function(){
+  if(!curP || !curP.guia_tallas) return;
+  const g = curP.guia_tallas;
+  if(!Array.isArray(g.columnas) || !Array.isArray(g.filas)) return;
+  const body = document.getElementById('guiaModalBody');
+  if(!body) return;
+
+  let html = '<div class="guia-table-wrap"><table class="guia-public-table"><thead><tr>';
+  g.columnas.forEach(c => {
+    html += `<th>${escHTML(c)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  g.filas.forEach(row => {
+    html += '<tr>';
+    g.columnas.forEach((_, ci) => {
+      html += `<td>${escHTML(row[ci]||'')}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  body.innerHTML = html;
+
+  document.getElementById('guiaModal').classList.add('open');
+  lockScroll();
+};
+window.closeGuiaTallas = function(){
+  document.getElementById('guiaModal').classList.remove('open');
+  unlockScroll();
+};
+// Click en overlay para cerrar
+document.addEventListener('DOMContentLoaded', () => {
+  const gm = document.getElementById('guiaModal');
+  if(gm){
+    gm.addEventListener('click', e => {
+      if(e.target === gm) closeGuiaTallas();
+    });
+  }
+});
+
 function setupImageNav(p){
   // Imágenes del color actualmente seleccionado
   const imgs = getColorImages(p, selC);
@@ -3323,14 +3606,12 @@ function openLightbox(idx=0){
   const img=document.getElementById('lboxImg');
   img.src=imgs[lboxIdx];
   lb.classList.add('open');
-  document.body.style.overflow='hidden';
+  lockScroll();
   updateLboxNav();
 }
 function closeLightbox(){
   document.getElementById('lbox').classList.remove('open');
-  if(!document.getElementById('pModal').classList.contains('open')){
-    document.body.style.overflow='';
-  }
+  unlockScroll();
 }
 function changeLbox(dir){
   if(!curP) return;
@@ -3421,12 +3702,12 @@ function updateCartUI(){
 function openCart(){
   document.getElementById("cDw").classList.add("open");
   document.getElementById("cOv").classList.add("open");
-  document.body.style.overflow="hidden"; renderCart();
+  lockScroll(); renderCart();
 }
 function closeCart(){
   document.getElementById("cDw").classList.remove("open");
   document.getElementById("cOv").classList.remove("open");
-  document.body.style.overflow="";
+  unlockScroll();
 }
 function renderCart(){
   const body=document.getElementById("cBody"),foot=document.getElementById("cFoot");
@@ -3675,9 +3956,9 @@ function openCheckout(){
     }
   }
   document.getElementById("checkoutModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
 }
-function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open");document.body.style.overflow="";}
+function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open");unlockScroll();}
 
 // Filtro de palabras ofensivas y spam
 const PALABRAS_PROHIBIDAS = [
@@ -3915,9 +4196,9 @@ function openAuth(mode='login'){
   document.getElementById("nameField").style.display=isLogin?'none':'block';
   document.getElementById("authMsg").innerHTML='';
   document.getElementById("authModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
 }
-function closeAuth(){document.getElementById("authModal").classList.remove("open");document.body.style.overflow="";hideRecover();}
+function closeAuth(){document.getElementById("authModal").classList.remove("open");unlockScroll();hideRecover();}
 function toggleAuth(){openAuth(authMode==='login'?'signup':'login');}
 
 // ─── RECUPERACIÓN DE CONTRASEÑA ──────────────────────────────
@@ -4167,10 +4448,10 @@ function openAccount(){
   if(!currentUser){openAuth('login');return;}
   document.getElementById("accEmail").textContent=currentUser.email;
   document.getElementById("accModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
   renderAccountTab('pedidos');
 }
-function closeAccount(){document.getElementById("accModal").classList.remove("open");document.body.style.overflow="";}
+function closeAccount(){document.getElementById("accModal").classList.remove("open");unlockScroll();}
 
 document.querySelectorAll(".acc-tab[data-t]").forEach(b=>{
   b.addEventListener("click",()=>{
@@ -4252,10 +4533,10 @@ async function deleteAddress(id){
 function openAdmin(){
   if(!isAdmin){showToast('Acceso denegado');return;}
   document.getElementById("adminModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
   renderAdminTab('dashboard');
 }
-function closeAdmin(){document.getElementById("adminModal").classList.remove("open");document.body.style.overflow="";}
+function closeAdmin(){document.getElementById("adminModal").classList.remove("open");unlockScroll();}
 
 document.querySelectorAll(".acc-tab[data-at]").forEach(b=>{
   b.addEventListener("click",()=>{
@@ -4597,7 +4878,7 @@ async function deletePedido(id){
 async function openMisPedidos(){
   if(!currentUser){ openAuth('login'); return; }
   document.getElementById("misPedidosModal").classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
   const c = document.getElementById('misPedidosContent');
   c.innerHTML = '<div class="loading">Cargando tus pedidos...</div>';
   try{
@@ -4705,7 +4986,7 @@ async function openMisPedidos(){
 
 function closeMisPedidos(){
   document.getElementById("misPedidosModal").classList.remove("open");
-  document.body.style.overflow="";
+  unlockScroll();
 }
 
 // Reintentar pago de un pedido existente
@@ -4846,6 +5127,10 @@ function openProductEditor(p){
   const fondos=p?.fondos||[];
   const tallas=p?.tallas||[];
   const etiquetas=p?.etiquetas||[];
+  // Guía de tallas: estructura {columnas:[...], filas:[[...]]}. Default: 3 columnas comunes
+  const guiaTallas = (p?.guia_tallas && typeof p.guia_tallas === 'object')
+    ? p.guia_tallas
+    : { columnas: ['Talla', 'CM', 'Pulgadas'], filas: [] };
   m.innerHTML=`
     <div class="pe-ov" onclick="closeProductEditor()"></div>
     <div class="pe-box">
@@ -4906,6 +5191,10 @@ function openProductEditor(p){
           <h4>📦 Inventario por color y talla <span>(se actualiza al cambiar colores/tallas)</span></h4>
           <div id="stockMatrixWrap"><div class="stock-empty">Agrega colores y tallas para ver la matriz de stock</div></div>
         </div>
+        <div class="guia-section">
+          <h4>Guía de tallas <span>(opcional, aparece como botón en la página del producto)</span></h4>
+          <div id="guiaTallasWrap"></div>
+        </div>
       </div>
       <div class="pe-foot">
         <button class="btn btn-out" onclick="closeProductEditor()">Cancelar</button>
@@ -4913,7 +5202,7 @@ function openProductEditor(p){
       </div>
     </div>`;
   m.classList.add('open');
-  document.body.style.overflow='hidden';
+  lockScroll();
   // Cargar stock existente
   _stockData = p?.stock && typeof p.stock === 'object' ? {...p.stock} : {};
   // Convertir valores a números
@@ -4932,6 +5221,9 @@ function openProductEditor(p){
   }else{
     addColorRow();
   }
+  // Cargar guía de tallas
+  _guiaTallasData = JSON.parse(JSON.stringify(guiaTallas)); // clonar
+  renderGuiaTallasEditor();
 }
 
 function addColorRow(hex='#000000',nombre='',imgs='',fondo=''){
@@ -5023,6 +5315,102 @@ function renderStockMatrix(){
   wrap.innerHTML=html;
 }
 
+// ─── GUÍA DE TALLAS — editor admin ─────────────────────────
+let _guiaTallasData = { columnas: ['Talla','CM','Pulgadas'], filas: [] };
+
+function renderGuiaTallasEditor(){
+  const wrap = document.getElementById('guiaTallasWrap');
+  if(!wrap) return;
+  // Leer valores actuales antes de re-renderizar (para no perder edits en curso)
+  syncGuiaTallasFromInputs();
+
+  const cols = _guiaTallasData.columnas || [];
+  const rows = _guiaTallasData.filas || [];
+
+  let html = '';
+  if(cols.length === 0 && rows.length === 0){
+    html += `<div class="guia-empty">Sin guía configurada. <button type="button" class="btn-link" onclick="initGuiaTallas()">Crear guía</button></div>`;
+  } else {
+    html += '<div class="guia-scroll"><table class="guia-table"><thead><tr>';
+    cols.forEach((c, ci) => {
+      html += `<th><input type="text" class="guia-col" data-c="${ci}" value="${escAttr(c)}" placeholder="Columna"><button type="button" class="guia-x" title="Eliminar columna" onclick="removeGuiaCol(${ci})">×</button></th>`;
+    });
+    html += `<th class="guia-add"><button type="button" class="btn btn-out btn-sm" onclick="addGuiaCol()">+ Col</button></th>`;
+    html += '</tr></thead><tbody>';
+    rows.forEach((row, ri) => {
+      html += '<tr>';
+      cols.forEach((_, ci) => {
+        const val = row[ci] || '';
+        html += `<td><input type="text" class="guia-cell" data-r="${ri}" data-c="${ci}" value="${escAttr(val)}"></td>`;
+      });
+      html += `<td class="guia-add"><button type="button" class="guia-x" title="Eliminar fila" onclick="removeGuiaRow(${ri})">×</button></td>`;
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn btn-out btn-sm" onclick="addGuiaRow()">+ Agregar fila</button>
+      <button type="button" class="btn btn-out btn-sm" onclick="clearGuiaTallas()" style="color:#dc2626">Eliminar guía</button>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+function syncGuiaTallasFromInputs(){
+  const wrap = document.getElementById('guiaTallasWrap');
+  if(!wrap) return;
+  // Leer columnas
+  const colInputs = wrap.querySelectorAll('.guia-col');
+  if(colInputs.length){
+    const cols = [];
+    colInputs.forEach(inp => cols.push(inp.value));
+    _guiaTallasData.columnas = cols;
+  }
+  // Leer celdas
+  const cells = wrap.querySelectorAll('.guia-cell');
+  cells.forEach(inp => {
+    const r = parseInt(inp.dataset.r);
+    const c = parseInt(inp.dataset.c);
+    if(!_guiaTallasData.filas[r]) _guiaTallasData.filas[r] = [];
+    _guiaTallasData.filas[r][c] = inp.value;
+  });
+}
+
+window.initGuiaTallas = function(){
+  _guiaTallasData = { columnas: ['Talla','CM','Pulgadas'], filas: [['','','']] };
+  renderGuiaTallasEditor();
+};
+window.addGuiaCol = function(){
+  syncGuiaTallasFromInputs();
+  _guiaTallasData.columnas.push('');
+  // Las filas ya existentes se rellenan con '' al renderizar
+  renderGuiaTallasEditor();
+};
+window.removeGuiaCol = function(idx){
+  syncGuiaTallasFromInputs();
+  _guiaTallasData.columnas.splice(idx, 1);
+  _guiaTallasData.filas.forEach(row => row.splice(idx, 1));
+  renderGuiaTallasEditor();
+};
+window.addGuiaRow = function(){
+  syncGuiaTallasFromInputs();
+  const newRow = new Array(_guiaTallasData.columnas.length).fill('');
+  _guiaTallasData.filas.push(newRow);
+  renderGuiaTallasEditor();
+};
+window.removeGuiaRow = function(idx){
+  syncGuiaTallasFromInputs();
+  _guiaTallasData.filas.splice(idx, 1);
+  renderGuiaTallasEditor();
+};
+window.clearGuiaTallas = function(){
+  if(!confirm('¿Eliminar toda la guía de tallas de este producto?')) return;
+  _guiaTallasData = { columnas: [], filas: [] };
+  renderGuiaTallasEditor();
+};
+
+// Helper para escapar atributos
+function escAttr(s){ return String(s||'').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
 // Observar cambios en tallas (delegación en pe-body)
 document.addEventListener('change',function(e){
   if(e.target.classList.contains('peSize')){
@@ -5097,7 +5485,7 @@ function closeProductEditor(){
   const m=document.getElementById('prodEditor');
   m.classList.remove('open');
   m.innerHTML='';
-  document.body.style.overflow='';
+  unlockScroll();
 }
 
 async function saveProduct(){
@@ -5128,9 +5516,30 @@ async function saveProduct(){
     _stockData[inp.dataset.sk]=parseInt(inp.value)||0;
   });
   const stock = {..._stockData};
+
+  // Leer guía de tallas y normalizar (limpiar columnas/filas vacías)
+  syncGuiaTallasFromInputs();
+  let guia_tallas = null;
+  if(_guiaTallasData.columnas.length > 0 && _guiaTallasData.filas.length > 0){
+    // Filtrar columnas con header vacío
+    const validCols = [];
+    _guiaTallasData.columnas.forEach((c, idx) => {
+      if(String(c).trim()) validCols.push(idx);
+    });
+    if(validCols.length > 0){
+      const cleanCols = validCols.map(i => _guiaTallasData.columnas[i].trim());
+      const cleanRows = _guiaTallasData.filas
+        .map(row => validCols.map(i => String(row[i]||'').trim()))
+        .filter(row => row.some(cell => cell));  // descartar filas completamente vacías
+      if(cleanRows.length > 0){
+        guia_tallas = { columnas: cleanCols, filas: cleanRows };
+      }
+    }
+  }
+
   const payload={
     nombre,categoria,precio,precio_original,descripcion,stock_mensaje,envio_gratis,
-    colores,nombres_colores,imagenes,fondos,tallas,etiquetas,stock,
+    colores,nombres_colores,imagenes,fondos,tallas,etiquetas,stock,guia_tallas,
     color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
     fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
   };
@@ -5261,13 +5670,13 @@ function openMobileDrawer(){
   mobileBtn.classList.add("open");
   mobileDrawer.classList.add("open");
   mobileDrawerOv.classList.add("open");
-  document.body.style.overflow="hidden";
+  lockScroll();
 }
 function closeMobileDrawer(){
   mobileBtn.classList.remove("open");
   mobileDrawer.classList.remove("open");
   mobileDrawerOv.classList.remove("open");
-  document.body.style.overflow="";
+  unlockScroll();
 }
 if(mobileBtn){
   mobileBtn.addEventListener("click",()=>{
