@@ -1789,6 +1789,53 @@ section.hero.hero-ready{
 .guia-add{background:#fafafa;width:36px;white-space:nowrap;padding:4px;text-align:center}
 .guia-add .btn{padding:6px 12px;font-size:.7rem}
 
+/* ── 17. MODAL DE PRODUCTO en casi pantalla completa ──
+   Solo afecta al modal de producto (#pModal), no a los otros modales */
+#pModal{padding:8px!important}
+#pModal .modal{
+  max-width:1400px!important;
+  width:100%!important;
+  max-height:96vh!important;
+  height:96vh!important;
+}
+@media (max-width:760px){
+  #pModal{padding:0!important;backdrop-filter:none!important;background:#fff!important}
+  #pModal .modal{
+    max-width:100%!important;
+    width:100%!important;
+    height:100vh!important;
+    max-height:100vh!important;
+    border:none!important;
+  }
+}
+
+/* Topbar del modal — contenedor de los botones compartir + cerrar */
+.m-topbar{
+  position:absolute;
+  top:14px;
+  right:14px;
+  z-index:10;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.m-topbar .mc{
+  position:static!important;  /* anular cualquier position:absolute previo */
+  top:auto!important;
+  right:auto!important;
+}
+.m-share{
+  background:#fff!important;
+  color:#000!important;
+  border:1px solid #000!important;
+}
+.m-share:hover{
+  background:#000!important;
+  color:#fff!important;
+}
+.m-share:hover svg{stroke:#fff!important}
+.m-share svg{stroke:#000;transition:stroke .2s ease}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -2046,7 +2093,16 @@ FIN HERO_BACKUP -->
 <!-- MODAL PRODUCTO -->
 <div class="ov" id="pModal">
   <div class="modal">
-    <button class="mc" id="mClose">✕</button>
+    <div class="m-topbar">
+      <button class="mc m-share" id="mShare" aria-label="Compartir producto" title="Compartir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+      </button>
+      <button class="mc" id="mClose" aria-label="Cerrar">✕</button>
+    </div>
     <div class="mb">
       <div class="mi" id="mImg">
         <div class="mi-badge" id="mBadge"></div>
@@ -5728,6 +5784,53 @@ window.addEventListener("scroll",()=>{
 });
 document.getElementById("addBtn").addEventListener("click",addToCart);
 document.getElementById("mClose").addEventListener("click",closeModal);
+document.getElementById("mShare").addEventListener("click", shareCurrentProduct);
+
+async function shareCurrentProduct(){
+  if(!curP){ return; }
+  const slug = slugify(curP.nombre) || curP.id;
+  const url = `${location.origin}/${slug}`;
+  const title = curP.nombre;
+  const text = `Mira este producto en ZapatosYa: ${curP.nombre}`;
+
+  // Web Share API (móvil principalmente) — abre el menú nativo del sistema
+  if(navigator.share){
+    try{
+      await navigator.share({ title, text, url });
+      return;
+    }catch(e){
+      // Usuario canceló o error — no es crítico
+      if(e.name === 'AbortError') return;
+      console.warn('[share] navigator.share falló:', e);
+    }
+  }
+
+  // Fallback: copiar link al portapapeles
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(url);
+      showToast('Enlace copiado');
+      return;
+    }
+  }catch(e){
+    console.warn('[share] clipboard falló:', e);
+  }
+
+  // Último fallback: textarea temporal (navegadores muy viejos)
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Enlace copiado');
+  }catch(e){
+    showToast('No se pudo copiar el enlace');
+  }
+}
 document.getElementById("cartBtn").addEventListener("click",openCart);
 document.getElementById("cClose").addEventListener("click",closeCart);
 document.getElementById("cOv").addEventListener("click",closeCart);
