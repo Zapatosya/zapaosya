@@ -1540,6 +1540,53 @@ section.hero.hero-ready{
   background-color:#1a1a1a;
 }
 
+/* ── Admin: grid de imágenes múltiples por color ── */
+.pe-color-imgs{margin-top:10px}
+.pe-imgs-grid{display:flex;flex-wrap:wrap;gap:8px}
+.pe-img-thumb{
+  position:relative;
+  width:72px;
+  height:72px;
+  border:1px solid #e5e5e5;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.pe-img-thumb.empty,.pe-img-thumb.loading{
+  background:#fafafa;
+  border-style:dashed;
+}
+.pe-thumb-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.pe-thumb-placeholder{
+  font-size:.65rem;
+  color:#999;
+  text-align:center;
+  padding:0 4px;
+}
+.pe-thumb-del{
+  position:absolute;
+  top:3px;right:3px;
+  width:20px;height:20px;
+  border:none;
+  background:rgba(0,0,0,.75);
+  color:#fff;
+  border-radius:0;
+  cursor:pointer;
+  font-size:.7rem;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.pe-thumb-del:hover{background:#000}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -2357,7 +2404,7 @@ const SVGS={
 };
 
 // ─── STATE ───────────────────────────────────────────────────
-let PRODUCTS=[], cart=[], curP=null, selC=0, selS=null;
+let PRODUCTS=[], cart=[], curP=null, selC=0, selS=null, selI=0;
 let currentUser=null, currentProfile=null, isAdmin=false;
 let authMode='login';
 const fmt=p=>"$"+(p||0).toLocaleString("es-CO");
@@ -2378,10 +2425,37 @@ const optimizeImg=(url,w=400,q=80)=>{
 };
 
 // Helper: devuelve HTML de imagen real o SVG fallback
+// ─── HELPER: Múltiples imágenes por color (compat hacia atrás) ───
+// Formato nuevo: imagenes = [["url1","url2"], ["url3"], ["url4","url5","url6"]]
+// Formato viejo: imagenes = ["url1", "url2", "url3"]  (1 por color)
+// Ambos funcionan. Esta función siempre devuelve un array de URLs (puede estar vacío).
+function getColorImages(p, colorIdx){
+  if(!p || !p.imagenes) return [];
+  const slot = p.imagenes[colorIdx];
+  if(slot == null) return [];
+  if(Array.isArray(slot)) return slot.filter(Boolean);
+  if(typeof slot === 'string' && slot) return [slot]; // formato viejo
+  return [];
+}
+
+// Devuelve la imagen "principal" (primera) de un color
+function getColorMainImage(p, colorIdx){
+  const arr = getColorImages(p, colorIdx);
+  return arr[0] || '';
+}
+
+// ¿Tiene este producto al menos una imagen en algún color?
+function productHasAnyImage(p){
+  if(!p || !p.imagenes) return false;
+  for(let i=0; i<p.imagenes.length; i++){
+    if(getColorImages(p, i).length > 0) return true;
+  }
+  return false;
+}
+
 const getProductVisual=(p,colorIdx=0)=>{
-  const imgs=p.imagenes||[];
-  if(imgs.length>0){
-    const url=imgs[colorIdx]||imgs[0];
+  const url = getColorMainImage(p, colorIdx) || getColorMainImage(p, 0);
+  if(url){
     return `<img src="${escURL(url)}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
@@ -2442,7 +2516,7 @@ window.addEventListener('popstate', () => {
 function updateProductsSchema(products){
   try{
     const items = products.map((p,i)=>{
-      const img = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'https://zapatosya.com/img/icon-512.png';
+      const img = getColorMainImage(p, 0) || 'https://zapatosya.com/img/icon-512.png';
       const slug = String(p.nombre||'producto').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
       const price = String(p.precio||0);
       const product = {
@@ -2607,7 +2681,7 @@ function enrichSchemaWithRatings(productos, byProd){
 
 function openModal(id){
   curP=PRODUCTS.find(p=>p.id===id); if(!curP) return;
-  selC=0; selS=null;
+  selC=0; selS=null; selI=0;
   const p=curP;
   
   // Actualizar URL para que sea compartible (deep linking)
@@ -2620,9 +2694,11 @@ function openModal(id){
   
   const mi=document.getElementById("mImg");
   
-  // Precargar todas las imágenes para evitar flash al cambiar de color
-  (p.imagenes||[]).forEach(url=>{
-    if(url){const img=new Image(); img.src=url;}
+  // Precargar TODAS las imágenes de TODOS los colores (compat con formato viejo y nuevo)
+  (p.imagenes||[]).forEach((slot, idx) => {
+    getColorImages(p, idx).forEach(url => {
+      if(url){const img=new Image(); img.src=url;}
+    });
   });
   
   // Limpia cualquier svg/img previo (pero deja los elementos de UI: badge, nav, dots)
@@ -2630,13 +2706,13 @@ function openModal(id){
   const oldImg=mi.querySelector("#mProductImg"); if(oldImg) oldImg.remove();
   
   // Inserta imagen real o SVG fallback (al principio del contenedor)
-  const hasImages=(p.imagenes||[]).filter(x=>x).length>0;
+  const hasImages=productHasAnyImage(p);
   if(hasImages){
     const img=document.createElement('img');
     img.id='mProductImg';
-    img.src=p.imagenes[0]||'';
+    img.src=getColorMainImage(p, 0);
     img.alt=p.nombre;
-    img.onclick=()=>openLightbox(selC);
+    img.onclick=()=>openLightbox(selI);
     mi.insertBefore(img,mi.firstChild);
   }else{
     mi.insertAdjacentHTML("afterbegin",getSVG(p));
@@ -3090,7 +3166,8 @@ document.addEventListener('keydown', e=>{
 
 // ─── NAV IMÁGENES EN MODAL ──────────────────────────────────
 function setupImageNav(p){
-  const imgs=(p.imagenes||[]).filter(x=>x);
+  // Imágenes del color actualmente seleccionado
+  const imgs = getColorImages(p, selC);
   const prev=document.getElementById('miPrev');
   const next=document.getElementById('miNext');
   const dots=document.getElementById('miDots');
@@ -3100,17 +3177,17 @@ function setupImageNav(p){
   prev.classList.toggle('hidden',!multiple);
   next.classList.toggle('hidden',!multiple);
   
-  // Dots
+  // Dots — un dot por imagen del color actual, no por color
   if(multiple){
-    dots.innerHTML=imgs.map((_,i)=>`<span class="mi-dot${i===0?' act':''}" data-i="${i}"></span>`).join('');
+    dots.innerHTML=imgs.map((_,i)=>`<span class="mi-dot${i===selI?' act':''}" data-i="${i}"></span>`).join('');
     dots.querySelectorAll('.mi-dot').forEach(d=>{
-      d.addEventListener('click',e=>{e.stopPropagation();selC=+d.dataset.i;updateModalColor();});
+      d.addEventListener('click',e=>{e.stopPropagation();selI=+d.dataset.i;updateModalImage();});
     });
   }else{
     dots.innerHTML='';
   }
   
-  // Handlers flechas (remover anteriores primero)
+  // Handlers flechas
   prev.onclick=(e)=>{e.stopPropagation();changeImage(-1);};
   next.onclick=(e)=>{e.stopPropagation();changeImage(1);};
   
@@ -3120,10 +3197,32 @@ function setupImageNav(p){
 
 function changeImage(dir){
   if(!curP) return;
-  const n=(curP.imagenes||[]).filter(x=>x).length;
+  const imgs = getColorImages(curP, selC);
+  const n = imgs.length;
   if(n<=1) return;
-  selC=(selC+dir+n)%n;
-  updateModalColor();
+  selI = (selI + dir + n) % n;
+  updateModalImage();
+}
+
+// Cambiar la imagen mostrada (sin tocar otros aspectos del modal)
+function updateModalImage(){
+  if(!curP) return;
+  const imgs = getColorImages(curP, selC);
+  const newSrc = imgs[selI] || imgs[0];
+  const imgEl = document.getElementById("mProductImg");
+  if(imgEl && newSrc && imgEl.src !== newSrc){
+    imgEl.style.opacity='0';
+    const tempImg=new Image();
+    tempImg.onload=()=>{
+      imgEl.src=newSrc;
+      requestAnimationFrame(()=>{imgEl.style.opacity='1';});
+    };
+    tempImg.src=newSrc;
+  }
+  // Actualizar dots activos
+  document.querySelectorAll('#miDots .mi-dot').forEach((d,i)=>{
+    d.classList.toggle('act', i===selI);
+  });
 }
 
 function renderSizesForColor(p, colorIdx){
@@ -3163,22 +3262,23 @@ function updateModalColor(){
   if(!curP) return;
   const cn=curP.nombres_colores||[];
   
+  // Reset al primer índice de imagen del nuevo color
+  selI = 0;
+  
   // Actualizar selección visual de botones de color
   document.querySelectorAll('#copts .copt').forEach((b,i)=>{
     b.classList.toggle('sel',i===selC);
   });
   document.getElementById("selC").textContent=cn[selC]||'—';
   
-  // Actualizar dots
-  document.querySelectorAll('#miDots .mi-dot').forEach((d,i)=>{
-    d.classList.toggle('act',i===selC);
-  });
+  // Reconstruir navegación de imágenes para el nuevo color
+  // (porque el número de imágenes puede cambiar entre colores)
+  setupImageNav(curP);
   
-  // Cambiar imagen con animación fade
+  // Cambiar imagen con animación fade — primera imagen del color actual
   const imgEl=document.getElementById("mProductImg");
-  const newSrc=(curP.imagenes||[])[selC];
+  const newSrc=getColorMainImage(curP, selC);
   if(imgEl && newSrc && imgEl.src!==newSrc){
-    // Fade out → change → fade in
     imgEl.style.opacity='0';
     const tempImg=new Image();
     tempImg.onload=()=>{
@@ -3220,35 +3320,37 @@ function setupSwipe(el){
 // ─── LIGHTBOX ZOOM ──────────────────────────────────────────
 let lboxIdx=0;
 function openLightbox(idx=0){
-  if(!curP||!(curP.imagenes||[]).length) return;
-  lboxIdx=idx;
+  if(!curP) return;
+  const imgs = getColorImages(curP, selC);
+  if(!imgs.length) return;
+  lboxIdx = (idx >= 0 && idx < imgs.length) ? idx : 0;
   const lb=document.getElementById('lbox');
   const img=document.getElementById('lboxImg');
-  img.src=curP.imagenes[lboxIdx];
+  img.src=imgs[lboxIdx];
   lb.classList.add('open');
   document.body.style.overflow='hidden';
   updateLboxNav();
 }
 function closeLightbox(){
   document.getElementById('lbox').classList.remove('open');
-  // Solo restauro overflow si el modal de producto no está abierto
   if(!document.getElementById('pModal').classList.contains('open')){
     document.body.style.overflow='';
   }
 }
 function changeLbox(dir){
   if(!curP) return;
-  const n=(curP.imagenes||[]).filter(x=>x).length;
+  const imgs = getColorImages(curP, selC);
+  const n = imgs.length;
   if(n<=1) return;
   lboxIdx=(lboxIdx+dir+n)%n;
-  document.getElementById('lboxImg').src=curP.imagenes[lboxIdx];
+  document.getElementById('lboxImg').src=imgs[lboxIdx];
   updateLboxNav();
-  // Sincronizar con modal
-  selC=lboxIdx;
-  updateModalColor();
+  // Sincronizar con el modal: cambiar selI al mismo índice
+  selI = lboxIdx;
+  updateModalImage();
 }
 function updateLboxNav(){
-  const n=(curP?.imagenes||[]).filter(x=>x).length;
+  const n = curP ? getColorImages(curP, selC).length : 0;
   document.getElementById('lboxPrev').style.display=n>1?'flex':'none';
   document.getElementById('lboxNext').style.display=n>1?'flex':'none';
 }
@@ -3300,7 +3402,7 @@ function addToCart(){
   else cart.push({
     key,id:p.id,name:p.nombre,
     svg:p.svg_tipo,c1:p.color_principal,c2:p.color_secundario,
-    img:(p.imagenes||[])[selC]||'',
+    img: getColorImages(p, selC)[selI] || getColorMainImage(p, selC) || '',
     bg:(p.fondos||[])[selC]||p.fondo||'#F5F5F5',
     price:p.precio,size:selS,color:cn[selC]||'',qty:1,
     envio_gratis: !!p.envio_gratis
@@ -4824,16 +4926,29 @@ function openProductEditor(p){
   // Cargar colores existentes o uno vacío
   const colorRows=document.getElementById('peColors');
   if(colores.length){
-    colores.forEach((c,i)=>addColorRow(c,nombresColores[i]||'',imagenes[i]||'',fondos[i]||c));
+    colores.forEach((c,i)=>{
+      // imagenes[i] puede ser string (formato viejo) o array (formato nuevo)
+      let imgsForColor = [];
+      const slot = imagenes[i];
+      if(Array.isArray(slot)) imgsForColor = slot.filter(Boolean);
+      else if(typeof slot === 'string' && slot) imgsForColor = [slot];
+      addColorRow(c, nombresColores[i]||'', imgsForColor, fondos[i]||c);
+    });
   }else{
     addColorRow();
   }
 }
 
-function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
+function addColorRow(hex='#000000',nombre='',imgs='',fondo=''){
   const wrap=document.getElementById('peColors');
   const row=document.createElement('div');
   row.className='pe-color-row';
+
+  // Normalizar imgs a array (compat hacia atrás)
+  let imgArr = [];
+  if(Array.isArray(imgs)) imgArr = imgs.filter(Boolean);
+  else if(typeof imgs === 'string' && imgs) imgArr = [imgs];
+
   row.innerHTML=`
     <div class="pe-color-main">
       <input type="color" value="${hex}" class="peColorHex" title="Color del botón">
@@ -4841,19 +4956,36 @@ function addColorRow(hex='#000000',nombre='',imgUrl='',fondo=''){
       <input type="color" value="${fondo||hex}" class="peColorBg" title="Color de fondo">
       <button type="button" class="pe-del" onclick="this.closest('.pe-color-row').remove();renderStockMatrix()">✕</button>
     </div>
-    <div class="pe-color-img">
-      ${imgUrl?`<img src="${imgUrl}" alt="Vista previa del producto" class="pe-preview">`:'<div class="pe-preview pe-preview-empty">Sin imagen</div>'}
-      <input type="hidden" value="${imgUrl}" class="peColorImg">
-      <label class="btn btn-out btn-sm" style="cursor:pointer">
-        Subir imagen
+    <div class="pe-color-imgs">
+      <div class="pe-imgs-grid"></div>
+      <label class="btn btn-out btn-sm" style="cursor:pointer;margin-top:8px;display:inline-block">
+        + Agregar imagen
         <input type="file" accept="image/*" style="display:none" onchange="uploadColorImage(this)">
       </label>
     </div>`;
-  // Escuchar cambios de nombre para actualizar matriz
+
+  // Render inicial de las imágenes existentes
+  const grid = row.querySelector('.pe-imgs-grid');
+  imgArr.forEach(url => grid.appendChild(buildImgThumb(url)));
+  if(!imgArr.length) grid.appendChild(buildImgThumb(''));
+
   row.querySelector('.peColorName').addEventListener('input', renderStockMatrix);
   row.querySelector('.peColorHex').addEventListener('input', renderStockMatrix);
   wrap.appendChild(row);
   renderStockMatrix();
+}
+
+// Construir un thumbnail de imagen (con botón eliminar)
+function buildImgThumb(url){
+  const div = document.createElement('div');
+  div.className = 'pe-img-thumb' + (url ? '' : ' empty');
+  div.innerHTML = url
+    ? `<img src="${url}" alt="" class="pe-thumb-img">
+       <input type="hidden" value="${url}" class="peColorImg">
+       <button type="button" class="pe-thumb-del" title="Eliminar" onclick="this.closest('.pe-img-thumb').remove()">✕</button>`
+    : `<div class="pe-thumb-placeholder">Sin imagen</div>
+       <input type="hidden" value="" class="peColorImg">`;
+  return div;
 }
 
 /* ─── STOCK MATRIX ─────────────────────────────────────────── */
@@ -4906,28 +5038,22 @@ document.addEventListener('change',function(e){
 async function uploadColorImage(input){
   const file=input.files[0]; if(!file) return;
   const row=input.closest('.pe-color-row');
-  const imgContainer=row.querySelector('.pe-color-img');
-  const hidden=row.querySelector('.peColorImg');
-  
-  // Guardar el HTML original por si hay error
-  const originalPreview=imgContainer.querySelector('.pe-preview');
-  
-  // Mostrar loading (reemplazar solo el preview, no toda la estructura)
-  const loadingDiv=document.createElement('div');
-  loadingDiv.className='pe-preview pe-preview-empty';
-  loadingDiv.textContent='Subiendo...';
-  loadingDiv.style.color='var(--red)';
-  originalPreview.replaceWith(loadingDiv);
+  const grid=row.querySelector('.pe-imgs-grid');
+
+  // Quitar placeholder vacío si existe
+  const emptyThumb = grid.querySelector('.pe-img-thumb.empty');
+  if(emptyThumb) emptyThumb.remove();
+
+  // Crear thumb temporal con loading
+  const tempThumb = document.createElement('div');
+  tempThumb.className = 'pe-img-thumb loading';
+  tempThumb.innerHTML = `<div class="pe-thumb-placeholder">Subiendo...</div>`;
+  grid.appendChild(tempThumb);
   
   try{
     const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
     const fileName=`${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     
-    console.log('[upload] Subiendo:', fileName, 'tamaño:', file.size);
-    
-    // Subir usando fetch directo al endpoint de Storage
-    // Usamos el anon key (las políticas del bucket permiten INSERT a authenticated,
-    // pero si el bucket es público, también permite con anon key)
     const uploadUrl=`${SUPABASE_URL}/storage/v1/object/productos/${fileName}`;
     const authH = await getAuthHeaders();
     const res=await fetch(uploadUrl,{
@@ -4947,26 +5073,28 @@ async function uploadColorImage(input){
       throw new Error(`HTTP ${res.status}: ${errText}`);
     }
     
-    // URL pública
     const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/productos/${fileName}`;
-    console.log('[upload] OK:', publicUrl);
-    
-    hidden.value=publicUrl;
-    const newImg=document.createElement('img');
-    newImg.src=publicUrl;
-    newImg.className='pe-preview';
-    loadingDiv.replaceWith(newImg);
+
+    // Reemplazar el thumb temporal con el real
+    const realThumb = buildImgThumb(publicUrl);
+    tempThumb.replaceWith(realThumb);
     showToast('Imagen subida');
+    // Reset input para poder subir la misma imagen de nuevo si hace falta
+    input.value = '';
   }catch(e){
     console.error('[upload] Error:',e);
     showToast('Error: '+(e.message||'No se pudo subir').slice(0,60));
-    // Restaurar preview original
-    const errDiv=document.createElement('div');
-    errDiv.className='pe-preview pe-preview-empty';
-    errDiv.textContent='Sin imagen';
-    loadingDiv.replaceWith(errDiv);
+    // Quitar el thumb temporal de loading
+    if(tempThumb && tempThumb.parentNode) tempThumb.remove();
+    // Si quedó el grid vacío, devolver un placeholder
+    const row = input.closest('.pe-color-row');
+    if(row){
+      const grid = row.querySelector('.pe-imgs-grid');
+      if(grid && grid.children.length === 0){
+        grid.appendChild(buildImgThumb(''));
+      }
+    }
   }
-  // Limpiar el input file para poder re-subir la misma imagen si quiere
   input.value='';
 }
 
@@ -4994,7 +5122,10 @@ async function saveProduct(){
   colorRows.forEach(r=>{
     colores.push(r.querySelector('.peColorHex').value);
     nombres_colores.push(r.querySelector('.peColorName').value.trim()||'—');
-    imagenes.push(r.querySelector('.peColorImg').value||'');
+    // Recoger TODAS las URLs de imágenes de este color (puede haber 0, 1 o más)
+    const imgInputs = r.querySelectorAll('.peColorImg');
+    const colorImgs = Array.from(imgInputs).map(i => i.value).filter(Boolean);
+    imagenes.push(colorImgs); // Siempre guardamos como array (formato nuevo)
     fondos.push(r.querySelector('.peColorBg').value);
   });
   // Leer stock de la matriz
