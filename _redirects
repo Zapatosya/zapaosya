@@ -1,14 +1,11 @@
-# Cloudflare Pages — SPA fallback
-# Cualquier URL que no sea un archivo real (CSS, JS, imagen, etc.)
-# sirve index.html con código 200.
-# Eso permite que URLs como /diesel-azul carguen el index.html
-# y el JS detecte el slug en location.pathname para abrir el producto.
+# Cloudflare Pages — SPA fallback para productos
+#
+# Solo una regla: cualquier URL que NO sea un archivo real → index.html
+# Esto permite que /diesel-azul, /kley-cafe, etc. carguen index.html
+# y el JS abra el producto correcto.
+#
+# Las páginas legales (sobre-nosotros.html, devoluciones.html, terminos.html,
+# privacidad.html) son archivos físicos en el repo y se sirven directamente
+# por Cloudflare antes de aplicar esta regla, así que NO entran en el catch-all.
 
-# Páginas legales: se sirven tal cual (tienen archivo .html propio)
-/sobre-nosotros  /sobre-nosotros.html  200
-/devoluciones    /devoluciones.html    200
-/terminos        /terminos.html        200
-/privacidad      /privacidad.html      200
-
-# Todo lo demás → index.html (el JS se encarga de abrir el producto correcto)
 /*  /index.html  200
