@@ -1818,6 +1818,19 @@ section.hero.hero-ready{
 .m-share:hover svg{stroke:#fff!important}
 .m-share svg{stroke:#000;transition:stroke .2s ease}
 
+/* ── 18. Ocultar botón flotante del chat en móvil cuando hay modal abierto ──
+   Evita que tape el botón "Finalizar compra" del carrito y la descripción del producto */
+@media (max-width:760px){
+  body.modal-open .chat-fab,
+  body.modal-open .chat-fab-badge{
+    display:none!important;
+  }
+  /* También ocultar el panel del chat si estuviera abierto cuando se abre un modal */
+  body.modal-open .chat-panel{
+    display:none!important;
+  }
+}
+
 /* FIN ZY-ICONS */
 
 </style>
@@ -2696,6 +2709,7 @@ function lockScroll(){
   document.body.style.right = '0';
   document.body.style.width = '100%';
   document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
 }
 function unlockScroll(){
   __scrollLocks = Math.max(0, __scrollLocks - 1);
@@ -2706,6 +2720,7 @@ function unlockScroll(){
   document.body.style.right = '';
   document.body.style.width = '';
   document.body.style.overflow = '';
+  document.body.classList.remove('modal-open');
   window.scrollTo(0, __scrollLockY);
 }
 let currentUser=null, currentProfile=null, isAdmin=false;
