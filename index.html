@@ -47,8 +47,8 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/></noscript>
 
 <!-- Supabase con fallback automático a CDN secundario si unpkg falla -->
-<script src="https://unpkg.com/@supabase/supabase-js@2.46.1/dist/umd/supabase.js"
-        onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1/dist/umd/supabase.js';document.head.appendChild(s);"></script>
+<script defer src="https://unpkg.com/@supabase/supabase-js@2.46.1/dist/umd/supabase.js"
+        onerror="this.onerror=null;var s=document.createElement('script');s.defer=true;s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1/dist/umd/supabase.js';document.head.appendChild(s);"></script>
 
 <!-- JSON-LD Schema (SEO + Rich Results) -->
 <script type="application/ld+json">
@@ -2794,10 +2794,13 @@ function productHasAnyImage(p){
 const getProductVisual=(p,colorIdx=0)=>{
   const url = getColorMainImage(p, colorIdx) || getColorMainImage(p, 0);
   if(url){
-    // 600px es suficiente para las cards del listado (en móvil son ~180px,
-    // en desktop son ~280px, x2 retina = 560px máximo)
-    const optUrl = optimizeImg(url, 600);
-    return `<img src="${escURL(optUrl)}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    // srcset adaptativo: el navegador escoge el tamaño correcto según pantalla
+    // Móvil (~180px card) usa 360w, desktop (~280px card) usa 560w, retina x2 = 720w
+    const src360 = optimizeImg(url, 360);
+    const src560 = optimizeImg(url, 560);
+    const src720 = optimizeImg(url, 720);
+    const srcset = `${src360} 360w, ${src560} 560w, ${src720} 720w`;
+    return `<img src="${escURL(src560)}" srcset="${escURL(srcset)}" sizes="(max-width:760px) 50vw, 280px" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -6051,8 +6054,13 @@ function chatWhatsapp(){
 async function loadHeroBanner(){
   const heroSection = document.querySelector('section.hero');
 
+  // Calcular el ancho óptimo según el dispositivo (DPR x viewport, con tope)
+  const dpr = Math.min(window.devicePixelRatio || 1, 2); // máx 2 (retina)
+  const vw = window.innerWidth || 800;
+  // Móvil ~400 → solicitar 800px. Desktop 1280 → solicitar 1600px (cap a 1600)
+  const optimalWidth = Math.min(1600, Math.round(vw * dpr * 0.55));
+
   // Timeout de seguridad: si Supabase tarda más de 1.5s, mostrar el hero
-  // igual aunque sin banner (no bloqueamos la página por una promesa lenta)
   const fallbackTimer = setTimeout(()=>{
     if(heroSection) heroSection.classList.add('hero-ready');
   }, 1500);
@@ -6060,7 +6068,6 @@ async function loadHeroBanner(){
   try{
     const data = await sbSelect('banners', 'activo=eq.true&order=prioridad.desc,creado_en.desc');
     if(!data || !data.length){
-      // No hay banner — mostramos el hero sin imágenes (placeholder negro)
       if(heroSection) heroSection.classList.add('hero-ready');
       return;
     }
@@ -6076,18 +6083,28 @@ async function loadHeroBanner(){
       return;
     }
 
-    // Precargar las imágenes ANTES de aplicarlas al DOM, para que cuando se
-    // muestre el hero ya estén descargadas y no haya un "flash" gris→imagen.
-    // Precargamos las versiones optimizadas (no las pesadas originales).
+    // Precargar la PRIMERA imagen con <link rel="preload"> (máxima prioridad)
+    // para que el navegador la pida ANTES de aplicarla al DOM como background
+    if(banner.imagen_1){
+      const preloadUrl = optimizeImg(banner.imagen_1, optimalWidth);
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = preloadUrl;
+      link.fetchPriority = 'high';
+      document.head.appendChild(link);
+    }
+
+    // Precargar las 3 con ancho adaptativo (no siempre 1400)
     const urls = [banner.imagen_1, banner.imagen_2, banner.imagen_3]
       .filter(Boolean)
-      .map(u => optimizeImg(u, 1400));
+      .map(u => optimizeImg(u, optimalWidth));
     await Promise.race([
       Promise.all(urls.map(preloadImage)),
-      new Promise(res => setTimeout(res, 1200)) // máximo 1.2s esperando imágenes
+      new Promise(res => setTimeout(res, 1200)) // máximo 1.2s esperando
     ]);
 
-    applyHeroBanner(banner);
+    applyHeroBanner(banner, optimalWidth);
   }catch(e){
     console.warn('[banner] No se pudo cargar:', e.message);
   }finally{
@@ -6108,11 +6125,11 @@ function preloadImage(url){
   });
 }
 
-function applyHeroBanner(b){
+function applyHeroBanner(b, optWidth){
+  const w = optWidth || 1400;
   const setImg = (id, url) => {
     const el = document.getElementById(id);
-    // Imágenes del banner son las MÁS grandes — optimizar a 1400px
-    if(el && url) el.style.backgroundImage = `url('${optimizeImg(url, 1400)}')`;
+    if(el && url) el.style.backgroundImage = `url('${optimizeImg(url, w)}')`;
   };
   // Set text + auto-hide si está vacío
   const setText = (id, text) => {
