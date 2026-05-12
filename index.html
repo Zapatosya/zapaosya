@@ -42,9 +42,9 @@
 <link rel="dns-prefetch" href="https://api.mercadopago.com"/>
 
 <!-- Cargar fuentes de forma no bloqueante -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/></noscript>
 
 <!-- Supabase con fallback automático a CDN secundario si unpkg falla -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.46.1/dist/umd/supabase.js"
@@ -2241,7 +2241,7 @@ FIN HERO_BACKUP -->
         <div id="recoverMsg" style="margin-top:8px"></div>
         <div style="text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
           <p style="font-size:.78rem;color:var(--gray);margin-bottom:8px">¿Problemas para recibir el correo?</p>
-          <a id="recoverWhatsapp" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:#25D366;font-weight:600;text-decoration:none">
+          <a id="recoverWhatsapp" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:#25D366;font-weight:600;text-decoration:none">
             <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
             Contactar por WhatsApp
           </a>
@@ -2514,7 +2514,7 @@ function initSupabase(){
   try {
     if (typeof supabase !== 'undefined' && supabase.createClient && !sb) {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log('Supabase client OK');
+      // console.log('Supabase client OK');
       return true;
     }
   } catch(e) {
@@ -2729,20 +2729,40 @@ const fmt=p=>"$"+(p||0).toLocaleString("es-CO");
 const disc=(o,c)=>Math.round(((o-c)/o)*100);
 const lblHTML=ls=>(ls||[]).map(l=>({h:'<span class="lbl lbl-h">Más vendido</span>',n:'<span class="lbl lbl-n">Nuevo</span>',s:'<span class="lbl lbl-s">Oferta</span>',l:'<span class="lbl lbl-l">Limitado</span>'}[l]||'')).join('');
 const getSVG=(p)=>(SVGS[p.svg_tipo]||SVGS.sneaker)(p.color_principal,p.color_secundario);
-// Helper: optimiza URL de Supabase (solo si tienes plan Pro con Image Transformations).
-// Por defecto desactivado para evitar imágenes borrosas. Cambia ENABLE_IMG_TRANSFORM a true si activas el feature.
-const ENABLE_IMG_TRANSFORM=false;
-const optimizeImg=(url,w=400,q=80)=>{
-  if(!url||!ENABLE_IMG_TRANSFORM) return url;
-  if(url.includes('/storage/v1/object/public/')){
-    const optimized=url.replace('/storage/v1/object/public/','/storage/v1/render/image/public/');
-    const sep=optimized.includes('?')?'&':'?';
-    return `${optimized}${sep}width=${w}&quality=${q}`;
-  }
-  return url;
-};
 
 // Helper: devuelve HTML de imagen real o SVG fallback
+// ─── HELPER: Optimización automática de imágenes vía wsrv.nl ───
+// Convierte URLs de imágenes pesadas (Supabase Storage) en URLs comprimidas
+// y redimensionadas al vuelo, servidas por el CDN gratuito wsrv.nl.
+// Esto baja imágenes de 2-5MB a 100-300KB sin tener que tocar Supabase.
+//
+// Ejemplo:
+//   optimizeImg("https://....supabase.co/storage/v1/.../foto.jpg", 800)
+//   → "https://wsrv.nl/?url=...&w=800&output=webp&q=80"
+//
+// Si la URL viene vacía, ya está optimizada (es de wsrv) o es local, no se toca.
+function optimizeImg(url, width){
+  if(!url || typeof url !== 'string') return url || '';
+  // No procesar:
+  // - URLs ya pasadas por wsrv.nl (evitar doble proxy)
+  // - URLs relativas (/img/...) — son archivos locales del repo
+  // - data URIs, blobs
+  if(url.startsWith('https://wsrv.nl') || url.startsWith('https://images.weserv.nl')) return url;
+  if(url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+  // Quitar el "https://" del inicio porque wsrv.nl lo asume
+  const cleanUrl = url.replace(/^https?:\/\//, '');
+  const w = Math.max(100, Math.min(2000, parseInt(width) || 800));
+  return `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=${w}&output=webp&q=80`;
+}
+
+// Wrappers que devuelven URLs ya optimizadas
+function getColorImagesOpt(p, colorIdx, width){
+  return getColorImages(p, colorIdx).map(u => optimizeImg(u, width));
+}
+function getColorMainImageOpt(p, colorIdx, width){
+  return optimizeImg(getColorMainImage(p, colorIdx), width);
+}
+
 // ─── HELPER: Múltiples imágenes por color (compat hacia atrás) ───
 // Formato nuevo: imagenes = [["url1","url2"], ["url3"], ["url4","url5","url6"]]
 // Formato viejo: imagenes = ["url1", "url2", "url3"]  (1 por color)
@@ -2774,7 +2794,10 @@ function productHasAnyImage(p){
 const getProductVisual=(p,colorIdx=0)=>{
   const url = getColorMainImage(p, colorIdx) || getColorMainImage(p, 0);
   if(url){
-    return `<img src="${escURL(url)}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    // 600px es suficiente para las cards del listado (en móvil son ~180px,
+    // en desktop son ~280px, x2 retina = 560px máximo)
+    const optUrl = optimizeImg(url, 600);
+    return `<img src="${escURL(optUrl)}" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -2784,7 +2807,7 @@ async function loadProducts(){
   try{
     const data = await sbSelect('productos', 'activo=eq.true&order=creado_en.asc&select=*');
     PRODUCTS = data || [];
-    console.log('Productos cargados:', PRODUCTS.length);
+    // console.log('Productos cargados:', PRODUCTS.length);
     updateProductsSchema(PRODUCTS);
     render();
     
@@ -3057,7 +3080,7 @@ function openModal(id){
   if(hasImages){
     const img=document.createElement('img');
     img.id='mProductImg';
-    img.src=getColorMainImage(p, 0);
+    img.src=optimizeImg(getColorMainImage(p, 0), 1200);
     img.alt=p.nombre;
     img.onclick=()=>openLightbox(selI);
     mi.insertBefore(img,mi.firstChild);
@@ -3610,7 +3633,8 @@ function changeImage(dir){
 function updateModalImage(){
   if(!curP) return;
   const imgs = getColorImages(curP, selC);
-  const newSrc = imgs[selI] || imgs[0];
+  const rawSrc = imgs[selI] || imgs[0];
+  const newSrc = optimizeImg(rawSrc, 1200);
   const imgEl = document.getElementById("mProductImg");
   if(imgEl && newSrc && imgEl.src !== newSrc){
     imgEl.style.opacity='0';
@@ -3679,7 +3703,7 @@ function updateModalColor(){
   
   // Cambiar imagen con animación fade — primera imagen del color actual
   const imgEl=document.getElementById("mProductImg");
-  const newSrc=getColorMainImage(curP, selC);
+  const newSrc=optimizeImg(getColorMainImage(curP, selC), 1200);
   if(imgEl && newSrc && imgEl.src!==newSrc){
     imgEl.style.opacity='0';
     const tempImg=new Image();
@@ -3728,7 +3752,7 @@ function openLightbox(idx=0){
   lboxIdx = (idx >= 0 && idx < imgs.length) ? idx : 0;
   const lb=document.getElementById('lbox');
   const img=document.getElementById('lboxImg');
-  img.src=imgs[lboxIdx];
+  img.src=optimizeImg(imgs[lboxIdx], 1600);
   lb.classList.add('open');
   lockScroll();
   updateLboxNav();
@@ -3743,7 +3767,7 @@ function changeLbox(dir){
   const n = imgs.length;
   if(n<=1) return;
   lboxIdx=(lboxIdx+dir+n)%n;
-  document.getElementById('lboxImg').src=imgs[lboxIdx];
+  document.getElementById('lboxImg').src=optimizeImg(imgs[lboxIdx], 1600);
   updateLboxNav();
   // Sincronizar con el modal: cambiar selI al mismo índice
   selI = lboxIdx;
@@ -5669,7 +5693,7 @@ async function saveProduct(){
     color_principal:colores[0]||'#111',color_secundario:colores[0]||'#111',
     fondo:fondos[0]||'#F5F5F5',svg_tipo:'sneaker',activo:true
   };
-  console.log('[saveProduct] payload:',payload);
+  // console.log('[saveProduct] payload:',payload);
   try{
     const authH = await getAuthHeaders();
     if(id){
@@ -5703,7 +5727,7 @@ async function saveProduct(){
 // ─── PERFIL Y SESIÓN ───────────────────────────────────────────
 async function loadProfile(){
   if(!currentUser){console.log('[loadProfile] sin user');return;}
-  console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
+  // console.log('[loadProfile] cargando perfil de:',currentUser.email,'id:',currentUser.id);
   try{
     // Leer el JWT directamente desde localStorage (más rápido y no se cuelga)
     // El SDK de Supabase guarda la sesión bajo una clave que empieza con "sb-"
@@ -5728,19 +5752,19 @@ async function loadProfile(){
     const res=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
       headers: headers
     });
-    console.log('[loadProfile] status:',res.status);
+    // console.log('[loadProfile] status:',res.status);
     if(!res.ok){
       const txt=await res.text();
       console.warn('[loadProfile] error body:',txt);
       return;
     }
     const rows=await res.json();
-    console.log('[loadProfile] rows:',rows);
+    // console.log('[loadProfile] rows:',rows);
     const data=rows[0];
     if(data){
       currentProfile=data;
       isAdmin=data.es_admin===true;
-      console.log('[loadProfile] ✓ isAdmin:',isAdmin,'perfil:',data);
+      // console.log('[loadProfile] ✓ isAdmin:',isAdmin,'perfil:',data);
     }else{
       console.warn('[loadProfile] no se encontró perfil para user id:',currentUser.id);
     }
@@ -6053,8 +6077,11 @@ async function loadHeroBanner(){
     }
 
     // Precargar las imágenes ANTES de aplicarlas al DOM, para que cuando se
-    // muestre el hero ya estén descargadas y no haya un "flash" gris→imagen
-    const urls = [banner.imagen_1, banner.imagen_2, banner.imagen_3].filter(Boolean);
+    // muestre el hero ya estén descargadas y no haya un "flash" gris→imagen.
+    // Precargamos las versiones optimizadas (no las pesadas originales).
+    const urls = [banner.imagen_1, banner.imagen_2, banner.imagen_3]
+      .filter(Boolean)
+      .map(u => optimizeImg(u, 1400));
     await Promise.race([
       Promise.all(urls.map(preloadImage)),
       new Promise(res => setTimeout(res, 1200)) // máximo 1.2s esperando imágenes
@@ -6084,7 +6111,8 @@ function preloadImage(url){
 function applyHeroBanner(b){
   const setImg = (id, url) => {
     const el = document.getElementById(id);
-    if(el && url) el.style.backgroundImage = `url('${url}')`;
+    // Imágenes del banner son las MÁS grandes — optimizar a 1400px
+    if(el && url) el.style.backgroundImage = `url('${optimizeImg(url, 1400)}')`;
   };
   // Set text + auto-hide si está vacío
   const setText = (id, text) => {
