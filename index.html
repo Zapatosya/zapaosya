@@ -2794,13 +2794,14 @@ function productHasAnyImage(p){
 const getProductVisual=(p,colorIdx=0)=>{
   const url = getColorMainImage(p, colorIdx) || getColorMainImage(p, 0);
   if(url){
-    // srcset adaptativo: el navegador escoge el tamaño correcto según pantalla
-    // Móvil (~180px card) usa 360w, desktop (~280px card) usa 560w, retina x2 = 720w
+    // srcset adaptativo agresivo: navegador escoge el tamaño correcto
+    // 240w para móvil chico, 360w móvil estándar, 560w desktop, 720w retina
+    const src240 = optimizeImg(url, 240);
     const src360 = optimizeImg(url, 360);
     const src560 = optimizeImg(url, 560);
     const src720 = optimizeImg(url, 720);
-    const srcset = `${src360} 360w, ${src560} 560w, ${src720} 720w`;
-    return `<img src="${escURL(src560)}" srcset="${escURL(srcset)}" sizes="(max-width:760px) 50vw, 280px" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
+    const srcset = `${src240} 240w, ${src360} 360w, ${src560} 560w, ${src720} 720w`;
+    return `<img src="${escURL(src360)}" srcset="${escURL(srcset)}" sizes="(max-width:480px) 45vw, (max-width:760px) 50vw, 280px" alt="${escHTML(p.nombre)}" width="400" height="400" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async"/>`;
   }
   return getSVG(p);
 };
@@ -3241,7 +3242,7 @@ function renderReviews(reviews){
     const fotos = Array.isArray(r.fotos) ? r.fotos.filter(Boolean) : [];
     const fotosHTML = fotos.length ? `
       <div class="review-item-photos">
-        ${fotos.map((f,i)=>`<div class="review-item-photo" onclick='openRvLightbox(${JSON.stringify(fotos).replace(/'/g,"&#39;")}, ${i})'><img src="${escURL(f)}" alt="Foto reseña" loading="lazy"></div>`).join('')}
+        ${fotos.map((f,i)=>`<div class="review-item-photo" onclick='openRvLightbox(${JSON.stringify(fotos).replace(/'/g,"&#39;")}, ${i})'><img src="${escURL(optimizeImg(f, 144))}" alt="Foto reseña" loading="lazy" decoding="async" width="72" height="72"></div>`).join('')}
       </div>` : '';
     return `<div class="review-item">
       <div class="review-item-hd">
@@ -6057,8 +6058,12 @@ async function loadHeroBanner(){
   // Calcular el ancho óptimo según el dispositivo (DPR x viewport, con tope)
   const dpr = Math.min(window.devicePixelRatio || 1, 2); // máx 2 (retina)
   const vw = window.innerWidth || 800;
-  // Móvil ~400 → solicitar 800px. Desktop 1280 → solicitar 1600px (cap a 1600)
-  const optimalWidth = Math.min(1600, Math.round(vw * dpr * 0.55));
+  // Móvil pequeño <400 → 600px, móvil estándar 400-760 → 800px, desktop → 1200-1600px
+  let optimalWidth;
+  if(vw < 400) optimalWidth = 600;
+  else if(vw < 760) optimalWidth = 800;
+  else if(vw < 1200) optimalWidth = 1200;
+  else optimalWidth = Math.min(1600, Math.round(vw * dpr * 0.5));
 
   // Timeout de seguridad: si Supabase tarda más de 1.5s, mostrar el hero
   const fallbackTimer = setTimeout(()=>{
